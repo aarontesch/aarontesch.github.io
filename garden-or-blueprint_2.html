@@ -77,16 +77,13 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 /* ---- visualization ---- */
 .viz{position:relative;min-height:290px;border-radius:18px;overflow:hidden;
   background:linear-gradient(160deg,#eef4e9,#f8f0df);border:1px solid #dde5d6;margin-bottom:16px}
-.blueprint{min-height:290px;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;padding:40px 22px}
-.board{width:32px;height:160px;border-radius:5px;position:relative;transform-origin:center;transition:transform .35s;
-  background:linear-gradient(90deg,#c89555,#e1b672 50%,#b9824c);border:3px solid #9a6a3d;box-shadow:5px 6px 0 #8f6a46}
-.board:after{content:"";position:absolute;left:-9px;top:45%;width:50px;height:6px;background:#754d36;border-radius:5px;transform:rotate(45deg);opacity:.9}
-.board.straight{transform:rotate(-1deg)}
-.board.slightly{transform:rotate(7deg)}
-.board.badly{transform:rotate(18deg);background:linear-gradient(90deg,#bd8258,#d9a473)}
-.board.totally{transform:rotate(31deg);background:linear-gradient(90deg,#b97853,#d69b68);border-color:#8a5c39}
-.board.ghost{opacity:.2;transform:none;box-shadow:none;background:#e7ddc7;border-style:dashed}
-.board.ghost:after{display:none}
+.bpsvg{display:block;width:100%;height:290px}
+.bpsvg .plumb{fill:none;stroke:#a5b7a2;stroke-width:2;stroke-dasharray:5 6}
+.bpsvg .ghost{fill:none;stroke:#b7a98a;stroke-width:2;stroke-dasharray:4 5;opacity:.6}
+.bpsvg .joint{fill:#7d5334}
+.bpsvg .drift{fill:none;stroke:var(--rose);stroke-width:1.5;stroke-dasharray:3 4}
+.bpsvg .bplabel{fill:#6f7f74;font:700 11px ui-sans-serif,system-ui,sans-serif}
+.bpsvg .driftlabel{fill:#b4564a;font:700 11px ui-sans-serif,system-ui,sans-serif}
 .vinesvg{display:block;width:100%;height:290px}
 .vinesvg .stemline,.vinesvg .branchline{fill:none;stroke:var(--deep);stroke-linecap:round}
 .vinesvg .stemline{stroke-width:7}
@@ -147,8 +144,8 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 @media(max-width:520px){
   .app{padding:20px 14px 36px}
   .strategies,.stats,.opps,.resultgrid{grid-template-columns:1fr}
-  .board{width:26px;height:120px}
-  .blueprint,.viz{min-height:230px}
+  .viz{min-height:230px}
+  .bpsvg{height:230px}
 }
 </style>
 </head>
@@ -352,6 +349,97 @@ function vineSvg(s){
   return out + '</svg>';
 }
 
+/* How far each grade of board turns the structure at the joint. A straight
+   board still gives up a degree -- nothing comes out of the mill perfect. */
+const WARP_DEG = {straight:1, slightly:7, badly:18, totally:31};
+
+/* The blueprint is built end to end: every board starts where the last one
+   stopped, and its warp is added to the running heading rather than applied
+   on its own. That is what takes the structure off track -- one bad board
+   early swings everything above it away from the plumb line, and the error
+   can never be un-nailed. */
+function blueprintSvg(s){
+  const need = CAREERS[s.selected].need;
+  /* sized by the most boards a run can ever nail, not by the target -- you can
+     keep building past what the job needed, and an easy target must not blow
+     the drawing off the top of the frame */
+  const L = 240 / TOTAL_TURNS;
+  const W = Math.max(10, L * 0.52);
+  const rad = d => d * Math.PI / 180;
+  const FILL = {straight:"url(#bpGood)", slightly:"url(#bpGood)",
+                badly:"url(#bpBad)",     totally:"url(#bpTot)"};
+  const EDGE = {straight:"#9a6a3d", slightly:"#9a6a3d",
+                badly:"#8f5f3c",    totally:"#8a5c39"};
+
+  // a plank rises from (px,py); q omitted draws the dashed not-yet-bought board
+  const plank = (px, py, pa, q) =>
+    '<rect x="' + (-W/2).toFixed(1) + '" y="' + (-L).toFixed(1) +
+    '" width="' + W.toFixed(1) + '" height="' + L.toFixed(1) + '" rx="2" ' +
+    (q ? 'fill="' + FILL[q] + '" stroke="' + EDGE[q] + '" stroke-width="2"' : 'class="ghost"') +
+    ' transform="translate(' + px.toFixed(1) + ',' + py.toFixed(1) +
+    ') rotate(' + pa.toFixed(1) + ')"/>';
+
+  let x = 0, y = 0, ang = 0, planks = "", joints = "";
+  const xs = [0], ys = [0, -need * L];
+
+  s.boards.forEach(b => {
+    // clamped so a ruinous run lies down flat instead of curling under the ground
+    ang = Math.max(-82, Math.min(82, ang + b.dir * WARP_DEG[b.q]));
+    planks += plank(x, y, ang, b.q);
+    joints += '<circle class="joint" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2.6"/>';
+    x += Math.sin(rad(ang)) * L;
+    y -= Math.cos(rad(ang)) * L;
+    xs.push(x); ys.push(y);
+  });
+
+  // where the remaining boards land if the structure keeps its current lean
+  let gx = x, gy = y, ghosts = "";
+  for(let i = s.boards.length; i < need; i++){
+    ghosts += plank(gx, gy, ang, null);
+    gx += Math.sin(rad(ang)) * L;
+    gy -= Math.cos(rad(ang)) * L;
+    xs.push(gx); ys.push(gy);
+  }
+
+  /* the frame is fitted to the drawing, so a structure that wanders a long
+     way sideways still stays fully visible instead of clipping */
+  const pad = W + 34;
+  let x0 = Math.min.apply(null, xs) - pad, x1 = Math.max.apply(null, xs) + pad;
+  let y0 = Math.min.apply(null, ys) - pad, y1 = 30;
+  if(x1 - x0 < 380){ const c = (x0 + x1) / 2; x0 = c - 190; x1 = c + 190; }
+  if(y1 - y0 < 250){ y0 = y1 - 250; }
+
+  const lean = Math.abs(Math.round(ang));
+  const top = (-need * L).toFixed(1);
+
+  return '<svg class="bpsvg" viewBox="' +
+      [x0, y0, x1 - x0, y1 - y0].map(v=>v.toFixed(1)).join(" ") +
+      '" preserveAspectRatio="xMidYMax meet" role="img" aria-label="' +
+      s.boards.length + ' of ' + need + ' boards nailed end to end, leaning ' +
+      lean + ' degrees off plumb.">' +
+    '<defs>' +
+      '<linearGradient id="bpGood" x1="0" x2="1"><stop offset="0" stop-color="#c89555"/>' +
+        '<stop offset=".5" stop-color="#e1b672"/><stop offset="1" stop-color="#b9824c"/></linearGradient>' +
+      '<linearGradient id="bpBad" x1="0" x2="1"><stop offset="0" stop-color="#bd8258"/>' +
+        '<stop offset="1" stop-color="#d9a473"/></linearGradient>' +
+      '<linearGradient id="bpTot" x1="0" x2="1"><stop offset="0" stop-color="#b97853"/>' +
+        '<stop offset="1" stop-color="#d69b68"/></linearGradient>' +
+    '</defs>' +
+    '<rect x="-900" y="0" width="2400" height="' + y1 + '" fill="#d8c79b"/>' +
+    '<line x1="-900" y1="0" x2="1500" y2="0" stroke="#b9a578" stroke-width="2"/>' +
+    // the blueprint itself: where a perfectly plumb structure would have gone
+    '<path class="plumb" d="M0,0 L0,' + top + '"/>' +
+    '<line class="plumb" x1="-15" y1="' + top + '" x2="15" y2="' + top + '"/>' +
+    '<text class="bplabel" x="21" y="' + (-need * L + 4).toFixed(1) + '">' + s.selected + '</text>' +
+    ghosts + planks + joints +
+    (s.boards.length
+      ? '<path class="drift" d="M0,' + y.toFixed(1) + ' L' + x.toFixed(1) + ',' + y.toFixed(1) + '"/>' +
+        '<text class="driftlabel" x="' + (x / 2).toFixed(1) + '" y="' + (y - 10).toFixed(1) +
+          '" text-anchor="middle">' + lean + '&#176; off plumb</text>'
+      : "") +
+    '</svg>';
+}
+
 /* ============ state ============ */
 let state;
 let history = [];   // completed runs, in memory only
@@ -369,7 +457,7 @@ function fresh(mode){
 
 /* ============ derived ============ */
 function usableBoards(s){
-  return s.boards.reduce((n,q)=> n + (q==="totally"?0 : q==="badly"?0.5 : 1), 0);
+  return s.boards.reduce((n,b)=> n + (b.q==="totally"?0 : b.q==="badly"?0.5 : 1), 0);
 }
 function openPaths(s){
   if(s.mode === "gardener") return Math.max(1, s.paths);
@@ -433,7 +521,7 @@ function render(){
         " to climb and " + openPaths(s) + " imaginable futures."
       : "No opportunities offered yet. The vine has nothing to climb.";
   } else {
-    const bent = s.boards.filter(q=>q==="totally"||q==="badly").length;
+    const bent = s.boards.filter(b=>b.q==="totally"||b.q==="badly").length;
     el("progress").textContent = bent + " nailed board" + (bent===1?" is":"s are") +
       " outside tolerance for " + s.selected + " (allowed: " + CAREERS[s.selected].tolerance + ").";
   }
@@ -476,12 +564,8 @@ function render(){
         ? ""
         : '<div class="vizempty">Nothing has been offered yet. Give the vine something to climb.</div>');
   } else {
-    const ghosts = Math.max(0, Math.min(4, need - s.boards.length));
-    el("viz").innerHTML = '<div class="blueprint">' +
-      s.boards.map(q=>'<div class="board ' + q + '"></div>').join("") +
-      Array.from({length:ghosts},()=>'<div class="board ghost"></div>').join("") +
-      '</div>' +
-      (s.boards.length ? "" : '<div class="vizempty">No boards nailed yet. Each one you buy comes out of the mill as it comes.</div>');
+    el("viz").innerHTML = blueprintSvg(s) +
+      (s.boards.length ? "" : '<div class="vizempty">No boards nailed yet. The dashed line is the blueprint&mdash;each board you buy comes out of the mill as it comes.</div>');
   }
 
   /* hero art tracks the run */
@@ -535,7 +619,9 @@ function doAction(act){
   const s = state;
   if(act === "board"){
     const q = randomWarp();
-    s.boards.push(q);
+    // the bend direction is rolled once and kept, so the structure never
+    // redraws itself differently from the run that actually happened
+    s.boards.push({q:q, dir: Math.random() < 0.5 ? -1 : 1});
     s.health -= q==="totally" ? 15 : q==="badly" ? 8 : 2;
     if(q === "straight") s.precision += 2;
     const words = {straight:"straight",slightly:"slightly curved",badly:"badly curved",totally:"totally bent"};
@@ -549,7 +635,7 @@ function doAction(act){
 /* ============ results ============ */
 function score(s){
   const g = s.mode === "gardener";
-  const bent = s.boards.filter(q=>q==="totally"||q==="badly").length;
+  const bent = s.boards.filter(b=>b.q==="totally"||b.q==="badly").length;
   return {
     mode:s.mode, career:s.selected, wellbeing:s.health,
     paths:openPaths(s), boards:usableBoards(s), support:s.support,
