@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Garden or Blueprint?</title>
+<style>
+:root{
+  --ink:#17221d; --muted:#6f7f74; --paper:#f6f3eb; --card:#fffdf8;
+  --line:#d9dfd5; --sage:#9bbca0; --deep:#315a43; --sun:#e4ad4b; --rose:#d47d70;
+  --shadow:0 18px 50px rgba(45,69,51,.12);
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:radial-gradient(circle at 10% 0%,#e6f0e2,transparent 35%),var(--paper)}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.app{max-width:1200px;margin:auto;padding:28px 22px 46px}
+
+/* ---- top bar ---- */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:25px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em}
+.mark{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--deep);color:#fff;font-size:18px}
+.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--muted);font-weight:800}
+.reset{border:1px solid var(--line);border-radius:99px;padding:9px 15px;color:var(--muted)}
+.reset:hover{border-color:var(--sage);color:var(--deep)}
+
+/* ---- hero ---- */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:26px;align-items:end;margin-bottom:26px}
+.hero h1{font:700 clamp(38px,6vw,68px)/.96 Georgia,serif;letter-spacing:-.06em;margin:9px 0 16px;max-width:700px}
+.hero p{font-size:18px;color:#516057;max-width:650px;margin:0}
+.hero-art{min-height:220px;border-radius:28px;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,#d5e8d4,#f5dba0);box-shadow:var(--shadow)}
+.hero-art:before{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-30px;top:-55px;background:#f7c96b}
+.hill{position:absolute;bottom:-45px;left:-10%;width:120%;height:150px;border-radius:50% 50% 0 0;background:#789b79}
+.stem{position:absolute;bottom:28px;left:46%;width:7px;background:var(--deep);transform-origin:bottom;
+  transform:rotate(9deg);transition:height .5s ease}
+.hero-leaf{position:absolute;width:52px;height:26px;border-radius:100% 0 100% 0;background:#427258;transition:opacity .5s}
+
+/* ---- panels ---- */
+.layout{display:grid;grid-template-columns:1fr 1.12fr;gap:22px;align-items:start}
+.panel{background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:23px}
+.panel-head{display:flex;justify-content:space-between;gap:15px;align-items:start;margin-bottom:19px}
+.panel h2{font:700 25px/1.05 Georgia,serif;margin:5px 0}
+.badge{border-radius:99px;padding:6px 10px;background:#e8f1e5;color:var(--deep);font-weight:750;font-size:12px;white-space:nowrap}
+
+/* ---- strategy cards ---- */
+.strategies{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:19px}
+.strategy{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:15px;text-align:left;min-height:132px;transition:.2s}
+.strategy:hover:not([disabled]){transform:translateY(-2px);border-color:var(--sage)}
+.strategy.active{background:var(--deep);border-color:var(--deep);color:#fff}
+.strategy[disabled]{opacity:.45;cursor:not-allowed}
+.strategy strong{display:block;margin:7px 0 4px}
+.strategy span{font-size:13px;opacity:.76}
+.glyph{font-size:24px}
+
+/* ---- resources + actions ---- */
+.resources{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f2eee4;border-radius:15px;padding:13px 15px;margin:15px 0 18px}
+.resources small{color:var(--muted)}
+.coins{font-size:21px;font-weight:800;color:var(--deep);white-space:nowrap}
+.actions{display:grid;gap:10px}
+.action{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;
+  border:1px solid var(--line);background:var(--card);border-radius:15px;padding:13px 14px;text-align:left;transition:.2s}
+.action:hover:not([disabled]){border-color:var(--sage);background:#f6fbf3}
+.action[disabled]{opacity:.45;cursor:not-allowed}
+.action b{display:block}
+.action small{color:var(--muted)}
+.cost{border-radius:99px;background:#f4ead2;color:#80601b;padding:5px 9px;font-weight:800;font-size:12px;white-space:nowrap}
+.opps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.opp{border:1px solid var(--line);border-radius:15px;padding:12px;background:var(--card);overflow:hidden}
+.opp b{display:block;font-size:14px}
+.opp small{color:var(--muted);font-size:12px}
+.opp button{float:right;background:var(--sun);color:#3d2d07;padding:5px 9px;border-radius:99px;font-weight:800;font-size:12px}
+.opp button[disabled]{background:#ddd7c8;color:#80807a;cursor:not-allowed}
+.opp.taken{background:#eef4ea;border-color:#cbdcc4}
+
+/* ---- visualization ---- */
+.viz{position:relative;min-height:290px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(160deg,#eef4e9,#f8f0df);border:1px solid #dde5d6;margin-bottom:16px}
+.blueprint{min-height:290px;display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;padding:40px 22px}
+.board{width:32px;height:160px;border-radius:5px;position:relative;transform-origin:center;transition:transform .35s;
+  background:linear-gradient(90deg,#c89555,#e1b672 50%,#b9824c);border:3px solid #9a6a3d;box-shadow:5px 6px 0 #8f6a46}
+.board:after{content:"";position:absolute;left:-9px;top:45%;width:50px;height:6px;background:#754d36;border-radius:5px;transform:rotate(45deg);opacity:.9}
+.board.straight{transform:rotate(-1deg)}
+.board.slightly{transform:rotate(7deg)}
+.board.badly{transform:rotate(18deg);background:linear-gradient(90deg,#bd8258,#d9a473)}
+.board.totally{transform:rotate(31deg);background:linear-gradient(90deg,#b97853,#d69b68);border-color:#8a5c39}
+.board.ghost{opacity:.2;transform:none;box-shadow:none;background:#e7ddc7;border-style:dashed}
+.board.ghost:after{display:none}
+.vinesvg{display:block;width:100%;height:290px}
+.vinesvg .stemline,.vinesvg .branchline{fill:none;stroke:var(--deep);stroke-linecap:round}
+.vinesvg .stemline{stroke-width:7}
+.vinesvg .branchline{stroke-width:4}
+.vinesvg .vleaf{fill:#427258}
+.vinesvg .vlabel{fill:#3f5545;font:600 11px ui-sans-serif,system-ui,sans-serif}
+.vinesvg .knot{fill:var(--sun);stroke:#fff;stroke-width:2}
+.vizempty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;padding:24px;text-align:center}
+
+/* ---- meter + stats ---- */
+.meterwrap{margin-bottom:18px}
+.meterhead{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-bottom:6px}
+.meter{height:12px;background:#dbe4d7;border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;background:var(--deep);transition:width .35s}
+.meter i.warn{background:var(--rose)}
+.timeline{display:flex;gap:5px;margin-bottom:18px}
+.dot{height:8px;flex:1;border-radius:8px;background:#dbe4d7}
+.dot.done{background:var(--deep)}
+.dot.current{background:var(--sun)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.stat{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fffefa}
+.stat label{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}
+.stat strong{font-size:17px}
+
+.log{border-top:1px solid var(--line);padding-top:17px}
+.log p{margin:7px 0;color:#4f5e54;font-size:14px}
+.tip{margin-top:18px;padding:13px 15px;border-left:4px solid var(--sun);background:#fff8e8;border-radius:0 12px 12px 0;color:#5e512d;font-size:13px}
+.tip.sage{border-color:var(--sage);background:#f0f7ed;color:#3f5545}
+.tip b{display:block;margin-bottom:3px}
+.footer{color:var(--muted);font-size:12px;margin:19px 4px 0;display:flex;justify-content:space-between;gap:15px}
+
+/* ---- modal ---- */
+.modal{position:fixed;inset:0;background:rgba(23,34,29,.48);display:none;place-items:center;padding:20px;overflow:auto;z-index:5}
+.modal.show{display:grid}
+.modal-card{max-width:560px;width:100%;background:var(--card);border-radius:24px;padding:28px;box-shadow:0 20px 70px rgba(0,0,0,.25)}
+.modal-card h2{font:700 32px/1.05 Georgia,serif;margin:6px 0 10px}
+.resultgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.result{background:#f1eee4;border-radius:15px;padding:12px}
+.result b{display:block;font-size:21px;color:var(--deep)}
+.result span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.compare{border-top:1px solid var(--line);margin-top:4px;padding-top:15px}
+.comparehead{display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;padding-bottom:7px;margin-top:12px;border-bottom:1px solid var(--line)}
+.comparerow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:14px}
+.comparerow:last-of-type{border:0}
+.comparerow b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.modalbtns{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
+.primary{background:var(--deep);color:#fff;border-radius:99px;padding:12px 18px;font-weight:800}
+.primary:hover{background:#26492f}
+.secondary{border:1px solid var(--line);border-radius:99px;padding:11px 16px;color:var(--deep);font-weight:700}
+.secondary:hover{border-color:var(--sage)}
+
+@media(max-width:860px){
+  .hero,.layout{grid-template-columns:1fr}
+  .hero-art{min-height:160px}
+  .topbar{align-items:flex-start}
+  .footer{display:block}.footer span{display:block;margin-top:5px}
+}
+@media(max-width:520px){
+  .app{padding:20px 14px 36px}
+  .strategies,.stats,.opps,.resultgrid{grid-template-columns:1fr}
+  .board{width:26px;height:120px}
+  .blueprint,.viz{min-height:230px}
+}
+</style>
+</head>
+<body>
+<main class="app">
+
+<header class="topbar">
+  <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?</div>
+  <button class="reset" id="reset">Reset run</button>
+</header>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow">A developmental strategy game &middot; prototype</div>
+    <h1>Raise a life by shaping the structure&mdash;or the conditions.</h1>
+    <p>Every run contains chance, tradeoffs, and outcomes you cannot fully control.</p>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hill"></div>
+    <div class="stem" id="stem" style="height:40px"></div>
+    <div id="heroLeaves"></div>
+  </div>
+</section>
+
+<section class="layout">
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="eyebrow">Year <span id="year">1</span> &middot; <span id="stageName">Foundations</span></div>
+        <h2>Choose your approach</h2>
+      </div>
+      <div class="badge" id="turnBadge">Turn 1 / 12</div>
+    </div>
+
+    <div class="strategies">
+      <button class="strategy active" data-mode="carpenter">
+        <div class="glyph" aria-hidden="true">&#9724;</div>
+        <strong>The Carpenter</strong>
+        <span>Build toward one chosen career.</span>
+      </button>
+      <button class="strategy" data-mode="gardener">
+        <div class="glyph" aria-hidden="true">&#8961;</div>
+        <strong>The Gardener</strong>
+        <span>Offer conditions for many futures.</span>
+      </button>
+    </div>
+
+    <div class="resources">
+      <div><span>Available resources</span><br><small id="incomeNote">+3 &#9671; accrues each turn</small></div>
+      <span class="coins" id="resources">18 &#9671;</span>
+    </div>
+
+    <div id="carpenterControls">
+      <div class="eyebrow" style="margin-bottom:9px">Blueprint target</div>
+      <div class="actions" id="careers" style="margin-bottom:18px"></div>
+      <div class="eyebrow" style="margin-bottom:9px">Actions</div>
+      <div class="actions">
+        <button class="action" data-act="board" data-cost="4">
+          <span><b>Buy &amp; nail a board</b><small>Build structure toward the target</small></span>
+          <span class="cost">4 &#9671;</span>
+        </button>
+        <button class="action" data-act="school" data-cost="5">
+          <span><b>Invest in school</b><small>More precision, fewer open paths</small></span>
+          <span class="cost">5 &#9671;</span>
+        </button>
+        <button class="action" data-act="rest" data-cost="2">
+          <span><b>Protect wellbeing</b><small>Recover and reinforce</small></span>
+          <span class="cost">2 &#9671;</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="gardenerControls" style="display:none">
+      <div class="eyebrow" style="margin-bottom:9px">Offer an opportunity</div>
+      <div class="opps" id="opps"></div>
+      <div class="eyebrow" style="margin:18px 0 9px">Tend the conditions</div>
+      <div class="actions">
+        <button class="action" data-act="sun" data-cost="3">
+          <span><b>Give sunlight</b><small>Attention and encouragement</small></span>
+          <span class="cost">3 &#9671;</span>
+        </button>
+        <button class="action" data-act="water" data-cost="4">
+          <span><b>Water &amp; nourish</b><small>Build resilience over time</small></span>
+          <span class="cost">4 &#9671;</span>
+        </button>
+        <button class="action" data-act="support" data-cost="3">
+          <span><b>Add a branch</b><small>A relationship opens a new path</small></span>
+          <span class="cost">3 &#9671;</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="tip" id="tip">A desirable career has tighter tolerances. A bent board is not a moral failure&mdash;it is a design problem.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="eyebrow">What happened</div>
+        <h2 id="dashTitle">A structure under construction</h2>
+      </div>
+      <div class="badge" id="modeBadge">Carpenter</div>
+    </div>
+
+    <div class="viz" id="viz"></div>
+
+    <div class="meterwrap">
+      <div class="meterhead"><span id="meterLabel">Structure toward target</span><span id="meterValue">0%</span></div>
+      <div class="meter"><i id="meter" style="width:0%"></i></div>
+    </div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <div class="stats" id="stats"></div>
+
+    <p id="progress" style="margin:0 0 4px;color:#4f5e54;font-size:14px"></p>
+
+    <div class="log">
+      <div class="eyebrow" id="principleLabel">Design principle</div>
+      <p id="principle">A blueprint rewards precision, but it can make adaptation expensive.</p>
+      <div class="eyebrow" style="margin-top:14px">Recent turns</div>
+      <div id="log" aria-live="polite"></div>
+    </div>
+
+    <div class="tip sage"><b>How to play</b>Pick a strategy before your first action&mdash;it locks once the run is under way. Each action costs resources and one of your twelve turns. Play both strategies to unlock the side-by-side comparison.</div>
+  </div>
+
+</section>
+
+<div class="footer">
+  <span>Inspired by the carpenter-and-gardener analogy in developmental psychology.</span>
+  <span>The game is a thought experiment, not a model of real children.</span>
+</div>
+</main>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <div class="eyebrow">Run complete</div>
+    <h2 id="resultTitle">A life has taken shape.</h2>
+    <p id="resultText"></p>
+    <div class="resultgrid" id="resultGrid"></div>
+    <div class="compare" id="compare"></div>
+    <div class="modalbtns">
+      <button class="primary" id="again">Play another run</button>
+      <button class="secondary" id="switchMode">Try the other strategy</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ============ content ============ */
+const CAREERS = {
+  Teacher:  {need:5,  tolerance:3},
+  Engineer: {need:7,  tolerance:2},
+  Lawyer:   {need:9,  tolerance:2},
+  Doctor:   {need:11, tolerance:1},
+  CEO:      {need:12, tolerance:1}
+};
+const OPPORTUNITIES = [
+  ["Music","performance, teaching, design"],
+  ["Building","engineering, craft, architecture"],
+  ["Nature","science, care, exploration"],
+  ["Storytelling","writing, law, leadership"],
+  ["Helping","education, health, community"],
+  ["Movement","sport, coaching, travel"]
+];
+const TOTAL_TURNS = 12;
+const INCOME = 3;
+const STAGES = ["Foundations","Exploration","Specialization","Transition"];
+
+/* One branch per domain offered, one knot per supportive relationship.
+   The drawing is generated from state, so it can't drift from the run. */
+function vineSvg(s){
+  const W = 400, H = 290, GROUND = 250;
+  const grow = Math.min(1, (s.opps.length + s.support) / 6);
+  const stemTop = GROUND - (55 + grow * 165);
+  let out = '<svg class="vinesvg" viewBox="0 0 ' + W + ' ' + H +
+    '" preserveAspectRatio="xMidYMax meet" role="img" aria-label="The vine: ' +
+    s.opps.length + ' domains offered, ' + s.support + ' supportive branches.">' +
+    // drawn wider than the viewBox so the ground reaches the panel edges
+    '<rect x="-600" y="' + GROUND + '" width="1600" height="' + (H-GROUND) +
+      '" fill="#d8c79b"/><line x1="-600" y1="' + GROUND + '" x2="1000" y2="' + GROUND +
+      '" stroke="#b9a578" stroke-width="2"/>' +
+    '<path class="stemline" d="M200,' + GROUND + ' C 188,' + (GROUND-60) + ' 212,' +
+      (stemTop+70) + ' 200,' + stemTop + '"/>';
+
+  const n = s.opps.length;
+  s.opps.forEach((o, i) => {
+    const t = (i + 1) / (n + 1);
+    const y = GROUND - 35 - t * (GROUND - 35 - stemTop - 8);
+    const dir = i % 2 ? 1 : -1;
+    const reach = 58 + (i % 3) * 16;
+    const x2 = 200 + dir * reach, y2 = y - 26;
+    out += '<path class="branchline" d="M200,' + y.toFixed(0) + ' Q' + (200 + dir*reach*0.55) +
+      ',' + (y - 4) + ' ' + x2 + ',' + y2.toFixed(0) + '"/>' +
+      '<ellipse class="vleaf" cx="' + x2 + '" cy="' + y2.toFixed(0) +
+        '" rx="13" ry="7" transform="rotate(' + (dir * -28) + ' ' + x2 + ' ' + y2.toFixed(0) + ')"/>' +
+      '<text class="vlabel" x="' + (x2 + dir * 20) + '" y="' + (y2 + 4).toFixed(0) +
+        '" text-anchor="' + (dir > 0 ? "start" : "end") + '">' + o[0] + '</text>';
+  });
+
+  for(let k = 0; k < Math.min(s.support, 5); k++){
+    const y = GROUND - 30 - k * 26;
+    out += '<circle class="knot" cx="' + (200 + (k % 2 ? 7 : -7)) + '" cy="' + y + '" r="5"/>';
+  }
+  return out + '</svg>';
+}
+
+/* ============ state ============ */
+let state;
+let history = [];   // completed runs, in memory only
+
+function fresh(mode){
+  return {
+    mode: mode || "carpenter",
+    locked:false, over:false,
+    turn:1, money:18, health:100,
+    paths:1, support:0, precision:0,
+    boards:[], selected:"Teacher", opps:[],
+    log:["The run begins. Twelve turns, one developing life, no guaranteed ending."]
+  };
+}
+
+/* ============ derived ============ */
+function usableBoards(s){
+  return s.boards.reduce((n,q)=> n + (q==="totally"?0 : q==="badly"?0.5 : 1), 0);
+}
+function openPaths(s){
+  if(s.mode === "gardener") return Math.max(1, s.paths);
+  return Math.max(1, 6 - Math.floor(usableBoards(s)) - Math.floor(s.precision/4));
+}
+
+/* ============ render ============ */
+const el = id => document.getElementById(id);
+
+function render(){
+  const s = state, g = s.mode === "gardener";
+  const need = CAREERS[s.selected].need;
+  const have = usableBoards(s);
+
+  document.querySelectorAll(".strategy").forEach(b=>{
+    b.classList.toggle("active", b.dataset.mode === s.mode);
+    b.disabled = s.locked;
+    b.title = s.locked ? "Strategy locks once the run is under way. Reset to switch." : "";
+  });
+
+  el("carpenterControls").style.display = g ? "none" : "block";
+  el("gardenerControls").style.display  = g ? "block" : "none";
+
+  el("year").textContent = Math.ceil(s.turn/3);
+  el("stageName").textContent = STAGES[Math.min(3, Math.floor((s.turn-1)/3))];
+  el("turnBadge").textContent = "Turn " + Math.min(s.turn, TOTAL_TURNS) + " / " + TOTAL_TURNS;
+  el("modeBadge").textContent = g ? "Gardener" : "Carpenter";
+  el("resources").textContent = s.money + " ◇";
+  el("incomeNote").textContent = s.over ? "run finished" : "+" + INCOME + " ◇ accrues each turn";
+
+  el("dashTitle").textContent = g ? "A living network" : "A structure under construction";
+  el("principle").textContent = g
+    ? "Care changes the conditions, not the destination. A curve can become a new direction."
+    : "A blueprint rewards precision, but it can make adaptation expensive.";
+  el("tip").textContent = g
+    ? "You cannot choose which branch the vine climbs. You can only decide how many are within reach."
+    : "A desirable career has tighter tolerances. A bent board is not a moral failure—it is a design problem.";
+
+  /* meter: real progress, not decoration */
+  const pct = g
+    ? Math.round(Math.min(1, openPaths(s)/10) * 100)
+    : Math.round(Math.min(1, have/need) * 100);
+  el("meterLabel").textContent = g ? "Breadth of possible futures" : "Structure toward " + s.selected;
+  el("meterValue").textContent = pct + "%";
+  el("meter").style.width = pct + "%";
+  el("meter").className = s.health <= 35 ? "warn" : "";
+
+  /* stats */
+  const stats = g
+    ? [["Wellbeing", s.health],["Open futures", openPaths(s)],
+       ["Supportive branches", s.support],["Domains offered", s.opps.length + " / 6"]]
+    : [["Wellbeing", s.health],["Open paths", openPaths(s)],
+       ["Usable boards", have.toFixed(1) + " / " + need],["Precision", s.precision]];
+  el("stats").innerHTML = stats.map(x=>
+    '<div class="stat"><label>' + x[0] + '</label><strong>' + x[1] + '</strong></div>').join("");
+
+  /* progress sentence */
+  if(g){
+    el("progress").textContent = s.opps.length
+      ? "The vine has " + s.opps.length + " domain" + (s.opps.length===1?"":"s") +
+        " to climb and " + openPaths(s) + " imaginable futures."
+      : "No opportunities offered yet. The vine has nothing to climb.";
+  } else {
+    const bent = s.boards.filter(q=>q==="totally"||q==="badly").length;
+    el("progress").textContent = bent + " nailed board" + (bent===1?" is":"s are") +
+      " outside tolerance for " + s.selected + " (allowed: " + CAREERS[s.selected].tolerance + ").";
+  }
+
+  /* timeline */
+  el("timeline").innerHTML = Array.from({length:TOTAL_TURNS},(_,i)=>
+    '<span class="dot ' + (i < s.turn-1 ? "done" : i === s.turn-1 ? "current" : "") + '"></span>'
+  ).join("");
+
+  /* career targets as selectable rows */
+  el("careers").innerHTML = Object.keys(CAREERS).map(c=>{
+    const k = CAREERS[c];
+    return '<button class="action' + (c===s.selected?" active":"") + '" data-career="' + c + '"' +
+      (s.boards.length ? " disabled" : "") +
+      ' style="' + (c===s.selected ? "border-color:var(--deep);background:#eef4ea" : "") + '">' +
+      '<span><b>' + c + '</b><small>' + k.need + ' boards · tolerance ' + k.tolerance + '</small></span>' +
+      '<span class="cost">' + (c===s.selected ? "chosen" : "select") + '</span></button>';
+  }).join("");
+
+  /* opportunities */
+  el("opps").innerHTML = OPPORTUNITIES.map((o,i)=>{
+    const taken = s.opps.some(t=>t[0]===o[0]);
+    return '<div class="opp' + (taken?" taken":"") + '">' +
+      '<button data-opp="' + i + '"' + (taken||s.over||s.money<3 ? " disabled":"") + '>' +
+      (taken ? "offered" : "3 ◇") + '</button>' +
+      '<b>' + o[0] + '</b><small>' + o[1] + '</small></div>';
+  }).join("");
+
+  /* affordability */
+  document.querySelectorAll("[data-cost]").forEach(b=>{
+    b.disabled = s.over || s.money < +b.dataset.cost;
+  });
+
+  el("log").innerHTML = s.log.slice(-4).map(x=>'<p>↳ ' + x + '</p>').join("");
+
+  /* the visualization reflects the actual record, not the turn count */
+  if(g){
+    el("viz").innerHTML = vineSvg(s) +
+      (s.opps.length || s.support
+        ? ""
+        : '<div class="vizempty">Nothing has been offered yet. Give the vine something to climb.</div>');
+  } else {
+    const ghosts = Math.max(0, Math.min(4, need - s.boards.length));
+    el("viz").innerHTML = '<div class="blueprint">' +
+      s.boards.map(q=>'<div class="board ' + q + '"></div>').join("") +
+      Array.from({length:ghosts},()=>'<div class="board ghost"></div>').join("") +
+      '</div>' +
+      (s.boards.length ? "" : '<div class="vizempty">No boards nailed yet. Each one you buy comes out of the mill as it comes.</div>');
+  }
+
+  /* hero art tracks the run */
+  const grow = g ? Math.min(1, (s.opps.length + s.support)/6) : Math.min(1, have/need);
+  el("stem").style.height = (40 + grow * 80) + "px";
+  // leaves attach along the stem, so the hero art reads as one plant
+  const stemH = 40 + grow * 80;
+  const heroLeaves = Math.round(grow * 4);
+  el("heroLeaves").innerHTML = Array.from({length:heroLeaves},(_,i)=>{
+    const up = 18 + (i / Math.max(1, heroLeaves)) * (stemH - 24);
+    const left = i % 2 ? "calc(46% + 6px)" : "calc(46% - 52px)";
+    return '<div class="hero-leaf" style="left:' + left + ';bottom:' + (28 + up).toFixed(0) +
+      'px;transform:' + (i % 2 ? "" : "scaleX(-1) ") + 'rotate(-20deg)"></div>';
+  }).join("");
+}
+
+/* ============ mechanics ============ */
+// One independent roll, so the stated distribution is the actual distribution.
+function randomWarp(){
+  const r = Math.random();
+  if(r < 0.05) return "totally";
+  if(r < 0.25) return "badly";
+  if(r < 0.60) return "slightly";
+  return "straight";
+}
+
+function advance(msg, cost){
+  const s = state;
+  cost = cost || 0;
+  if(s.over) return;
+  if(s.money < cost){ s.log.push("Not enough resources for that action."); return render(); }
+
+  s.locked = true;
+  s.money -= cost;
+  s.health = Math.max(0, Math.min(100, s.health));
+  s.log.push(msg);
+  s.turn++;
+
+  if(s.health <= 0){
+    s.log.push("Wellbeing bottomed out. The run stops here.");
+    return finishRun("collapse");
+  }
+  if(s.turn > TOTAL_TURNS) return finishRun("complete");
+
+  s.money += INCOME;
+  s.log.push("Turn " + s.turn + ": +" + INCOME + " ◇ accrued.");
+  render();
+}
+
+function doAction(act){
+  const s = state;
+  if(act === "board"){
+    const q = randomWarp();
+    s.boards.push(q);
+    s.health -= q==="totally" ? 15 : q==="badly" ? 8 : 2;
+    if(q === "straight") s.precision += 2;
+    const words = {straight:"straight",slightly:"slightly curved",badly:"badly curved",totally:"totally bent"};
+    advance("The board came out " + words[q] + ".", 4);
+  }
+  else if(act === "school"){ s.precision += 2; advance("A lesson improved fit, but narrowed the design.", 5); }
+  else if(act === "rest"){   s.health += 14; advance("A pause protected wellbeing.", 2); }
+  else if(act === "sun"){    s.health += 8; s.paths += 1; advance("Sunlight opened a new direction.", 3); }
+  else if(act === "water"){  s.health += 17; advance("Water and nutrients helped the vine recover.", 4); }
+  else if(act === "support"){s.support += 1; s.paths += 1; advance("A new branch offered support and a possible route.", 3); }
+}
+
+/* ============ results ============ */
+function score(s){
+  const g = s.mode === "gardener";
+  const bent = s.boards.filter(q=>q==="totally"||q==="badly").length;
+  return {
+    mode:s.mode, career:s.selected, wellbeing:s.health,
+    paths:openPaths(s), boards:usableBoards(s), support:s.support,
+    opps:s.opps.length, precision:s.precision,
+    reached: g ? null : usableBoards(s) >= CAREERS[s.selected].need,
+    withinTolerance: g ? null : bent <= CAREERS[s.selected].tolerance
+  };
+}
+
+function finishRun(reason){
+  const s = state;
+  if(s.over) return;
+  s.over = true;
+  const g = s.mode === "gardener";
+  const r = score(s);
+  history.push(r);
+
+  const success = g
+    ? (r.paths >= 8 || r.support >= 3) && r.wellbeing > 35
+    : r.reached && r.withinTolerance && r.wellbeing > 35;
+
+  el("resultTitle").textContent = reason === "collapse"
+    ? "The run ended early."
+    : success ? "The run has flourished." : "The run reached a difficult edge.";
+
+  el("resultText").textContent = reason === "collapse"
+    ? "Wellbeing ran out before the twelfth turn. Whatever the strategy, the child was the resource being spent."
+    : g
+      ? (success
+        ? "The garden produced a broad canopy of possible futures."
+        : "The garden remained sparse, but even partial growth is not a failure.")
+      : (success
+        ? "The blueprint reached " + r.career + ". The question now is what it cost to hold the shape."
+        : r.reached
+          ? "The " + r.career + " blueprint was assembled, but too many boards fell outside tolerance."
+          : "The " + r.career + " blueprint was not completed. A life is more than a missed target.");
+
+  const cells = g
+    ? [["Open futures",r.paths],["Branches",r.support],["Wellbeing",r.wellbeing],["Domains",r.opps]]
+    : [["Target",r.career],["Usable boards",r.boards.toFixed(1)],["Precision",r.precision],["Wellbeing",r.wellbeing]];
+  el("resultGrid").innerHTML = cells.map(x=>
+    '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
+
+  const lastC = [...history].reverse().find(h=>h.mode==="carpenter");
+  const lastG = [...history].reverse().find(h=>h.mode==="gardener");
+  if(lastC && lastG){
+    const rows = [
+      ["Wellbeing at the end", lastC.wellbeing, lastG.wellbeing],
+      ["Open futures", lastC.paths, lastG.paths],
+      ["Named target reached", lastC.reached ? "yes" : "no", "n/a"],
+      ["Supportive relationships", lastC.support, lastG.support]
+    ];
+    el("compare").innerHTML =
+      '<div class="eyebrow">Your most recent run of each</div>' +
+      '<div class="comparehead"><span>Measure</span><span>Carpenter / Gardener</span></div>' +
+      rows.map(x=>'<div class="comparerow"><span>' + x[0] + '</span><b>' + x[1] +
+        ' &nbsp;/&nbsp; ' + x[2] + '</b></div>').join("") +
+      '<p style="color:var(--muted);font-size:12px;margin:12px 0 0">Neither column is the answer. The point is what each strategy made expensive.</p>';
+  } else {
+    const other = g ? "carpenter" : "gardener";
+    el("compare").innerHTML = '<p style="color:var(--muted);font-size:13px;margin:0">Play a ' +
+      other + ' run to unlock the side-by-side comparison.</p>';
+  }
+
+  render();
+  el("modal").classList.add("show");
+}
+
+/* ============ events — closest(), so clicks on child nodes register ============ */
+document.addEventListener("click", e => {
+  const strat = e.target.closest("[data-mode]");
+  if(strat){
+    if(strat.disabled) return;
+    state.mode = strat.dataset.mode;
+    state.log.push(state.mode === "gardener"
+      ? "You loosen your grip on the outcome."
+      : "You choose a target and begin construction.");
+    return render();
+  }
+
+  const career = e.target.closest("[data-career]");
+  if(career){
+    if(career.disabled) return;
+    state.selected = career.dataset.career;
+    return render();
+  }
+
+  const act = e.target.closest("[data-act]");
+  if(act){
+    if(act.disabled) return;
+    return doAction(act.dataset.act);
+  }
+
+  const opp = e.target.closest("[data-opp]");
+  if(opp){
+    if(opp.disabled) return;
+    const o = OPPORTUNITIES[+opp.dataset.opp];
+    state.opps.push(o);
+    state.paths += 2;
+    state.health += 3;
+    return advance("You offered " + o[0] + "; several futures became imaginable.", 3);
+  }
+
+  if(e.target.closest("#reset")){ state = fresh(state.mode); return render(); }
+  if(e.target.closest("#again")){
+    el("modal").classList.remove("show");
+    state = fresh(state.mode);
+    return render();
+  }
+  if(e.target.closest("#switchMode")){
+    el("modal").classList.remove("show");
+    state = fresh(state.mode === "carpenter" ? "gardener" : "carpenter");
+    return render();
+  }
+});
+
+state = fresh();
+render();
+</script>
+</body>
+</html>
