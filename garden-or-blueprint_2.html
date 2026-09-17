@@ -21,6 +21,8 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:25px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.03em}
 .mark{display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--deep);color:#fff;font-size:18px}
+.ver{font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line);border-radius:99px;padding:3px 9px;background:var(--card)}
 .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--muted);font-weight:800}
 .reset{border:1px solid var(--line);border-radius:99px;padding:9px 15px;color:var(--muted)}
 .reset:hover{border-color:var(--sage);color:var(--deep)}
@@ -82,7 +84,12 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .bpsvg .ghost{fill:none;stroke:#b7a98a;stroke-width:2;stroke-dasharray:4 5;opacity:.6}
 .bpsvg .joint{fill:#7d5334}
 .bpsvg .drift{fill:none;stroke:var(--rose);stroke-width:1.5;stroke-dasharray:3 4}
-.bpsvg .bplabel{fill:#6f7f74;font:700 11px ui-sans-serif,system-ui,sans-serif}
+.bpsvg .level{fill:none;stroke:#c3cdbd;stroke-width:1;stroke-dasharray:2 5}
+.bpsvg .level.on{stroke:#8aa389;stroke-width:1.6;stroke-dasharray:4 4}
+/* the cream halo keeps a label readable where a board crosses behind it */
+.bpsvg .levellabel{fill:#93a293;font:800 10px ui-sans-serif,system-ui,sans-serif;
+  stroke:#f4f1e4;stroke-width:3;paint-order:stroke}
+.bpsvg .levellabel.on{fill:var(--deep);font-size:11px}
 .bpsvg .driftlabel{fill:#b4564a;font:700 11px ui-sans-serif,system-ui,sans-serif}
 .vinesvg{display:block;width:100%;height:290px}
 .vinesvg .stemline,.vinesvg .branchline{fill:none;stroke:var(--deep);stroke-linecap:round}
@@ -153,7 +160,9 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 <main class="app">
 
 <header class="topbar">
-  <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?</div>
+  <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
+    <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
+    <span class="ver">build 5</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -358,6 +367,12 @@ function vineSvg(s){
 const WARP_DEG = {straight:2, slightly:10, badly:22, totally:36};
 const RISE     = {straight:1, slightly:0.9, badly:0.74, totally:0.55};
 
+/* Every profession is marked on the plumb line, not just the chosen one, and
+   the frame always reaches the tallest of them. The ladder therefore stays the
+   same height whichever target you pick, so how much further a CEO sits above
+   a Teacher is visible from the first turn. */
+const MAX_NEED = Math.max.apply(null, Object.keys(CAREERS).map(c => CAREERS[c].need));
+
 /* The blueprint is built end to end: every board starts where the last one
    stopped, and its warp is added to the running heading rather than applied
    on its own. That is what takes the structure off track -- one bad board
@@ -385,7 +400,7 @@ function blueprintSvg(s){
     ') rotate(' + pa.toFixed(1) + ')"/>';
 
   let x = 0, y = 0, ang = 0, planks = "", joints = "";
-  const xs = [0], ys = [0, -need * L];
+  const xs = [0], ys = [0, -MAX_NEED * L];
 
   s.boards.forEach(b => {
     // clamped so a ruinous run lies down flat instead of curling under the ground
@@ -418,7 +433,25 @@ function blueprintSvg(s){
   if(y1 - y0 < 250){ y0 = y1 - 250; }
 
   const lean = Math.abs(Math.round(ang));
-  const top = (-need * L).toFixed(1);
+  const top = (-MAX_NEED * L).toFixed(1);
+
+  /* one guide per profession, spanning the fitted frame so you can see which
+     levels the structure has actually cleared. Built after the frame is known
+     so the guides always reach both edges. */
+  const careerNames = Object.keys(CAREERS);
+  const levels = careerNames.map(c => {
+    const ly = (-CAREERS[c].need * L).toFixed(1);
+    return '<line class="level' + (c === s.selected ? " on" : "") +
+      '" x1="' + x0.toFixed(1) + '" y1="' + ly +
+      '" x2="' + x1.toFixed(1) + '" y2="' + ly + '"/>';
+  }).join("");
+  // labels are emitted last so they sit above the boards
+  const levelLabels = careerNames.map(c => {
+    const on = c === s.selected;
+    return '<text class="levellabel' + (on ? " on" : "") +
+      '" x="' + (x1 - 7).toFixed(1) + '" y="' + (-CAREERS[c].need * L + 3.5).toFixed(1) +
+      '" text-anchor="end">' + c + (on ? " &#183; target" : "") + '</text>';
+  }).join("");
 
   return '<svg class="bpsvg" viewBox="' +
       [x0, y0, x1 - x0, y1 - y0].map(v=>v.toFixed(1)).join(" ") +
@@ -435,16 +468,16 @@ function blueprintSvg(s){
     '</defs>' +
     '<rect x="-900" y="0" width="2400" height="' + y1 + '" fill="#d8c79b"/>' +
     '<line x1="-900" y1="0" x2="1500" y2="0" stroke="#b9a578" stroke-width="2"/>' +
+    levels +
     // the blueprint itself: where a perfectly plumb structure would have gone
     '<path class="plumb" d="M0,0 L0,' + top + '"/>' +
-    '<line class="plumb" x1="-15" y1="' + top + '" x2="15" y2="' + top + '"/>' +
-    '<text class="bplabel" x="21" y="' + (-need * L + 4).toFixed(1) + '">' + s.selected + '</text>' +
     ghosts + planks + joints +
     (s.boards.length
       ? '<path class="drift" d="M0,' + y.toFixed(1) + ' L' + x.toFixed(1) + ',' + y.toFixed(1) + '"/>' +
         '<text class="driftlabel" x="' + (x / 2).toFixed(1) + '" y="' + (y - 10).toFixed(1) +
           '" text-anchor="middle">' + lean + '&#176; off plumb</text>'
       : "") +
+    levelLabels +
     '</svg>';
 }
 
