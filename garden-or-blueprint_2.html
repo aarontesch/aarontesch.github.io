@@ -349,9 +349,14 @@ function vineSvg(s){
   return out + '</svg>';
 }
 
-/* How far each grade of board turns the structure at the joint. A straight
-   board still gives up a degree -- nothing comes out of the mill perfect. */
-const WARP_DEG = {straight:1, slightly:7, badly:18, totally:31};
+/* Each grade reads off the plumb line in two ways at once. WARP_DEG is how far
+   it turns the structure at the joint -- the direction. RISE is how much of the
+   board's length survives its own bend -- the level. A totally bent board both
+   swings hardest and lifts you least, so the grades stay apart on the drawing
+   even when two of them happen to share a heading. A straight board still gives
+   up a couple of degrees; nothing comes out of the mill perfect. */
+const WARP_DEG = {straight:2, slightly:10, badly:22, totally:36};
+const RISE     = {straight:1, slightly:0.9, badly:0.74, totally:0.55};
 
 /* The blueprint is built end to end: every board starts where the last one
    stopped, and its warp is added to the running heading rather than applied
@@ -371,10 +376,10 @@ function blueprintSvg(s){
   const EDGE = {straight:"#9a6a3d", slightly:"#9a6a3d",
                 badly:"#8f5f3c",    totally:"#8a5c39"};
 
-  // a plank rises from (px,py); q omitted draws the dashed not-yet-bought board
-  const plank = (px, py, pa, q) =>
-    '<rect x="' + (-W/2).toFixed(1) + '" y="' + (-L).toFixed(1) +
-    '" width="' + W.toFixed(1) + '" height="' + L.toFixed(1) + '" rx="2" ' +
+  // a plank of length len rises from (px,py); q omitted draws a dashed ghost
+  const plank = (px, py, pa, q, len) =>
+    '<rect x="' + (-W/2).toFixed(1) + '" y="' + (-len).toFixed(1) +
+    '" width="' + W.toFixed(1) + '" height="' + len.toFixed(1) + '" rx="2" ' +
     (q ? 'fill="' + FILL[q] + '" stroke="' + EDGE[q] + '" stroke-width="2"' : 'class="ghost"') +
     ' transform="translate(' + px.toFixed(1) + ',' + py.toFixed(1) +
     ') rotate(' + pa.toFixed(1) + ')"/>';
@@ -385,17 +390,20 @@ function blueprintSvg(s){
   s.boards.forEach(b => {
     // clamped so a ruinous run lies down flat instead of curling under the ground
     ang = Math.max(-82, Math.min(82, ang + b.dir * WARP_DEG[b.q]));
-    planks += plank(x, y, ang, b.q);
+    const len = L * RISE[b.q];
+    planks += plank(x, y, ang, b.q, len);
     joints += '<circle class="joint" cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2.6"/>';
-    x += Math.sin(rad(ang)) * L;
-    y -= Math.cos(rad(ang)) * L;
+    x += Math.sin(rad(ang)) * len;
+    y -= Math.cos(rad(ang)) * len;
     xs.push(x); ys.push(y);
   });
 
   // where the remaining boards land if the structure keeps its current lean
   let gx = x, gy = y, ghosts = "";
+  // ghosts are drawn full length: the grade is not known until you buy them,
+  // so they show the best the remaining boards could do from here
   for(let i = s.boards.length; i < need; i++){
-    ghosts += plank(gx, gy, ang, null);
+    ghosts += plank(gx, gy, ang, null, L);
     gx += Math.sin(rad(ang)) * L;
     gy -= Math.cos(rad(ang)) * L;
     xs.push(gx); ys.push(gy);
