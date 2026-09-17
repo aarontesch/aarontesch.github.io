@@ -211,14 +211,6 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
           <span><b>Buy &amp; nail a board</b><small>Build structure toward the target</small></span>
           <span class="cost">4 &#9671;</span>
         </button>
-        <button class="action" data-act="school" data-cost="5">
-          <span><b>Invest in school</b><small>More precision, fewer open paths</small></span>
-          <span class="cost">5 &#9671;</span>
-        </button>
-        <button class="action" data-act="rest" data-cost="2">
-          <span><b>Protect wellbeing</b><small>Recover and reinforce</small></span>
-          <span class="cost">2 &#9671;</span>
-        </button>
       </div>
     </div>
 
@@ -549,8 +541,6 @@ function doAction(act){
     const words = {straight:"straight",slightly:"slightly curved",badly:"badly curved",totally:"totally bent"};
     advance("The board came out " + words[q] + ".", 4);
   }
-  else if(act === "school"){ s.precision += 2; advance("A lesson improved fit, but narrowed the design.", 5); }
-  else if(act === "rest"){   s.health += 14; advance("A pause protected wellbeing.", 2); }
   else if(act === "sun"){    s.health += 8; s.paths += 1; advance("Sunlight opened a new direction.", 3); }
   else if(act === "water"){  s.health += 17; advance("Water and nutrients helped the vine recover.", 4); }
   else if(act === "support"){s.support += 1; s.paths += 1; advance("A new branch offered support and a possible route.", 3); }
