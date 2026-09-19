@@ -2213,14 +2213,20 @@ function endGame(){
 
 <script>
 // PWA
-if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+// Storage and service-worker access both throw SecurityError when the page runs
+// in a sandboxed iframe without allow-same-origin -- which is how OneDrive, Teams
+// and most LMS viewers preview an HTML file (about:srcdoc). Guarded so the activity
+// still runs there; the install/offline extras just no-op.
+function storeGet(k){try{return sessionStorage.getItem(k);}catch(e){return null;}}
+function storeSet(k,v){try{sessionStorage.setItem(k,v);}catch(e){}}
+window.addEventListener('load',()=>{try{if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}});
 function updateOnline(){document.getElementById('offline-badge').classList.toggle('show',!navigator.onLine);}
 window.addEventListener('online',updateOnline);window.addEventListener('offline',updateOnline);updateOnline();
 function isIOS(){return/iphone|ipad|ipod/i.test(navigator.userAgent);}
 function isStandalone(){return window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone;}
-function dismissBanner(){document.getElementById('install-banner').classList.remove('visible');sessionStorage.setItem('bd','1');}
-window.addEventListener('DOMContentLoaded',()=>{if(isIOS()&&!isStandalone()&&!sessionStorage.getItem('bd')){setTimeout(()=>document.getElementById('install-banner').classList.add('visible'),2800);}});
-if(screen.orientation&&screen.orientation.lock){screen.orientation.lock('portrait').catch(()=>{});}
+function dismissBanner(){document.getElementById('install-banner').classList.remove('visible');storeSet('bd','1');}
+window.addEventListener('DOMContentLoaded',()=>{if(isIOS()&&!isStandalone()&&!storeGet('bd')){setTimeout(()=>document.getElementById('install-banner').classList.add('visible'),2800);}});
+try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('portrait').catch(()=>{});}catch(e){}
 </script>
 </body>
 </html>
