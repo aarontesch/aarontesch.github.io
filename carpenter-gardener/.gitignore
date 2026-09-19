@@ -1,8 +1,0 @@
-# Windows / OneDrive noise
-Thumbs.db
-desktop.ini
-~$*
-
-# Browser "Save As" copies of Claude artifacts (only work online via claude.ai)
-saved-from-claude.html
-*_files/

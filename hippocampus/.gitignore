@@ -1,8 +1,0 @@
-# Claude Code local config
-.claude/
-
-# OneDrive / Windows cruft
-desktop.ini
-Thumbs.db
-~$*
-*.tmp
