@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Shaping Lab</title>
+<meta name="description" content="An operant chamber simulator: shape a lever press by reinforcing successive approximations, then put the response on a schedule and read the cumulative record.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#128000;</text></svg>">
+<style>
+  :root{
+    --ink:#1b211f;
+    --paper:#e9e3d4;
+    --paper-line:#c3b79b;
+    --steel:#2c3634;
+    --steel-lite:#3d4b48;
+    --brass:#b28a3c;
+    --pellet:#ddcfa8;
+    --mark:#9c3524;
+    --ok:#4a7c59;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--steel);color:var(--paper);
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.5}
+  h1,h2,h3{font-family:Palatino,"Iowan Old Style",Georgia,serif;font-weight:600;margin:0}
+  header{padding:20px 22px 12px;border-bottom:1px solid var(--steel-lite)}
+  h1{font-size:26px;letter-spacing:.2px}
+  header p{margin:4px 0 0;max-width:62ch;color:#a9b3af;font-size:14px}
+  .wrap{display:grid;grid-template-columns:minmax(320px,1fr) minmax(300px,380px);
+    gap:18px;padding:18px 22px 40px;align-items:start}
+  @media(max-width:860px){.wrap{grid-template-columns:1fr}}
+  .panel{background:var(--steel-lite);border-radius:6px;padding:14px}
+  canvas{display:block;width:100%;border-radius:4px}
+  #chamber{background:#1a2220;aspect-ratio:16/10}
+  #recorder{background:var(--paper);aspect-ratio:16/7;margin-top:6px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  button{font:inherit;background:var(--steel);color:var(--paper);border:1px solid #5c6d69;
+    border-radius:4px;padding:8px 12px;cursor:pointer}
+  button:hover{background:#495956}
+  button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  button.primary{background:var(--brass);color:#221b09;border-color:var(--brass);font-weight:600}
+  button.primary:hover{background:#c99b45}
+  button[disabled]{opacity:.4;cursor:not-allowed}
+  select,input[type=number]{font:inherit;background:var(--steel);color:var(--paper);
+    border:1px solid #5c6d69;border-radius:4px;padding:6px 8px}
+  label{font-size:13px;color:#a9b3af}
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+  .stat{background:var(--steel);border-radius:4px;padding:8px 10px}
+  .stat b{display:block;font-size:20px;font-family:Palatino,Georgia,serif}
+  .stat span{font-size:12px;color:#a9b3af}
+  .steps{margin:8px 0 0;padding:0;list-style:none;font-size:13px}
+  .steps li{padding:3px 0;color:#8e9a96;display:flex;gap:8px;align-items:baseline}
+  .steps li.on{color:var(--paper)}
+  .steps li.on::before{content:"◆";color:var(--brass)}
+  .steps li::before{content:"◇";font-size:11px}
+  .log{height:110px;overflow-y:auto;background:#20292700;border-top:1px solid #5c6d69;
+    margin-top:10px;padding-top:8px;font-size:13px;color:#a9b3af}
+  .log div{padding:1px 0}
+  h3{font-size:15px;margin-bottom:2px}
+  .note{font-size:12.5px;color:#8e9a96;margin-top:8px}
+  .tabs{display:flex;gap:6px;margin-bottom:10px}
+  .tabs button{flex:1}
+  .tabs button.sel{background:var(--paper);color:var(--ink);border-color:var(--paper);font-weight:600}
+  details{margin-top:12px;font-size:13px;color:#a9b3af}
+  summary{cursor:pointer;color:var(--paper)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Shaping Lab</h1>
+  <p>Train a rat to press a lever by reinforcing successive approximations, then put the
+     established response on a schedule and watch the cumulative record change shape.</p>
+</header>
+
+<div class="wrap">
+  <div class="panel">
+    <canvas id="chamber" width="800" height="500"></canvas>
+    <canvas id="recorder" width="800" height="350"></canvas>
+    <div class="row">
+      <button id="reinforce" class="primary">Deliver pellet (spacebar)</button>
+      <button id="run">Pause</button>
+      <button id="reset">New rat</button>
+      <label>Speed
+        <select id="speed">
+          <option value="0.25">0.25× — slow motion</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1× — real time</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option>
+        </select>
+      </label>
+    </div>
+    <p class="note">The record climbs one step per lever press. Red ticks mark reinforcers.
+       A flat line means no responding.</p>
+  </div>
+
+  <div class="panel">
+    <div class="tabs">
+      <button id="tabShape" class="sel">Shaping</button>
+      <button id="tabSched">Schedules</button>
+    </div>
+
+    <div id="shapePane">
+      <h3>Reinforce by hand</h3>
+      <p class="note" style="margin-top:2px">Watch the rat. The instant it does something closer
+         to a lever press than what came before, deliver a pellet. Reinforce late and you'll
+         strengthen whatever it's doing <em>now</em> instead.</p>
+      <ul class="steps" id="steps"></ul>
+      <div class="stats">
+        <div class="stat"><b id="sPellets">0</b><span>Pellets delivered</span></div>
+        <div class="stat"><b id="sPresses">0</b><span>Lever presses</span></div>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div id="schedPane" style="display:none">
+      <h3>Automatic reinforcement</h3>
+      <p class="note" style="margin-top:2px">The chamber now delivers pellets on its own,
+         according to the contingency below.</p>
+      <div class="row">
+        <label>Schedule
+          <select id="schedule">
+            <option value="CRF">CRF — every press</option>
+            <option value="FR">FR — fixed ratio</option>
+            <option value="VR" selected>VR — variable ratio</option>
+            <option value="FI">FI — fixed interval</option>
+            <option value="VI">VI — variable interval</option>
+            <option value="EXT">EXT — extinction</option>
+          </select>
+        </label>
+        <label id="paramWrap">Value
+          <input id="param" type="number" min="1" max="120" value="10" style="width:80px">
+        </label>
+      </div>
+      <p class="note" id="schedDesc"></p>
+      <div class="stats">
+        <div class="stat"><b id="sRate">0</b><span>Presses / min</span></div>
+        <div class="stat"><b id="sRatio">—</b><span>Presses per pellet</span></div>
+        <div class="stat"><b id="sPellets2">0</b><span>Pellets</span></div>
+        <div class="stat"><b id="sPresses2">0</b><span>Presses</span></div>
+      </div>
+      <button id="clearRec" style="margin-top:10px">Clear the record</button>
+      <div class="log" id="log2"></div>
+    </div>
+
+    <details>
+      <summary>What the model is doing</summary>
+      <p><b>Shaping</b> is a learning model: each behavior class has a response strength, a pellet
+      raises the strength of whatever class the rat was in when it arrived, discounted by the
+      delay, and unreinforced strength decays. Nothing about lever pressing is given to the rat
+      in advance — a student who reinforces badly gets no pressing at all.</p>
+      <p><b>Schedules</b> work differently. The response is already established by that point, so
+      each schedule drives a scripted performance profile chosen to reproduce its documented
+      signature: response rate, post-reinforcement pause, and resistance to extinction. This is a
+      demonstration of the patterns, not a derivation of them.</p>
+
+    </details>
+  </div>
+</div>
+
+<script>
+(function(){
+const LEVELS = [
+  "Anywhere in the chamber",
+  "On the lever side",
+  "Near the lever",
+  "Facing / sniffing the lever",
+  "Paw touching the lever",
+  "Pressing the lever"
+];
+
+const chamber = document.getElementById('chamber'), cx = chamber.getContext('2d');
+const rec = document.getElementById('recorder'), rx = rec.getContext('2d');
+const $ = id => document.getElementById(id);
+
+let S, mode = 'shape', running = true, speed = 1;
+
+function newRat(){
+  S = {
+    strength: [1,.35,.15,.06,.02,.005],  // response strength per approximation class
+    level: 0, x: .25, y: .6, facing: 1,
+    presses: 0, pellets: 0, t: 0,
+    eating: 0, lastRft: -999, lastPress: -999,
+    inMag: false, magT: 0,
+    motivation: 1,
+    count: 0, target: 0, intervalReady: false,
+    schedRfts: 0, priorSched: 'VR', pressTimer: 0, offLevel: 1,
+    pressTimes: [], burst: 0,
+    trace: [], marks: [], recT0: 0,
+    highest: 0
+  };
+  setTarget();
+  $('log').innerHTML = ''; $('log2').innerHTML = '';
+}
+
+function say(msg){
+  [$('log'),$('log2')].forEach(l=>{
+    const d = document.createElement('div');
+    d.textContent = '· ' + msg; l.appendChild(d); l.scrollTop = l.scrollHeight;
+  });
+}
+
+/* ---------- schedule bookkeeping ---------- */
+function sched(){ return $('schedule').value; }
+function param(){ return Math.max(1, +$('param').value || 1); }
+function setTarget(){
+  const s = sched();
+  if(s==='FR') S.target = param();
+  else if(s==='VR') S.target = Math.max(1, Math.round(-Math.log(Math.random())*param()));
+  else if(s==='FI') S.target = param();
+  else if(s==='VI') S.target = Math.max(1, -Math.log(Math.random())*param());
+  else S.target = 1;
+  S.count = 0;
+}
+const DESC = {
+  CRF:"Every press pays. Fast acquisition, quick satiation, and the fastest extinction later.",
+  FR:"Every Nth press pays. Expect a pause right after each pellet, then a fast run.",
+  VR:"On average every Nth press pays, but the rat can never tell which one. Highest, steadiest rates and the most resistant to extinction.",
+  FI:"The first press after N seconds pays; presses before that do nothing. Expect a scallop — a pause, then acceleration as the interval runs out.",
+  VI:"The first press after a variable average of N seconds pays. Steady, moderate, unhurried.",
+  EXT:"No press pays. Look for a burst of responding first, then a decline."
+};
+function schedUI(){
+  const s = sched();
+  $('schedDesc').textContent = DESC[s];
+  $('paramWrap').style.display = (s==='CRF'||s==='EXT') ? 'none' : '';
+  $('paramWrap').firstChild.textContent = (s==='FR'||s==='VR') ? 'Presses ' : 'Seconds ';
+  setTarget();
+}
+
+/* ---------- reinforcement ---------- */
+function reinforce(auto, level){
+  const delay = auto ? 0 : S.t - S.lastEmit;   // seconds since the behavior occurred
+  const w = Math.exp(-delay/1.2);              // delay of reinforcement discount
+  // catching a behavior the moment it first appears pays more than reinforcing
+  // the same behavior once it has been going on for a while
+  const fresh = 1 + 1.1*Math.exp(-delay/0.7);
+  const L = (level === undefined) ? S.level : level;
+  S.strength[L] += 2.0*w*fresh*S.motivation;
+  if(L>0) S.strength[L-1] += .25*w;            // neighbours get a little
+  if(L<5) S.strength[L+1] += (L===4 ? 2.2 : .8)*w;   // touching generalizes strongly to pressing
+  for(let i=0;i<6;i++) S.strength[i] = Math.min(S.strength[i], 12);
+  S.pellets++; S.schedRfts = (S.schedRfts||0)+1; S.lastRft = S.t; S.eating = 1.6 + Math.random()*.6;
+  S.marks.push(S.t);
+  if(!auto){
+    if(delay > 1.5) say('Pellet arrived '+delay.toFixed(1)+' s late — you reinforced "'+LEVELS[L].toLowerCase()+'".');
+    else if(delay < 0.7) say('Caught it immediately — strong reinforcement of "'+LEVELS[L].toLowerCase()+'".');
+    else say('Reinforced: '+LEVELS[L].toLowerCase()+'.');
+  }
+  if(mode==='sched') setTarget();
+  S.intervalReady = false;
+}
+
+
+/* ---------- scripted schedule performance ----------
+   In schedule mode the response is already established, so instead of letting
+   rates emerge from the shaping model we drive each schedule from a profile
+   that reproduces its textbook signature. */
+const PROFILE = {
+  CRF: { rate: 45, jitter: 'low',  pause: () => 0,                  resist: 10 },
+  FR:  { rate: 115, jitter: 'low',  pause: P => 0.8 + P*0.30,        resist: 26 },
+  VR:  { rate: 145, jitter: 'high', pause: () => 0.25,              resist: 75 },
+  FI:  { rate: 44, jitter: 'low',  pause: P => P*0.08,              resist: 30 },
+  VI:  { rate: 55, jitter: 'high', pause: () => 0.4,                resist: 48 },
+  EXT: { rate: 0,  jitter: 'high', pause: () => 0,                  resist: 20 }
+};
+
+function schedStep(dt){
+  const s = sched(), P = param(), prof = PROFILE[s];
+  const since = S.t - S.lastRft;
+
+  // off-task bouts: grooming, exploring, nosing the magazine — more as the rat fills up
+  if(S.t < (S.offUntil||0)){ S.level = S.offLevel; drift(dt); return; }
+  if(Math.random() < dt * 0.012){
+    S.offUntil = S.t + 1.2 + Math.random()*2.5;
+    S.offLevel = Math.random()<.5 ? 1 : 2; pickSpot(); return;
+  }
+
+  // presses per minute for this schedule, right now
+  let rate = prof.rate;
+
+  if(s === 'FI'){
+    // scallop: near zero after a pellet, accelerating as the interval elapses.
+    // Timing sharpens with experience on the schedule.
+    const sharp = Math.min(1, S.schedRfts/5);
+    const f = Math.min(1, since/P);
+    // low trickle spread across the interval + a sharp terminal burst
+    const shape = 0.16 + 0.85*f + 2.20*Math.pow(f, 2.4);
+    rate = prof.rate * shape * sharp + prof.rate*0.55*(1-sharp);
+  }
+  if(s === 'EXT'){
+    const d = S.t - S.extStart;
+    const base = (PROFILE[S.priorSched] || PROFILE.VR);
+    rate = base.rate * (d < 10 ? 1.7 : 1) * Math.exp(-d/base.resist);   // burst, then decline
+  }
+
+  // post-reinforcement pause (fixed schedules pause, variable ones barely do)
+  const pause = prof.pause(P);
+  const paused = since < pause;
+
+
+  // working or idling — drives where the rat stands
+  if(paused || rate < 1.5){
+    if(S.level > 2){ S.level = 2; pickSpot(); }
+    // keep the timer in step with the current (low) rate, so responding resumes
+    // gradually instead of firing a stale press the instant the pause ends
+    S.pressTimer = 60/Math.max(rate, 0.6);
+    drift(dt);
+    return;
+  }
+  if(S.level < 4){ S.level = 4; pickSpot(); }
+
+  // emit presses at the scheduled inter-response time
+  S.pressTimer = (S.pressTimer||0) - dt;
+  if(S.pressTimer <= 0){
+    let irt = 60/rate;
+    irt *= prof.jitter === 'high'
+      ? -Math.log(Math.random() || 1e-6)          // variable schedules: ragged, exponential
+      : 0.82 + Math.random()*0.36;                // fixed schedules: metronomic runs
+    S.pressTimer = Math.max(0.18, irt);
+    S.lastPress = S.t; S.presses++; S.pressTimes.push(S.t); S.trace.push(S.t);
+    S.level = 5;
+    onPress();
+  }
+  drift(dt);
+}
+
+/* ---------- the rat ---------- */
+function stepRat(dt){
+  S.t += dt;
+
+  if(S.eating > 0){                                       // at the food magazine
+    S.eating -= dt; S.inMag = true;
+    S.x += (.13 - S.x)*Math.min(1,dt*4); S.y += (.72 - S.y)*Math.min(1,dt*4);
+    if(S.eating <= 0 && S.strength[5] > 2){               // established response: return to the lever
+      S.level = 4; S.lastEmit = S.t; S.nextDecision = S.t; pickSpot();
+    }
+    return;
+  }
+  S.inMag = false;
+
+  if(mode==='sched'){ schedStep(dt); return; }   // schedules use scripted response profiles
+
+  const m = 1;
+
+  // decay of unreinforced classes
+  for(let i=0;i<6;i++) S.strength[i] *= (1 - dt*0.0035);
+
+  // transition among behavior classes — only when the current behavior has run its course
+  if(S.t < (S.nextDecision||0)) { drift(dt); return; }
+  const dwell = .9 + Math.random()*1.1;
+  S.nextDecision = S.t + dwell;
+  const L = S.level;
+  const upBias = (L===4) ? 2.2 : 1;                  // a paw on the lever easily becomes a press
+  const wUp   = (L<5 ? S.strength[L+1] : 0) * m * S.motivation * 1.3 * upBias;
+  const wStay = S.strength[L] * .8 + .15;
+  const wDown = ((L>0 ? S.strength[L-1] : 0) * .55 + .25) / (1 + S.strength[L]*.8);
+  const tot = wUp + wStay + wDown, r = Math.random()*tot;
+  let next = L;
+  if(r < wUp) next = L+1; else if(r < wUp+wStay) next = L; else next = Math.max(0,L-1);
+
+  if(next !== L){ S.level = next; S.lastEmit = S.t; pickSpot(); }
+  if(next > S.highest && next > 0){
+    S.highest = next;
+    if(mode==='shape') say('New behavior: ' + LEVELS[next].toLowerCase() + '.');
+  }
+
+  // a press event
+  if(S.level === 5 && S.t - S.lastPress > .45){
+    S.lastPress = S.t; S.presses++; S.pressTimes.push(S.t);
+    S.trace.push(S.t);
+    S.level = 4; S.lastEmit = S.t;               // release the lever
+    if(mode==='sched') onPress();
+    else { reinforce(true, 5); say('Lever press — the chamber paid automatically.'); }
+  }
+
+  // wander toward a position that matches the current class
+  drift(dt);
+}
+
+function pickSpot(){
+  const tx = [ .30, .52, .64, .70, .731, .731 ][S.level];
+  const ty = [ .62, .60, .57, .54, .468, .468 ][S.level];
+  const spread = [ .26, .15, .08, .035, .004, .002 ][S.level];
+  S.tx = Math.min(.88, Math.max(.10, tx + (Math.random()-.5)*2*spread));
+  S.ty = Math.min(.82, Math.max(.24, ty + (Math.random()-.5)*1.4*spread));
+  S.roamUntil = S.t + .6 + Math.random()*.9;
+}
+
+function drift(dt){
+  if(S.tx === undefined || S.t > (S.roamUntil||0)) pickSpot();
+  const sp = 1.1 + S.level*0.25;
+  S.x += (S.tx - S.x)*dt*sp + (Math.random()-.5)*.004;
+  S.y += (S.ty - S.y)*dt*sp + (Math.random()-.5)*.004;
+  S.x = Math.min(.9, Math.max(.08, S.x)); S.y = Math.min(.85, Math.max(.2, S.y));
+}
+
+function onPress(){
+  const s = sched();
+  if(s==='EXT') return;
+  if(s==="CRF"){ reinforce(true,5); return; }
+  if(s==="FR"||s==="VR"){ if(++S.count >= S.target) reinforce(true,5); return; }
+  if(S.t - S.lastRft >= S.target) reinforce(true,5);   // FI / VI
+}
+
+/* ---------- drawing ---------- */
+function drawChamber(){
+  const W = chamber.width, H = chamber.height;
+  cx.clearRect(0,0,W,H);
+  // floor grid
+  cx.fillStyle = '#1a2220'; cx.fillRect(0,0,W,H);
+  cx.strokeStyle = '#2f3d3a'; cx.lineWidth = 2;
+  for(let i=0;i<26;i++){ cx.beginPath(); cx.moveTo(30+i*(W-60)/25, H*0.9); cx.lineTo(30+i*(W-60)/25, H*0.97); cx.stroke(); }
+  cx.strokeStyle = '#46554f'; cx.lineWidth = 3; cx.strokeRect(24,24,W-48,H-48);
+
+  // lever
+  const lx = W*0.83, ly = H*0.42, pressed = S.level===5 || S.t-S.lastPress < .35;
+  cx.strokeStyle = '#8a949a'; cx.lineWidth = 9; cx.lineCap='round';
+  cx.beginPath(); cx.moveTo(W-30, ly-26); cx.lineTo(lx-34, ly + (pressed?12:-14)); cx.stroke();
+  cx.fillStyle = '#6d7880'; cx.fillRect(W-38, ly-52, 14, 52);
+  // cue light
+  cx.beginPath(); cx.arc(W-46, H*0.34, 11, 0, 7);
+  cx.fillStyle = (S.t - S.lastRft < 1.2) ? '#f2d489' : '#4a5450'; cx.fill();
+
+  // magazine
+  cx.fillStyle = '#232e2b'; cx.fillRect(30, H*0.60, 74, 62);
+  cx.strokeStyle='#5d6b66'; cx.lineWidth=3; cx.strokeRect(30, H*0.60, 74, 62);
+  cx.fillStyle = 'var'; cx.fillStyle = '#ddcfa8';
+  if(S.eating>0){ cx.beginPath(); cx.arc(67, H*0.60+34, 7, 0, 7); cx.fill(); }
+
+  // rat
+  const px = S.x*W, py = S.y*H;
+  const face = S.eating>0 ? -1 : ((S.tx!==undefined && S.tx < S.x - .01) ? -1 : 1);
+  cx.save(); cx.translate(px,py); cx.scale(face,1);
+  cx.fillStyle = '#cfc6b4';
+  cx.beginPath(); cx.ellipse(0,0,34,20,0,0,7); cx.fill();                 // body
+  const rear = S.level>=4 ? -20 : (S.level>=3 ? -11 : 0);
+  cx.beginPath(); cx.ellipse(30, -4+rear, 16, 13, 0,0,7); cx.fill();      // head
+  cx.beginPath(); cx.arc(26,-16+rear,7,0,7); cx.fill();                   // ear
+  cx.fillStyle='#e8b6b6'; cx.beginPath(); cx.arc(45,-2+rear,3,0,7); cx.fill(); // nose
+  cx.fillStyle='#1a2220'; cx.beginPath(); cx.arc(36,-7+rear,2.6,0,7); cx.fill(); // eye
+  cx.strokeStyle='#cfc6b4'; cx.lineWidth=4; cx.beginPath();               // tail
+  cx.moveTo(-32,2); cx.quadraticCurveTo(-58, 8+Math.sin(S.t*4)*8, -70, -6); cx.stroke();
+  cx.lineCap='round';
+  if(S.level>=4){ cx.strokeStyle='#cfc6b4'; cx.lineWidth=7; cx.beginPath();
+    cx.strokeStyle='#b7ad99'; cx.lineWidth=8; cx.lineCap='round'; cx.beginPath();
+    const drop = (S.level===5 || S.t-S.lastPress < .35) ? 17 : 0;   // ride the lever down on a press
+    cx.moveTo(18,0+rear); cx.lineTo(46,-14+rear+drop); cx.stroke();
+    cx.fillStyle='#e8dfcb'; cx.beginPath(); cx.arc(48,-15+rear+drop,5,0,7); cx.fill(); }
+  cx.restore();
+
+  // caption
+  cx.fillStyle = '#a9b3af'; cx.font = '20px Helvetica, Arial';
+  cx.fillText(S.eating>0 ? 'Eating at the magazine' : LEVELS[S.level], 34, H-34);
+}
+
+function drawRecorder(){
+  const W = rec.width, H = rec.height, span = 90;               // seconds shown
+  const t1 = Math.max(span, S.t), t0 = t1 - span;
+  rx.fillStyle = '#e9e3d4'; rx.fillRect(0,0,W,H);
+  rx.strokeStyle = '#cfc3a6'; rx.lineWidth = 1;
+  for(let i=0;i<=18;i++){ const x=i*W/18; rx.beginPath(); rx.moveTo(x,0); rx.lineTo(x,H); rx.stroke(); }
+  for(let i=0;i<=8;i++){ const y=i*H/8; rx.beginPath(); rx.moveTo(0,y); rx.lineTo(W,y); rx.stroke(); }
+
+  const vis = S.trace.filter(t => t>=t0);
+  const base = S.trace.length - vis.length;
+  const maxN = Math.max(20, vis.length);
+  const X = t => (t-t0)/span*W, Y = n => H - 8 - (n/maxN)*(H-24);
+
+  rx.strokeStyle = '#1b211f'; rx.lineWidth = 2.2; rx.beginPath();
+  rx.moveTo(0, Y(0));
+  let n = 0;
+  vis.forEach(t => { rx.lineTo(X(t), Y(n)); n++; rx.lineTo(X(t), Y(n)); });
+  rx.lineTo(X(t1), Y(n)); rx.stroke();
+
+  // reinforcement hash marks
+  rx.strokeStyle = '#9c3524'; rx.lineWidth = 2;
+  S.marks.filter(t=>t>=t0).forEach(t => {
+    const k = vis.filter(p=>p<=t).length;
+    rx.beginPath(); rx.moveTo(X(t), Y(k)); rx.lineTo(X(t), Y(k)+16); rx.stroke();
+  });
+  rx.fillStyle = '#6d6350'; rx.font = '18px Helvetica, Arial';
+  rx.fillText('cumulative responses', 12, 24);
+  rx.fillText(Math.round(span)+' s', W-64, H-12);
+}
+
+/* ---------- panels ---------- */
+function drawSteps(){
+  const ul = $('steps');
+  if(ul.children.length !== 6){
+    ul.innerHTML = LEVELS.map(l=>'<li>'+l+'</li>').join('');
+  }
+  [...ul.children].forEach((li,i)=> li.className = (i===S.level ? 'on':''));
+}
+function updateUI(){
+  $('sPellets').textContent = S.pellets; $('sPellets2').textContent = S.pellets;
+  $('sPresses').textContent = S.presses; $('sPresses2').textContent = S.presses;
+  const recent = S.pressTimes.filter(t => t > S.t-60);
+  const window_ = Math.min(60, Math.max(5,S.t));
+  $('sRate').textContent = Math.round(recent.length*60/window_);
+  $('sRatio').textContent = S.pellets ? (S.presses/S.pellets).toFixed(1) : '—';
+  drawSteps();
+}
+
+/* ---------- loop ---------- */
+let last = performance.now(), acc = 0;
+const STEP = 0.1;                                  // fixed simulated timestep (seconds)
+function frame(now){
+  const raw = Math.min(.05,(now-last)/1000); last = now;
+  if(running){
+    acc += raw*speed;
+    let guard = 0;
+    while(acc >= STEP && guard++ < 20){ stepRat(STEP); acc -= STEP; }
+  }
+  drawChamber(); drawRecorder(); updateUI();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- wiring ---------- */
+$('reinforce').onclick = ()=> { if(mode==='shape' && S.eating<=0) reinforce(false); };
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); $('reinforce').click(); }
+});
+$('run').onclick = e => { running = !running; e.target.textContent = running?'Pause':'Resume'; };
+$('reset').onclick = ()=> { newRat(); say('New rat in the chamber, magazine trained.'); };
+$('speed').onchange = e => speed = +e.target.value;
+$('schedule').onchange = ()=> {
+  if(sched()==='EXT') { S.extStart = S.t; }
+  else S.priorSched = sched();
+  S.schedRfts = 0; S.pressTimer = 0; S.lastRft = S.t;
+  schedUI();
+  say('Schedule set to ' + sched() + '.');
+};
+$('param').onchange = schedUI;
+$('clearRec').onclick = ()=> { S.trace = []; S.marks = []; };
+
+function setMode(m){
+  mode = m;
+  $('tabShape').classList.toggle('sel', m==='shape');
+  $('tabSched').classList.toggle('sel', m==='sched');
+  $('shapePane').style.display = m==='shape'?'':'none';
+  $('schedPane').style.display = m==='sched'?'':'none';
+  $('reinforce').disabled = m!=='shape';
+  if(m==='sched'){
+    if(S.strength[5] < .8){
+      S.strength[4] = Math.max(S.strength[4], 1.2);
+      S.strength[5] = Math.max(S.strength[5], 1.0);
+      say('Press strength topped up so the schedule has a response to work with.');
+    }
+    S.extStart = S.t; schedUI();
+  }
+}
+$('tabShape').onclick = ()=> setMode('shape');
+$('tabSched').onclick = ()=> setMode('sched');
+
+newRat(); S.lastEmit = 0; schedUI();
+say('New rat in the chamber, magazine trained.');
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
