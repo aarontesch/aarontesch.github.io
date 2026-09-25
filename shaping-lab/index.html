@@ -32,6 +32,10 @@
   .panel{background:var(--steel-lite);border-radius:6px;padding:14px}
   canvas{display:block;width:100%;border-radius:4px}
   #chamber{background:#1a2220;aspect-ratio:16/10}
+  .chamber-wrap{position:relative}
+  #reinforce{position:absolute;right:14px;bottom:14px;z-index:2;
+    box-shadow:0 3px 12px rgba(0,0,0,.5)}
+  @media(max-width:560px){#reinforce{right:9px;bottom:9px;padding:6px 10px;font-size:13.5px}}
   #recorder{background:var(--paper);aspect-ratio:16/7;margin-top:6px}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
   button{font:inherit;background:var(--steel);color:var(--paper);border:1px solid #5c6d69;
@@ -74,10 +78,12 @@
 
 <div class="wrap">
   <div class="panel">
-    <canvas id="chamber" width="800" height="500"></canvas>
+    <div class="chamber-wrap">
+      <canvas id="chamber" width="800" height="500"></canvas>
+      <button id="reinforce" class="primary">Deliver pellet (spacebar)</button>
+    </div>
     <canvas id="recorder" width="800" height="350"></canvas>
     <div class="row">
-      <button id="reinforce" class="primary">Deliver pellet (spacebar)</button>
       <button id="run">Pause</button>
       <button id="reset">New rat</button>
       <label>Speed
