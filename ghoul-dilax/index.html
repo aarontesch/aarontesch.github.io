@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ghoul Dilax — a prosody demonstration</title>
+<style>
+  :root {
+    --ink: #000000;
+    --paper: #FFFFFF;
+    --rule: #000000;
+    --live: #FFE600;
+  }
+  * { box-sizing: border-box; }
+  html { background: #FFFFFF; }
+  body {
+    margin: 0;
+    background: #FFFFFF;
+    color: #000000;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 46rem; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+  header { border-bottom: 4px solid #000; padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  h1 {
+    font-size: clamp(2rem, 7vw, 3.4rem);
+    line-height: 1.05;
+    margin: 0 0 .4rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  header p { margin: 0; max-width: 34rem; font-size: 1.05rem; color: #000; }
+
+  .passes { display: grid; gap: .75rem; margin: 0 0 2rem; }
+  @media (min-width: 640px) { .passes { grid-template-columns: repeat(3, 1fr); } }
+
+  .pass {
+    border: 3px solid #000;
+    background: #fff;
+    color: #000;
+    font: inherit;
+    text-align: left;
+    padding: .9rem 1rem;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .pass:hover { background: #EDEDED; }
+  .pass:focus-visible { outline: 4px solid #000; outline-offset: 3px; }
+  .pass[aria-pressed="true"] { background: #000; color: #fff; }
+  .pass b { display: block; font-weight: 600; font-size: 1.05rem; }
+  .pass span { display: block; font-size: .9rem; margin-top: .2rem; }
+
+  .bar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 2rem; }
+  .bar button {
+    font: inherit; padding: .5rem 1.1rem; cursor: pointer;
+    border: 3px solid #000; background: #000; color: #fff; font-weight: 600;
+  }
+  .bar button.ghost { background: #fff; color: #000; }
+  .bar button:disabled { background: #fff; color: #767676; border-color: #767676; cursor: default; }
+  .bar button:focus-visible { outline: 4px solid #000; outline-offset: 3px; }
+  .bar label { font-size: .95rem; display: flex; align-items: center; gap: .4rem; color: #000; }
+  select { font: inherit; font-size: .95rem; padding: .35rem; border: 2px solid #000; background: #fff; color: #000; }
+
+  .story {
+    font-size: 1.25rem;
+    color: #000;
+    background: #FFFFFF;
+    border: 3px solid #000;
+    padding: 1.75rem 1.5rem .65rem;
+  }
+  .story p { margin: 0 0 1.1rem; }
+  .story .speaker { font-style: italic; }
+  .flat .story { font-size: 1.1rem; word-spacing: .55em; }
+  .story .blob { margin: 0; text-align: left; }
+
+  .word.live { background: #FFE600; color: #000; box-shadow: 0 0 0 .15em #FFE600; font-weight: 700; }
+
+  .note {
+    margin-top: 3rem; padding-top: 1.5rem; border-top: 3px solid #000; color: #000;
+    font-size: .95rem;
+  }
+  .note h2 { font-size: 1.1rem; margin: 0 0 .6rem; font-weight: 600; }
+  .note ol { padding-left: 1.2rem; margin: 0 0 1rem; }
+  .note li { margin-bottom: .5rem; }
+  .warn { background: #fff; padding: .9rem 1rem; border: 3px solid #000; font-weight: 600; }
+  .reveal { margin-top: .8rem; }
+  .reveal summary { cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Ghoul Dilax<br>enter tree barest</h1>
+    <p>The same words, read three ways. Nothing changes between the first two passes except the rhythm.</p>
+  </header>
+
+  <div class="passes">
+    <button class="pass" data-mode="flat" aria-pressed="false">
+      <b>Pass one</b><span>Flat. Word by word. No phrasing.</span>
+    </button>
+    <button class="pass" data-mode="phrased" aria-pressed="false">
+      <b>Pass two</b><span>Same words, grouped and stressed.</span>
+    </button>
+    <button class="pass" data-mode="plain" aria-pressed="false">
+      <b>Pass three</b><span>Plain English.</span>
+    </button>
+  </div>
+
+  <div class="bar">
+    <button id="play" disabled>Play</button>
+    <button id="stop" class="ghost" disabled>Stop</button>
+    <label>Voice
+      <select id="voice"></select>
+    </label>
+    <label>Speed
+      <input id="rate" type="range" min="0.5" max="1.3" step="0.05" value="0.95">
+    </label>
+  </div>
+
+  <div id="stage" class="story"></div>
+
+  <div class="note">
+    <h2>Running this with a class</h2>
+    <ol>
+      <li>Don't say the title. Keep pass three hidden until the end.</li>
+      <li>To halt a read-through mid-sentence: press Escape, or the Stop button. To pause and pick up where you left off, press the spacebar or tap anywhere outside the buttons.</li>
+      <li>Play pass one. Ask what they heard. They'll say nothing.</li>
+      <li>Play pass two. Most students break through within two or three sentences.</li>
+      <li>Point out that not one letter changed. Prosody did all the work.</li>
+      <li>Play pass three to confirm, then discuss.</li>
+    </ol>
+    <p class="warn">Browser speech synthesis is blunt. If pass two doesn't land, read it aloud yourself — a human reader will always outperform this. Treat the page as a backup or as something students run on their own.</p>
+    <details class="reveal">
+      <summary>Instructor notes: what the passes actually change</summary>
+      <p>Pass one speaks each word as a separate utterance at low pitch variation with a pause after every word, so the listener gets no clause boundaries and no stress peaks to anchor a parse. Pass two speaks whole clauses with punctuation intact and varied pitch on dialogue lines, restoring the boundary cues. The lexical content is byte-identical.</p>
+    </details>
+  </div>
+
+</div>
+
+<script>
+const NONSENSE = [
+  {t:"Wants a pun a tam, dare wuzza ladle gull hoe hatter ed fuller curly yalta hair. Pimple colder Ghoul Dilax."},
+  {t:"Wan moaning, Ghoul Dilax wend fora wok inner wets. Inner clairing shea sore a ladle horse. Door wuz soap in. Shea nut nocked. Shea jest wend rat inn."},
+  {t:"Honda tebble stud tree bulls of poor itch. Shea tasted door big wan — toe hut! Shea tasted door mitten wan — toe culled! Shea tasted door ladle wan, ender udder id oil oop."},
+  {t:"Dan shea sacked honor cheers. Door big cheer wuz toe hard. Door mitten cheer wuz toe soft. Door ladle cheer wuz jest rat — butt itt bloke!"},
+  {t:"Upsteers shea fond tree bets. Shea flopped honor ladle wan enfil fest a slip."},
+  {t:"Dan door barest kem hum."},
+  {t:"Summon's bin eating my poor itch! grunted Fodder Bare.", v:"low"},
+  {t:"Summon's bin eating my poor itch! grimaced Murder Bare.", v:"mid"},
+  {t:"Summon's bin eating my poor itch, whimped Ladle Bare, ender id oil oop!", v:"high"},
+  {t:"Day rushed upsteers. Dare, honor ladle bet, laid Ghoul Dilax — snoring lacquer sore mill."},
+  {t:"Shea wake tup, sore tree barest, scrammed, ender ran oil door weigh hum."},
+  {t:"Mural: dun net goen udder pimple's horses wet-out nocking."}
+];
+
+const PLAIN = [
+  {t:"Once upon a time, there was a little girl who had a head full of curly yellow hair. People called her Goldilocks."},
+  {t:"One morning, Goldilocks went for a walk in the woods. In a clearing she saw a little house. The door was open. She didn't knock. She just went right in."},
+  {t:"On the table stood three bowls of porridge. She tasted the big one — too hot! She tasted the middle one — too cold! She tasted the little one, and ate it all up."},
+  {t:"Then she sat on the chairs. The big chair was too hard. The middle chair was too soft. The little chair was just right — but it broke!"},
+  {t:"Upstairs she found three beds. She flopped on the little one and fell fast asleep."},
+  {t:"Then the bears came home."},
+  {t:"Someone's been eating my porridge! grunted Father Bear.", v:"low"},
+  {t:"Someone's been eating my porridge! grimaced Mother Bear.", v:"mid"},
+  {t:"Someone's been eating my porridge, whimpered Little Bear, and ate it all up!", v:"high"},
+  {t:"They rushed upstairs. There, on the little bed, lay Goldilocks — snoring like a sawmill."},
+  {t:"She woke up, saw three bears, screamed, and ran all the way home."},
+  {t:"Moral: don't go in other people's houses without knocking."}
+];
+
+const synth = window.speechSynthesis;
+const stage = document.getElementById("stage");
+const playBtn = document.getElementById("play");
+const stopBtn = document.getElementById("stop");
+const voiceSel = document.getElementById("voice");
+const rateIn = document.getElementById("rate");
+let mode = null, queue = [], idx = 0, playing = false;
+
+if (!synth) {
+  stage.innerHTML = "<p>This browser can't speak. Try Chrome, Edge, or Safari on a desktop.</p>";
+}
+
+function loadVoices() {
+  const vs = synth.getVoices().filter(v => v.lang.startsWith("en"));
+  voiceSel.innerHTML = "";
+  vs.forEach((v, i) => {
+    const o = document.createElement("option");
+    o.value = i; o.textContent = v.name;
+    voiceSel.appendChild(o);
+  });
+  voiceSel._list = vs;
+}
+if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices; }
+
+const STRIP = /[\u2014\u2013,.;:!?\u2018\u2019"()]/g;
+
+function render(lines, flat) {
+  document.body.classList.toggle("flat", flat);
+  stage.innerHTML = "";
+
+  if (flat) {
+    // One undifferentiated block: no paragraphs, no punctuation, no speaker styling.
+    const p = document.createElement("p");
+    p.className = "blob";
+    lines.forEach((line, li) => {
+      line.t.split(/\s+/).forEach((rawW, wi) => {
+        const w = rawW.replace(STRIP, "");
+        if (!w) return;
+        const sp = document.createElement("span");
+        sp.className = "word";
+        sp.dataset.line = li; sp.dataset.word = wi;
+        sp.textContent = w;
+        stageAppend(p, sp);
+      });
+    });
+    stage.appendChild(p);
+    return;
+  }
+
+  lines.forEach((line, li) => {
+    const p = document.createElement("p");
+    if (line.v) p.className = "speaker";
+    line.t.split(/\s+/).forEach((w, wi) => {
+      const sp = document.createElement("span");
+      sp.className = "word";
+      sp.dataset.line = li; sp.dataset.word = wi;
+      sp.textContent = w;
+      stageAppend(p, sp);
+    });
+    stage.appendChild(p);
+  });
+}
+
+function stageAppend(p, s) { p.appendChild(s); p.appendChild(document.createTextNode(" ")); }
+
+function clearLive() {
+  stage.querySelectorAll(".live").forEach(e => e.classList.remove("live"));
+}
+
+// Build the speech queue for the chosen mode.
+function buildQueue(m) {
+  const src = (m === "plain") ? PLAIN : NONSENSE;
+  const q = [];
+  if (m === "flat") {
+    // every word its own utterance, flat pitch, pause between
+    src.forEach((line, li) => {
+      line.t.split(/\s+/).forEach((w, wi) => {
+        q.push({ text: w.replace(STRIP, ""), pitch: 1.0, rate: 1.0, gap: 260, li, wi, span: 1 });
+      });
+    });
+  } else {
+    src.forEach((line, li) => {
+      const pitch = line.v === "low" ? 0.62 : line.v === "high" ? 1.55 : line.v === "mid" ? 1.05 : 1.0;
+      const words = line.t.split(/\s+/);
+      // split line into clauses so we can keep highlight roughly in sync
+      let start = 0;
+      const chunks = [];
+      words.forEach((w, i) => {
+        if (/[—!?,.;:]$/.test(w) || i === words.length - 1) {
+          chunks.push({ from: start, to: i });
+          start = i + 1;
+        }
+      });
+      chunks.forEach((c, ci) => {
+        const text = words.slice(c.from, c.to + 1).join(" ");
+        q.push({
+          text, pitch, rate: 1.0,
+          gap: ci === chunks.length - 1 ? 420 : 140,
+          li, wi: c.from, span: c.to - c.from + 1
+        });
+      });
+    });
+  }
+  return q;
+}
+
+function highlight(item) {
+  clearLive();
+  for (let i = item.wi; i < item.wi + item.span; i++) {
+    const el = stage.querySelector(`[data-line="${item.li}"][data-word="${i}"]`);
+    if (el) el.classList.add("live");
+  }
+  const first = stage.querySelector(`[data-line="${item.li}"][data-word="${item.wi}"]`);
+  if (first) first.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+
+function speakNext() {
+  if (!playing || idx >= queue.length) { finish(); return; }
+  const item = queue[idx];
+  highlight(item);
+  const u = new SpeechSynthesisUtterance(item.text);
+  const vs = voiceSel._list || [];
+  if (vs[voiceSel.value]) u.voice = vs[voiceSel.value];
+  u.pitch = item.pitch;
+  u.rate = parseFloat(rateIn.value) * item.rate;
+  u.onend = () => { idx++; setTimeout(speakNext, item.gap); };
+  u.onerror = () => { idx++; setTimeout(speakNext, 60); };
+  synth.speak(u);
+}
+
+function finish() {
+  playing = false;
+  clearLive();
+  playBtn.textContent = "Play";
+  stopBtn.disabled = true;
+}
+
+function selectMode(m) {
+  stopAll();
+  mode = m;
+  document.querySelectorAll(".pass").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+  render(m === "plain" ? PLAIN : NONSENSE, m === "flat");
+  queue = buildQueue(m);
+  idx = 0;
+  playBtn.disabled = false;
+}
+
+function stopAll() {
+  playing = false;
+  synth.cancel();
+  idx = 0;
+  clearLive();
+  playBtn.textContent = "Play";
+  stopBtn.disabled = true;
+}
+
+document.querySelectorAll(".pass").forEach(b =>
+  b.addEventListener("click", () => selectMode(b.dataset.mode)));
+
+playBtn.addEventListener("click", () => {
+  if (playing) { synth.pause(); playing = false; playBtn.textContent = "Resume"; return; }
+  if (synth.paused) { playing = true; synth.resume(); playBtn.textContent = "Pause"; stopBtn.disabled = false; return; }
+  playing = true;
+  playBtn.textContent = "Pause";
+  stopBtn.disabled = false;
+  speakNext();
+});
+
+stopBtn.addEventListener("click", stopAll);
+
+// Stop the read-through without hunting for the button:
+// spacebar, Escape, or a click anywhere on the story text.
+document.addEventListener("keydown", (e) => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName);
+  if (typing) return;
+  if (e.code === "Space" || e.key === " ") {
+    e.preventDefault();
+    tapToPause({ target: document.body });
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    stopAll();
+  }
+});
+
+// Tap anywhere on the page to pause or resume, except on the controls.
+// pointerdown fires reliably on touch; click can be swallowed or delayed on mobile.
+function tapToPause(e) {
+  if (e.target.closest(".bar, .pass, .reveal")) return;
+  if (playing) {
+    synth.pause();
+    playing = false;
+    playBtn.textContent = "Resume";
+  } else if (synth.paused) {
+    playing = true;
+    synth.resume();
+    playBtn.textContent = "Pause";
+    stopBtn.disabled = false;
+  }
+}
+document.addEventListener("pointerdown", tapToPause, true);
+
+stage.style.cursor = "default";
+stage.style.webkitTapHighlightColor = "transparent";
+window.addEventListener("beforeunload", () => synth.cancel());
+</script>
+</body>
+</html>
