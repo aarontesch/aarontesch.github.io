@@ -84,12 +84,20 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .bpsvg .ghost{fill:none;stroke:#b7a98a;stroke-width:2;stroke-dasharray:4 5;opacity:.6}
 .bpsvg .joint{fill:#7d5334}
 .bpsvg .drift{fill:none;stroke:var(--rose);stroke-width:1.5;stroke-dasharray:3 4}
-.bpsvg .level{fill:none;stroke:#c3cdbd;stroke-width:1;stroke-dasharray:2 5}
-.bpsvg .level.on{stroke:#8aa389;stroke-width:1.6;stroke-dasharray:4 4}
+/* everything secured on both axes; a profession's pin inside it is a pass */
+.bpsvg .reach{fill:#8aa389;opacity:.14}
+.bpsvg .aim{stroke:#8aa389;stroke-width:1.4;stroke-dasharray:4 4;fill:none}
+.bpsvg .trackbase{stroke:#bfae8a;stroke-width:4;stroke-linecap:round}
+.bpsvg .trackfill{stroke:var(--deep);stroke-width:4;stroke-linecap:round}
+.bpsvg .axislabel{fill:#8b9a8c;font:800 9px ui-sans-serif,system-ui,sans-serif;
+  letter-spacing:.08em;text-transform:uppercase;text-anchor:end}
+.bpsvg .pin{fill:#fffdf8;stroke:#93a293;stroke-width:2}
+.bpsvg .pin.on{stroke:var(--deep);stroke-width:2.5}
+.bpsvg .pin.got{fill:var(--deep);stroke:var(--deep)}
 /* the cream halo keeps a label readable where a board crosses behind it */
-.bpsvg .levellabel{fill:#93a293;font:800 10px ui-sans-serif,system-ui,sans-serif;
+.bpsvg .pinlabel{fill:#8b9a8c;font:800 10px ui-sans-serif,system-ui,sans-serif;
   stroke:#f4f1e4;stroke-width:3;paint-order:stroke}
-.bpsvg .levellabel.on{fill:var(--deep);font-size:11px}
+.bpsvg .pinlabel.on{fill:var(--deep);font-size:11px}
 .bpsvg .driftlabel{fill:#b4564a;font:700 11px ui-sans-serif,system-ui,sans-serif}
 .vinesvg{display:block;width:100%;height:290px}
 .vinesvg .stemline,.vinesvg .branchline{fill:none;stroke:var(--deep);stroke-linecap:round}
@@ -162,7 +170,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver">build 5</span></div>
+    <span class="ver">build 6</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -204,8 +212,8 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
     </div>
 
     <div class="resources">
-      <div><span>Available resources</span><br><small id="incomeNote">+3 &#9671; accrues each turn</small></div>
-      <span class="coins" id="resources">18 &#9671;</span>
+      <div><span>Available resources</span><br><small id="incomeNote">+6 &#9671; accrues each turn</small></div>
+      <span class="coins" id="resources">20 &#9671;</span>
     </div>
 
     <div id="carpenterControls">
@@ -214,8 +222,12 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
       <div class="eyebrow" style="margin-bottom:9px">Actions</div>
       <div class="actions">
         <button class="action" data-act="board" data-cost="4">
-          <span><b>Buy &amp; nail a board</b><small>Build structure toward the target</small></span>
+          <span><b>Buy &amp; nail a board</b><small>Climb toward the target &middot; costs a turn</small></span>
           <span class="cost">4 &#9671;</span>
+        </button>
+        <button class="action" id="trainBtn" data-act="train">
+          <span><b>Enrol for a term</b><small id="trainNote">Academic training &middot; costs no turn</small></span>
+          <span class="cost">3 &#9671;</span>
         </button>
       </div>
     </div>
@@ -301,12 +313,17 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 "use strict";
 
 /* ============ content ============ */
+/* Two independent axes, so a profession is a position rather than a height.
+   `need` is the climb -- structure you have to stack up. `training` is the
+   academic distance sideways. CEO is brutal because of the climb and asks
+   almost no schooling; Lawyer is a modest climb that most runs never finish
+   because of the training. Doctor is punishing on both. */
 const CAREERS = {
-  Teacher:  {need:5,  tolerance:3},
-  Engineer: {need:7,  tolerance:2},
-  Lawyer:   {need:9,  tolerance:2},
-  Doctor:   {need:11, tolerance:1},
-  CEO:      {need:12, tolerance:1}
+  Teacher:  {need:5,  training:4,  tolerance:4},
+  Engineer: {need:7,  training:6,  tolerance:3},
+  Lawyer:   {need:7,  training:10, tolerance:3},
+  Doctor:   {need:10, training:10, tolerance:2},
+  CEO:      {need:12, training:3,  tolerance:2}
 };
 const OPPORTUNITIES = [
   ["Music","performance, teaching, design"],
@@ -317,7 +334,15 @@ const OPPORTUNITIES = [
   ["Movement","sport, coaching, travel"]
 ];
 const TOTAL_TURNS = 12;
-const INCOME = 3;
+const INCOME = 6;
+const BOARD_COST = 4;
+/* A term of study costs money but not a turn, so training never competes with
+   the climb for the twelve turns -- only for the purse. It can also simply not
+   take: a term that fails spends the money and teaches nothing, which is what
+   makes a high-training career unlikely rather than merely expensive. */
+const TERM_COST = 3;
+const TERM_PASS = 0.75;
+const TERM_HEALTH = 1;
 const STAGES = ["Foundations","Exploration","Specialization","Transition"];
 
 /* One branch per domain offered, one knot per supportive relationship.
@@ -371,7 +396,12 @@ const RISE     = {straight:1, slightly:0.9, badly:0.74, totally:0.55};
    the frame always reaches the tallest of them. The ladder therefore stays the
    same height whichever target you pick, so how much further a CEO sits above
    a Teacher is visible from the first turn. */
-const MAX_NEED = Math.max.apply(null, Object.keys(CAREERS).map(c => CAREERS[c].need));
+const MAX_NEED  = Math.max.apply(null, Object.keys(CAREERS).map(c => CAREERS[c].need));
+const MAX_TRAIN = Math.max.apply(null, Object.keys(CAREERS).map(c => CAREERS[c].training));
+/* pixels per term. Chosen so the widest training requirement spans about the
+   same distance as the tallest climb, which keeps the two axes comparable --
+   the whole point being that one profession is far up and another far across. */
+const TX = 22;
 
 /* The blueprint is built end to end: every board starts where the last one
    stopped, and its warp is added to the running heading rather than applied
@@ -424,6 +454,20 @@ function blueprintSvg(s){
     xs.push(gx); ys.push(gy);
   }
 
+  /* A profession sits at (training, climb), so the horizontal axis is academic
+     distance and the vertical is structure. Both are in the same units the
+     rules use, so the picture cannot disagree with the win condition. */
+  const careerNames = Object.keys(CAREERS);
+  const trainX = t => t * TX;
+  const myX = trainX(s.training), myY = -usableBoards(s) * L;
+  /* reserve room for each pin's label, or a long name on the right-hand pins
+     runs off the fitted frame. ~6.2px per character is close enough here. */
+  careerNames.forEach(c => {
+    const lw = 14 + (c.length + (c === s.selected ? 9 : 0)) * 6.2;
+    xs.push(trainX(CAREERS[c].training) + lw);
+  });
+  xs.push(myX);
+
   /* the frame is fitted to the drawing, so a structure that wanders a long
      way sideways still stays fully visible instead of clipping */
   const pad = W + 34;
@@ -434,30 +478,45 @@ function blueprintSvg(s){
 
   const lean = Math.abs(Math.round(ang));
   const top = (-MAX_NEED * L).toFixed(1);
+  const k = CAREERS[s.selected];
 
-  /* one guide per profession, spanning the fitted frame so you can see which
-     levels the structure has actually cleared. Built after the frame is known
-     so the guides always reach both edges. */
-  const careerNames = Object.keys(CAREERS);
-  const levels = careerNames.map(c => {
-    const ly = (-CAREERS[c].need * L).toFixed(1);
-    return '<line class="level' + (c === s.selected ? " on" : "") +
-      '" x1="' + x0.toFixed(1) + '" y1="' + ly +
-      '" x2="' + x1.toFixed(1) + '" y2="' + ly + '"/>';
-  }).join("");
-  // labels are emitted last so they sit above the boards
-  const levelLabels = careerNames.map(c => {
-    const on = c === s.selected;
-    return '<text class="levellabel' + (on ? " on" : "") +
-      '" x="' + (x1 - 7).toFixed(1) + '" y="' + (-CAREERS[c].need * L + 3.5).toFixed(1) +
-      '" text-anchor="end">' + c + (on ? " &#183; target" : "") + '</text>';
+  /* everything already secured on both axes. A profession's dot falling inside
+     this box is exactly the win condition for climb and training, so the
+     student can read the rule off the picture instead of the stat panel. */
+  const reach = '<rect class="reach" x="0" y="' + myY.toFixed(1) +
+    '" width="' + Math.max(0, myX).toFixed(1) +
+    '" height="' + Math.abs(myY).toFixed(1) + '"/>';
+
+  // crosshair on the chosen target: what the climb and the training must each clear
+  const cross =
+    '<line class="aim" x1="0" y1="' + (-k.need * L).toFixed(1) +
+      '" x2="' + trainX(k.training).toFixed(1) + '" y2="' + (-k.need * L).toFixed(1) + '"/>' +
+    '<line class="aim" x1="' + trainX(k.training).toFixed(1) + '" y1="0' +
+      '" x2="' + trainX(k.training).toFixed(1) + '" y2="' + (-k.need * L).toFixed(1) + '"/>';
+
+  // the training axis along the ground, filled as far as the schooling reaches
+  const trainBar =
+    '<line class="trackbase" x1="0" y1="14" x2="' + trainX(MAX_TRAIN).toFixed(1) + '" y2="14"/>' +
+    (s.training ? '<line class="trackfill" x1="0" y1="14" x2="' + myX.toFixed(1) + '" y2="14"/>' : "") +
+    '<text class="axislabel" x="' + trainX(MAX_TRAIN).toFixed(1) + '" y="26">training &#8594;</text>';
+
+  // dots last, so they sit above the boards they may overlap
+  const dots = careerNames.map(c => {
+    const kc = CAREERS[c], cx = trainX(kc.training), cy = -kc.need * L;
+    const on  = c === s.selected;
+    const got = usableBoards(s) >= kc.need && s.training >= kc.training;
+    return '<circle class="pin' + (on ? " on" : "") + (got ? " got" : "") +
+        '" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + (on ? 5.5 : 4) + '"/>' +
+      '<text class="pinlabel' + (on ? " on" : "") + '" x="' + (cx + 9).toFixed(1) +
+        '" y="' + (cy + 3.5).toFixed(1) + '">' + c + (on ? " &#183; target" : "") + '</text>';
   }).join("");
 
   return '<svg class="bpsvg" viewBox="' +
       [x0, y0, x1 - x0, y1 - y0].map(v=>v.toFixed(1)).join(" ") +
       '" preserveAspectRatio="xMidYMax meet" role="img" aria-label="' +
       s.boards.length + ' of ' + need + ' boards nailed end to end, leaning ' +
-      lean + ' degrees off plumb.">' +
+      lean + ' degrees off plumb. Training ' + s.training + ' of ' +
+      k.training + ' for ' + s.selected + '.">' +
     '<defs>' +
       '<linearGradient id="bpGood" x1="0" x2="1"><stop offset="0" stop-color="#c89555"/>' +
         '<stop offset=".5" stop-color="#e1b672"/><stop offset="1" stop-color="#b9824c"/></linearGradient>' +
@@ -468,7 +527,7 @@ function blueprintSvg(s){
     '</defs>' +
     '<rect x="-900" y="0" width="2400" height="' + y1 + '" fill="#d8c79b"/>' +
     '<line x1="-900" y1="0" x2="1500" y2="0" stroke="#b9a578" stroke-width="2"/>' +
-    levels +
+    reach + trainBar + cross +
     // the blueprint itself: where a perfectly plumb structure would have gone
     '<path class="plumb" d="M0,0 L0,' + top + '"/>' +
     ghosts + planks + joints +
@@ -477,7 +536,7 @@ function blueprintSvg(s){
         '<text class="driftlabel" x="' + (x / 2).toFixed(1) + '" y="' + (y - 10).toFixed(1) +
           '" text-anchor="middle">' + lean + '&#176; off plumb</text>'
       : "") +
-    levelLabels +
+    dots +
     '</svg>';
 }
 
@@ -489,8 +548,9 @@ function fresh(mode){
   return {
     mode: mode || "carpenter",
     locked:false, over:false,
-    turn:1, money:18, health:100,
+    turn:1, money:20, health:100,
     paths:1, support:0, precision:0,
+    training:0, terms:0,
     boards:[], selected:"Teacher", opps:[],
     log:["The run begins. Twelve turns, one developing life, no guaranteed ending."]
   };
@@ -535,7 +595,7 @@ function render(){
     : "A blueprint rewards precision, but it can make adaptation expensive.";
   el("tip").textContent = g
     ? "You cannot choose which branch the vine climbs. You can only decide how many are within reach."
-    : "A desirable career has tighter tolerances. A bent board is not a moral failure—it is a design problem.";
+    : "Two things stand between a child and a profession: how high you can build, and how far the schooling reaches. They are not the same obstacle.";
 
   /* meter: real progress, not decoration */
   const pct = g
@@ -551,7 +611,8 @@ function render(){
     ? [["Wellbeing", s.health],["Open futures", openPaths(s)],
        ["Supportive branches", s.support],["Domains offered", s.opps.length + " / 6"]]
     : [["Wellbeing", s.health],["Open paths", openPaths(s)],
-       ["Usable boards", have.toFixed(1) + " / " + need],["Precision", s.precision]];
+       ["Climb &middot; usable boards", have.toFixed(1) + " / " + need],
+       ["Training", s.training + " / " + CAREERS[s.selected].training]];
   el("stats").innerHTML = stats.map(x=>
     '<div class="stat"><label>' + x[0] + '</label><strong>' + x[1] + '</strong></div>').join("");
 
@@ -562,9 +623,17 @@ function render(){
         " to climb and " + openPaths(s) + " imaginable futures."
       : "No opportunities offered yet. The vine has nothing to climb.";
   } else {
+    const k = CAREERS[s.selected];
     const bent = s.boards.filter(b=>b.q==="totally"||b.q==="badly").length;
-    el("progress").textContent = bent + " nailed board" + (bent===1?" is":"s are") +
-      " outside tolerance for " + s.selected + " (allowed: " + CAREERS[s.selected].tolerance + ").";
+    // name whichever axis is actually short, so the gap is never a mystery
+    const short = [];
+    if(have < k.need)      short.push((k.need - have).toFixed(1) + " more climb");
+    if(s.training < k.training) short.push((k.training - s.training) + " more training");
+    el("progress").textContent = (short.length
+        ? s.selected + " still wants " + short.join(" and ") + ". "
+        : s.selected + " is within reach on both axes. ") +
+      bent + " nailed board" + (bent===1?" is":"s are") +
+      " outside tolerance (allowed: " + k.tolerance + ").";
   }
 
   /* timeline */
@@ -578,7 +647,8 @@ function render(){
     return '<button class="action' + (c===s.selected?" active":"") + '" data-career="' + c + '"' +
       (s.boards.length ? " disabled" : "") +
       ' style="' + (c===s.selected ? "border-color:var(--deep);background:#eef4ea" : "") + '">' +
-      '<span><b>' + c + '</b><small>' + k.need + ' boards · tolerance ' + k.tolerance + '</small></span>' +
+      '<span><b>' + c + '</b><small>climb ' + k.need + ' · training ' + k.training +
+        ' · tolerance ' + k.tolerance + '</small></span>' +
       '<span class="cost">' + (c===s.selected ? "chosen" : "select") + '</span></button>';
   }).join("");
 
@@ -595,6 +665,20 @@ function render(){
   document.querySelectorAll("[data-cost]").forEach(b=>{
     b.disabled = s.over || s.money < +b.dataset.cost;
   });
+
+  /* Enrolling is the one purchase that does not advance a turn, so left alone
+     it could spend the purse down past the price of a board -- and since a
+     board is the only thing that moves the clock, the run would hang with no
+     legal move. Hold back enough for one more board while the run is live. */
+  if(el("trainBtn")){
+    const stranded = s.money - TERM_COST < BOARD_COST;
+    el("trainBtn").disabled = s.over || s.money < TERM_COST || stranded;
+    el("trainNote").textContent = s.over
+      ? "run finished"
+      : stranded
+        ? "held back — a board must stay affordable"
+        : Math.round(TERM_PASS * 100) + "% of terms count · costs no turn";
+  }
 
   el("log").innerHTML = s.log.slice(-4).map(x=>'<p>↳ ' + x + '</p>').join("");
 
@@ -666,7 +750,28 @@ function doAction(act){
     s.health -= q==="totally" ? 15 : q==="badly" ? 8 : 2;
     if(q === "straight") s.precision += 2;
     const words = {straight:"straight",slightly:"slightly curved",badly:"badly curved",totally:"totally bent"};
-    advance("The board came out " + words[q] + ".", 4);
+    advance("The board came out " + words[q] + ".", BOARD_COST);
+  }
+  /* Enrolling deliberately does NOT call advance(): it costs no turn and earns
+     no income, so it cannot be used to outrun the twelve-turn clock. */
+  else if(act === "train"){
+    if(s.over) return;
+    if(s.money < TERM_COST){ s.log.push("Not enough resources to enrol."); return render(); }
+    s.locked = true;
+    s.money -= TERM_COST;
+    s.health = Math.max(0, s.health - TERM_HEALTH);
+    s.terms += 1;
+    if(Math.random() < TERM_PASS){
+      s.training += 1;
+      s.log.push("A term of study counted. Training is now " + s.training + ".");
+    } else {
+      s.log.push("A term of study did not take. The fees are spent either way.");
+    }
+    if(s.health <= 0){
+      s.log.push("Wellbeing bottomed out. The run stops here.");
+      return finishRun("collapse");
+    }
+    render();
   }
   else if(act === "sun"){    s.health += 8; s.paths += 1; advance("Sunlight opened a new direction.", 3); }
   else if(act === "water"){  s.health += 17; advance("Water and nutrients helped the vine recover.", 4); }
@@ -681,7 +786,9 @@ function score(s){
     mode:s.mode, career:s.selected, wellbeing:s.health,
     paths:openPaths(s), boards:usableBoards(s), support:s.support,
     opps:s.opps.length, precision:s.precision,
+    training:s.training, terms:s.terms,
     reached: g ? null : usableBoards(s) >= CAREERS[s.selected].need,
+    trained: g ? null : s.training >= CAREERS[s.selected].training,
     withinTolerance: g ? null : bent <= CAREERS[s.selected].tolerance
   };
 }
@@ -696,7 +803,7 @@ function finishRun(reason){
 
   const success = g
     ? (r.paths >= 8 || r.support >= 3) && r.wellbeing > 35
-    : r.reached && r.withinTolerance && r.wellbeing > 35;
+    : r.reached && r.trained && r.withinTolerance && r.wellbeing > 35;
 
   el("resultTitle").textContent = reason === "collapse"
     ? "The run ended early."
@@ -710,13 +817,22 @@ function finishRun(reason){
         : "The garden remained sparse, but even partial growth is not a failure.")
       : (success
         ? "The blueprint reached " + r.career + ". The question now is what it cost to hold the shape."
-        : r.reached
-          ? "The " + r.career + " blueprint was assembled, but too many boards fell outside tolerance."
-          : "The " + r.career + " blueprint was not completed. A life is more than a missed target.");
+        /* say which axis fell short: the two are different kinds of failure and
+           collapsing them into "missed the target" is the thing to avoid */
+        : (!r.reached && !r.trained)
+          ? "The " + r.career + " blueprint fell short on both counts: the structure never got high enough, and the training never got far enough."
+          : !r.trained
+            ? "The structure was tall enough for " + r.career + ", but the training was never there. " +
+              r.terms + " term" + (r.terms===1?"":"s") + " of study bought " + r.training +
+              " training; the door needed " + CAREERS[r.career].training + "."
+            : !r.reached
+              ? "The training was in place for " + r.career + ", but the structure never climbed high enough to use it."
+              : "The " + r.career + " blueprint was assembled and the training was in hand, but too many boards fell outside tolerance.");
 
   const cells = g
     ? [["Open futures",r.paths],["Branches",r.support],["Wellbeing",r.wellbeing],["Domains",r.opps]]
-    : [["Target",r.career],["Usable boards",r.boards.toFixed(1)],["Precision",r.precision],["Wellbeing",r.wellbeing]];
+    : [["Target",r.career],["Climb",r.boards.toFixed(1) + " / " + CAREERS[r.career].need],
+       ["Training",r.training + " / " + CAREERS[r.career].training],["Wellbeing",r.wellbeing]];
   el("resultGrid").innerHTML = cells.map(x=>
     '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
 
