@@ -71,7 +71,6 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .action[disabled]{opacity:.45;cursor:not-allowed}
 .action b{display:block}
 .action small{color:var(--muted);font-size:12.5px;line-height:1.3}
-.cost{border-radius:99px;background:#f4ead2;color:#80601b;padding:4px 8px;font-weight:800;font-size:11px;white-space:nowrap}
 .tgtpick summary{cursor:pointer;list-style:none;border:1px solid var(--line);background:var(--card);
   border-radius:15px;padding:12px 14px;font-size:14px;font-weight:750}
 .tgtpick summary::-webkit-details-marker{display:none}
@@ -119,11 +118,17 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .spaceactions{position:absolute;left:10px;right:10px;bottom:10px;display:grid;
   grid-template-columns:1fr 1fr;gap:9px}
 .spaceactions .action{background:rgba(255,253,248,.93);border-color:#cdd8c7;
-  box-shadow:0 4px 14px rgba(45,69,51,.13);backdrop-filter:blur(2px)}
+  box-shadow:0 4px 14px rgba(45,69,51,.13);backdrop-filter:blur(2px);padding:9px 11px}
+/* the condition names are long; hold them to two lines so the strip the svg
+   reserves underneath stays the right size */
+.spaceactions .action b{font-size:13px;line-height:1.22}
+.spaceactions .action small{font-size:11.5px;line-height:1.3}
 .spaceactions .action:hover:not([disabled]){background:#f3f9ef;border-color:var(--sage)}
 .spaceactions .action[disabled]{opacity:.5}
 .spaceactions.single{grid-template-columns:1fr}
-@media(max-width:620px){.spaceactions{grid-template-columns:1fr;gap:7px}}
+@media(max-width:620px){.spaceactions{grid-template-columns:1fr;gap:6px}
+  .spaceactions .action small{display:none}
+  .spaceactions .action{padding:8px 10px}}
 
 /* ---- accessible table equivalents of the drawing ---- */
 .vizdata{margin:-2px 0 16px}
@@ -196,7 +201,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 25</span></div>
+    <span class="ver" role="note">build 27</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -291,13 +296,14 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
            taller than the visible band so this strip covers empty sky rather
            than the structure. -->
       <div class="spaceactions" id="actions" role="group" aria-label="This stage">
+        <!-- Named for the two strategies rather than for the mechanic: each
+             stage is a choice to act like a carpenter or like a gardener,
+             whichever condition the run is nominally in. -->
         <button class="action" id="btnAim" data-act="aim">
-          <span><b>Aim the growth</b><small id="aimNote">Point this stage at the target</small></span>
-          <span class="cost" id="aimCost">accuracy</span>
+          <span><b>Carpenter: Build the Child Towards a Goal</b><small id="aimNote">Point this stage at the target</small></span>
         </button>
         <button class="action" id="btnNur" data-act="nurture">
-          <span><b>Nurture the growth</b><small id="nurNote">Let go of the wheel. +1 SD, no steering.</small></span>
-          <span class="cost">+1 SD reach</span>
+          <span><b>Gardener: Focus on Growing your Child&rsquo;s Natural Inclinations</b><small id="nurNote">Let go of the wheel. Longer growth, no steering.</small></span>
         </button>
       </div>
     </div>
@@ -643,7 +649,27 @@ const DIST = 300, SCALE = 1.72;
 /* The frame is extended downward and anchored to its top, so the drawing sits
    in the upper band and the strip the stage buttons occupy stays empty sky. */
 const VIEW = {x:-168, y:-146, w:336, h:292};
-const CONTROL_PAD = 80;
+/* The strip the drawing leaves empty underneath, in world units. The two
+   condition names are long and wrap differently at every width, so this is
+   measured from the buttons after each draw rather than guessed; the svg
+   grows to make room instead of the drawing shrinking to make room. */
+let CONTROL_PAD = 90;
+function fitControls(){
+  const svg = el("space"), ov = el("actions");
+  if(!svg || !ov) return;
+  let h = 0;
+  try { h = ov.getBoundingClientRect().height; } catch(e){ return; }
+  if(!h) return;
+  /* 10px sits the overlay off the bottom and 12 keeps it clear of the floor. */
+  const pad = Math.max(70, Math.round(h) + 22);
+  if(pad !== CONTROL_PAD){
+    CONTROL_PAD = pad;
+    svg.setAttribute("viewBox", [VIEW.x, VIEW.y, VIEW.w, VIEW.h + CONTROL_PAD].join(" "));
+  }
+  /* height == viewBox height keeps the projection at 1px per world unit, so
+     the strip measures exactly the pad however tall the buttons have grown. */
+  svg.style.height = (VIEW.h + CONTROL_PAD) + "px";
+}
 function project(p){
   const x = p[0]-AXIS[0]/2, y = p[1]-AXIS[1]/2, z = p[2]-AXIS[2]/2;
   const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
@@ -922,7 +948,7 @@ function render(){
     : "A blueprint names one address out of eighty-five. Every stage spent correcting the aim is a stage not spent growing.";
   el("tip").textContent = g
     ? "Nothing here is a failure, because nothing was named. But restraint and hunger land in very different parts of the space."
-    : "Aim buys accuracy. Nurture buys reach but hands back the wheel. You only have five stages, and a stage can only do one of them.";
+    : "Building points the stage at the target. Growing reaches further but hands back the wheel. You only have five stages, and a stage can only do one of them.";
 
   /* A gardener has one move. "Let it grow" was a second button that did the
      same thing with less of it, which is not a decision; all that is left to
@@ -932,7 +958,7 @@ function render(){
   el("aimNote").textContent = "Point this stage at " + OCC[s.target][0];
   el("nurNote").textContent = g
     ? "Feed it. Where it goes is not yours to choose."
-    : "Let go of the wheel. +1 SD of length, no steering.";
+    : "Let go of the wheel. Longer growth, but no steering.";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
   /* target picker, hardest first */
@@ -1004,6 +1030,7 @@ function render(){
   el("log").innerHTML = s.log.slice(-4).map(x => '<p>↳ ' + esc(x) + '</p>').join("");
   el("space").outerHTML = spaceSvg(s);
   bindSpace();
+  fitControls();
   el("tableWrap").innerHTML = occTable(s);
   el("tableSummary").textContent = "Show these figures as a table";
 }
@@ -1109,7 +1136,7 @@ function bindSpace(){
     redrawSpace();
   });
 }
-function redrawSpace(){ el("space").outerHTML = spaceSvg(state); bindSpace(); }
+function redrawSpace(){ el("space").outerHTML = spaceSvg(state); bindSpace(); fitControls(); }
 
 /* ============ events ============ */
 document.addEventListener("click", e => {
@@ -1157,6 +1184,13 @@ document.addEventListener("click", e => {
     state = fresh(state.mode === "carpenter" ? "gardener" : "carpenter", state.target);
     return render();
   }
+});
+
+/* the buttons rewrap as the window changes, so the strip is re-measured */
+let fitTimer = null;
+window.addEventListener("resize", function(){
+  if(fitTimer) clearTimeout(fitTimer);
+  fitTimer = setTimeout(fitControls, 80);
 });
 
 try{
