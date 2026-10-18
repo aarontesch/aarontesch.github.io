@@ -75,12 +75,21 @@ halving of the share of the workforce that works at that level or above.**
 | total | tier | | share of workforce at or above | coordinate |
 |---|---|---|---|---|
 | 0–3 | **T0 Incidental** | work on things, not people | 100% | 0 |
-| 4–7 | **T1 Transactional** | brief scripted exchanges | 85% | 5 |
+| 4–7 | **T1 Transactional** | brief scripted exchanges | 64% | 15 |
 | 8–11 | **T2 Coordinative** | sustained working relationships, tact, negotiation | 50% | 23 |
 | 12–15 | **T3 Developmental** | responsible for someone's growth or recovery over time | 22% | 50 |
 | 16–20 | **T4 Clinical** | routine distress and crisis, contained | 7% | 88 |
 
 The axis then runs 0–88, comparable to education's 0–110 and pay's 0–210.
+
+**T1 was first set at 5 and raised to 15.** A brief transaction can matter a
+great deal to whether the work succeeds — a cashier or a waiter who cannot
+manage a counter is not doing the job — and 5 put that almost at the floor. In
+the ladder's own terms the raise is a claim that fewer of the workforce are at
+transactional level or above than first assumed, about 64% rather than 85%,
+with the rest in genuinely object-focused work. The step from T1 to T2 is
+correspondingly small, which is right: transactional and coordinative work are
+not far apart in how common they are.
 
 **The share column is the weak point.** It is my estimate of how much of US
 employment sits at each tier, not a measured distribution, and it sets the
@@ -93,9 +102,9 @@ compresses to 70.
 |---|---|---|---|---|---|---|---|---|---|
 | Radiologists | 0 | 1 | 0 | 1 | 1 | 3 | T0 | 0 | 21 |
 | Farmworkers | 0 | 0 | 0 | 0 | 0 | 0 | T0 | 0 | 6 |
-| Cashiers | 1 | 1 | 1 | 1 | 1 | 5 | T1 | 5 | **94** |
-| Waiters and Waitresses | 1 | 1 | 2 | 2 | 1 | 7 | T1 | 5 | 79 |
-| Electricians | 2 | 1 | 1 | 1 | 2 | 7 | T1 | 5 | 67 |
+| Cashiers | 1 | 1 | 1 | 1 | 1 | 5 | T1 | 15 | **94** |
+| Waiters and Waitresses | 1 | 1 | 2 | 2 | 1 | 7 | T1 | 15 | 79 |
+| Electricians | 2 | 1 | 1 | 1 | 2 | 7 | T1 | 15 | 67 |
 | Software Developers | 2 | 1 | 2 | 1 | 2 | 8 | T2 | 23 | 18 |
 | Accountants and Auditors | 2 | 2 | 2 | 2 | 2 | 10 | T2 | 23 | 12 |
 | Lawyers | 3 | 3 | 3 | 3 | 3 | 15 | T3 | 50 | 67 |
@@ -104,7 +113,7 @@ compresses to 70.
 | Child and Family Social Workers | 4 | 4 | 4 | 4 | 4 | 20 | T4 | 88 | 94 |
 | Psychiatrists | 4 | 4 | 4 | 4 | 4 | 20 | T4 | 88 | **54** |
 
-The two that motivated this invert as intended: the cashier drops 94 → 5, the
+The two that motivated this invert as intended: the cashier drops 94 → 15, the
 psychiatrist rises 54 → 88.
 
 ## What it does to the model
