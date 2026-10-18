@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 24</span></div>
+    <span class="ver" role="note">build 25</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -464,7 +464,14 @@ const CENTROID = (function(){
 })();
 const CENTRE_DIST = Math.hypot(CENTROID[0], CENTROID[1], CENTROID[2]);
 const MU  = CENTRE_DIST / TOTAL_STAGES;   // five plain segments land on the average life
-const SIG = 0.65 * MU;                    // wide: nurture must buy real reach
+const SIG = 0.65 * MU;                    // spread of ordinary stage length
+/* The reach a nurtured stage buys, kept separate from the noise above. They
+   were the same number, which meant extra reach could only be bought by
+   widening the spread, and a wider spread drops a quarter of all stages onto
+   LEN_FLOOR. Separated, this is the one dial that makes the far corner of the
+   space attainable: at 1.0x SIG five nurtured stages reach 114 and a
+   psychiatrist at 169 is a 0.1% shot; at 1.6x they reach 141 and it is 2.9%. */
+const NURTURE_BONUS = 1.6 * SIG;
 const ANG = 15 * Math.PI / 180;           // heading noise per segment
 /* a wide length distribution is what lets nurture buy real reach, but an
    unfloored draw can produce a stage that visibly does nothing */
@@ -539,11 +546,12 @@ const reachOf = o => Math.hypot(o[1], o[2], o[3]);
    Calibrated, not guessed: a gardener lands a median of 19 units from the
    nearest occupation, so at 30 the median run scored 35 and 15% scored zero,
    far too bleak for a condition whose premise is that any arrival is fine. At
-   45 the gardener median is 57, inside the carpenter range of 37 (aiming at
-   Lawyers) to 70 (aiming at Software Developers). That is the point: gardening
-   does not automatically win. It beats over-reaching and loses to a
-   well-chosen target. */
-const FIT_SPAN = 45;
+   45 the gardener median was 57, inside the carpenter range. Raised to 54 when
+   NURTURE_BONUS went up: a gardener now travels further and so lands further
+   from any occupation, and 45 would have dropped the median to 48. The point
+   is unchanged -- gardening does not automatically win. It beats over-reaching
+   and loses to a well-chosen target. */
+const FIT_SPAN = 54;
 const AIM_PENALTY = 0.05;
 
 function satisfaction(s){
@@ -601,7 +609,7 @@ function growStage(choice){
     const L = Math.hypot(d[0],d[1],d[2]);
     dir = perturb(L < 1e-9 ? s.heading : [d[0]/L,d[1]/L,d[2]/L], ANG);
   }
-  let len = MU + gauss()*SIG + (nurture ? SIG : 0);
+  let len = MU + gauss()*SIG + (nurture ? NURTURE_BONUS : 0);
   if(len < LEN_FLOOR) len = LEN_FLOOR;
   if(!g && !nurture){                                  // do not sail past what you aimed at
     const t = OCC[s.target];
@@ -811,7 +819,7 @@ function playPlan(ti, nAim){
     const d = [t[1]-p[0], t[2]-p[1], t[3]-p[2]];
     const L = Math.hypot(d[0],d[1],d[2]);
     const dir = aim ? perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG) : flatDir();
-    let len = MU + gauss()*SIG + (aim ? 0 : SIG);
+    let len = MU + gauss()*SIG + (aim ? 0 : NURTURE_BONUS);
     if(len < LEN_FLOOR) len = LEN_FLOOR;
     if(aim && len > L) len = L;
     p = clampPt([p[0]+dir[0]*len, p[1]+dir[1]*len, p[2]+dir[2]*len]);
