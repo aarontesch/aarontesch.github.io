@@ -177,7 +177,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 18</span></div>
+    <span class="ver" role="note">build 19</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -201,7 +201,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <section class="hero">
   <div class="eyebrow">A developmental strategy game &middot; prototype</div>
   <h1>Five stages of growth, in a space of real occupations.</h1>
-  <p>Eighty-five real occupations, placed by pay, schooling and time spent with people. A child grows five segments through that space.</p>
+  <p>Eighty-five real occupations, placed by what they pay, the schooling they ask, and the emotional labour they demand. A child grows five segments through that space.</p>
 </section>
 
 <section class="layout">
@@ -269,8 +269,8 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     </div>
     <div class="viewbtns">
       <button class="viewbtn" data-view="iso">Reset view</button>
-      <button class="viewbtn" data-view="sal">Salary &times; Education</button>
-      <button class="viewbtn" data-view="con">Salary &times; Contact</button>
+      <button class="viewbtn" data-view="sal">Pay &times; Education</button>
+      <button class="viewbtn" data-view="con">Pay &times; Emotional labour</button>
       <button class="viewbtn" data-view="spin" id="spinBtn" aria-pressed="false">Spin</button>
     </div>
 
@@ -348,57 +348,58 @@ window.addEventListener("error", function(ev){
 /* ============ the occupation cloud ============
    name, pay coordinate (log-dollars), education coordinate (attainment
    rarity), human-contact percentile, group code, median pay in dollars.
-   Pay and education are difficulty ladders; contact is still a plain
-   percentile over the catalogue. See the axis notes below. */
+   All three are difficulty ladders now. Emotional labour comes from the
+   rubric in EMOTIONAL-LABOUR-RUBRIC.md, scored per occupation in
+   emotional-labour-scores.csv. See the axis notes below. */
 const GROUPS = {M:"Management",B:"Business & finance",C:"Computing & math",E:"Engineering & science",
   S:"Social service & legal",A:"Education & arts",H:"Healthcare",P:"Protective, food & personal service",
   O:"Sales & office",T:"Trades & transport"};
 const GCOL = {M:"#6f559b",B:"#44719f",C:"#28806f",E:"#3a7247",S:"#9c6d1f",A:"#ad5f43",
   H:"#a33f52",P:"#5e7280",O:"#7c7140",T:"#6d5a49"};
 const OCC = [
-  ["Chief Executives",67.8,32.9,48,"M",239200],["Fortune 500 CEO (illustrative)",209.3,66.2,48,"M",17000000],
-  ["General and Operations Managers",39.8,32.9,54,"M",103000],["Marketing Managers",54.7,32.9,33,"M",161000],
-  ["Financial Managers",54.7,32.9,27,"M",161000],["Construction Managers",40.8,32.9,48,"M",106000],
-  ["Medical and Health Services Managers",44.1,32.9,79,"M",117000],["Human Resources Specialists",28.0,32.9,67,"B",72000],
-  ["Market Research Analysts",29.8,32.9,11,"B",76000],["Accountants and Auditors",31.9,32.9,12,"B",81000],
-  ["Information Security Analysts",46.0,32.9,31,"C",124000],["Computer User Support Specialists",21.9,15.6,36,"C",60000],
-  ["Software Developers",48.3,32.9,18,"C",133080],["Mathematicians",44.9,66.2,4,"C",120000],
-  ["Statisticians",40.2,66.2,5,"C",104000],["Data Scientists",45.0,32.9,2,"C",120230],
-  ["Architects",37.5,32.9,40,"E",96000],["Civil Engineers",38.5,32.9,27,"E",99000],
-  ["Electrical Engineers",42.3,32.9,33,"E",111000],["Mechanical Engineers",39.6,32.9,60,"E",102320],
-  ["Medical Scientists",38.9,109.4,57,"E",100000],["Physicists",53.6,109.4,10,"E",156000],
-  ["Economists",43.8,66.2,7,"E",116000],["Clinical and Counseling Psychologists",37.5,109.4,42,"E",96000],
-  ["Educational, Guidance, and Career Counselors",24.1,66.2,85,"S",64000],["Child, Family, and School Social Workers",19.0,32.9,94,"S",55000],
-  ["Clergy",20.8,32.9,48,"S",58000],["Lawyers",52.6,109.4,67,"S",151160],
-  ["Judges and Magistrates",52.5,109.4,57,"S",151000],["Paralegals and Legal Assistants",22.5,24.6,42,"S",61000],
-  ["Mathematical Science Teachers, Postsecondary",31.5,109.4,31,"A",80000],["English Language and Literature Teachers, Postsecondary",31.7,109.4,37,"A",80470],
-  ["Elementary School Teachers",24.1,32.9,85,"A",64000],["Secondary School Teachers",25.1,32.9,76,"A",66000],
-  ["Librarians",24.6,66.2,23,"A",65000],["Fine Artists",25.1,32.9,1,"A",66000],
-  ["Graphic Designers",22.5,32.9,30,"A",61000],["News Analysts, Reporters, and Journalists",20.8,32.9,42,"A",58000],
-  ["Writers and Authors",28.0,32.9,7,"A",72000],["Dentists, General",56.9,109.4,94,"H",172000],
-  ["Pharmacists",49.3,109.4,60,"H",137000],["Physician Assistants",48.3,66.2,93,"H",133000],
-  ["Physical Therapists",39.2,109.4,94,"H",101000],["Veterinarians",46.3,109.4,85,"H",125000],
-  ["Registered Nurses",36.7,32.9,85,"H",93600],["Nurse Practitioners",47.3,66.2,67,"H",129000],
-  ["Anesthesiologists",95.9,109.4,99,"H",557131],["Family Medicine Physicians",78.0,109.4,99,"H",325040],
-  ["Psychiatrists",80.5,109.4,54,"H",350786],["Radiologists",98.8,109.4,21,"H",609684],
-  ["Paramedics",18.4,17,37,"H",54000],["Licensed Practical Nurses",23.0,17,79,"H",62000],
-  ["Nursing Assistants",8.5,17,79,"H",40000],["Dental Assistants",14.5,17,76,"H",48000],
-  ["Firefighters",21.4,17,18,"P",59000],["Police and Sheriff's Patrol Officers",30.2,3.3,45,"P",77000],
-  ["Security Guards",6.8,3.3,85,"P",38000],["Chefs and Head Cooks",21.9,3.3,48,"P",60000],
-  ["Cooks, Restaurant",5.9,0,23,"P",37000],["Bartenders",3.1,0,60,"P",34000],
-  ["Waiters and Waitresses",3.1,0,79,"P",34000],["Janitors and Cleaners",5.0,0,13,"P",36000],
-  ["Landscaping and Groundskeeping Workers",6.8,0,0,"P",38000],["Hairdressers and Cosmetologists",5.0,17,67,"P",36000],
-  ["Childcare Workers",1.1,3.3,67,"P",32000],["Cashiers",0.0,0,94,"O",31000],
-  ["Retail Salespersons",4.0,0,85,"O",35000],["Real Estate Sales Agents",19.6,3.3,54,"O",56000],
-  ["Customer Service Representatives",10.1,3.3,79,"O",42000],["Secretaries and Administrative Assistants",13.1,3.3,85,"O",46000],
-  ["Office Clerks, General",9.3,3.3,60,"O",41000],["Farmworkers and Laborers, Crop",4.0,0,6,"T",35000],
-  ["Carpenters",21.4,3.3,67,"T",59000],["Construction Laborers",13.1,0,45,"T",46000],
-  ["Electricians",23.2,3.3,67,"T",62350],["Plumbers, Pipefitters, and Steamfitters",23.0,3.3,23,"T",62000],
-  ["Automotive Service Technicians",15.9,17,20,"T",50000],["HVAC Mechanics and Installers",21.4,17,60,"T",59000],
-  ["Bakers",5.0,0,67,"T",36000],["Machinists",17.8,3.3,14,"T",53000],
-  ["Welders, Cutters, Solderers, and Brazers",16.5,3.3,17,"T",51000],["Airline Pilots, Copilots, and Flight Engineers",67.8,32.9,37,"T",239200],
-  ["Air Traffic Controllers",51.2,24.6,60,"T",145000],["Heavy and Tractor-Trailer Truck Drivers",20.8,17,26,"T",58000],
-  ["Laborers and Freight, Stock, and Material Movers",6.8,0,14,"T",38000],
+  ["Chief Executives",67.8,32.9,70.4,"M",239200],["Fortune 500 CEO (illustrative)",209.3,66.2,70.4,"M",17000000],
+  ["General and Operations Managers",39.8,32.9,70.4,"M",103000],["Marketing Managers",54.7,32.9,44.9,"M",161000],
+  ["Financial Managers",54.7,32.9,44.9,"M",161000],["Construction Managers",40.8,32.9,44.9,"M",106000],
+  ["Medical and Health Services Managers",44.1,32.9,70.4,"M",117000],["Human Resources Specialists",28.0,32.9,70.4,"B",72000],
+  ["Market Research Analysts",29.8,32.9,18.6,"B",76000],["Accountants and Auditors",31.9,32.9,44.9,"B",81000],
+  ["Information Security Analysts",46.0,32.9,31.9,"C",124000],["Computer User Support Specialists",21.9,15.6,36.0,"C",60000],
+  ["Software Developers",48.3,32.9,36.0,"C",133080],["Mathematicians",44.9,66.2,16.4,"C",120000],
+  ["Statisticians",40.2,66.2,18.6,"C",104000],["Data Scientists",45.0,32.9,18.6,"C",120230],
+  ["Architects",37.5,32.9,49.6,"E",96000],["Civil Engineers",38.5,32.9,36.0,"E",99000],
+  ["Electrical Engineers",42.3,32.9,31.9,"E",111000],["Mechanical Engineers",39.6,32.9,31.9,"E",102320],
+  ["Medical Scientists",38.9,109.4,24.6,"E",100000],["Physicists",53.6,109.4,16.4,"E",156000],
+  ["Economists",43.8,66.2,24.6,"E",116000],["Clinical and Counseling Psychologists",37.5,109.4,100.0,"E",96000],
+  ["Educational, Guidance, and Career Counselors",24.1,66.2,81.8,"S",64000],["Child, Family, and School Social Workers",19.0,32.9,100.0,"S",55000],
+  ["Clergy",20.8,32.9,87.7,"S",58000],["Lawyers",52.6,109.4,70.4,"S",151160],
+  ["Judges and Magistrates",52.5,109.4,76.1,"S",151000],["Paralegals and Legal Assistants",22.5,24.6,40.3,"S",61000],
+  ["Mathematical Science Teachers, Postsecondary",31.5,109.4,54.5,"A",80000],["English Language and Literature Teachers, Postsecondary",31.7,109.4,59.7,"A",80470],
+  ["Elementary School Teachers",24.1,32.9,70.4,"A",64000],["Secondary School Teachers",25.1,32.9,70.4,"A",66000],
+  ["Librarians",24.6,66.2,36.0,"A",65000],["Fine Artists",25.1,32.9,15.0,"A",66000],
+  ["Graphic Designers",22.5,32.9,31.9,"A",61000],["News Analysts, Reporters, and Journalists",20.8,32.9,44.9,"A",58000],
+  ["Writers and Authors",28.0,32.9,16.4,"A",72000],["Dentists, General",56.9,109.4,65.0,"H",172000],
+  ["Pharmacists",49.3,109.4,54.5,"H",137000],["Physician Assistants",48.3,66.2,81.8,"H",133000],
+  ["Physical Therapists",39.2,109.4,76.1,"H",101000],["Veterinarians",46.3,109.4,76.1,"H",125000],
+  ["Registered Nurses",36.7,32.9,76.1,"H",93600],["Nurse Practitioners",47.3,66.2,93.8,"H",129000],
+  ["Anesthesiologists",95.9,109.4,65.0,"H",557131],["Family Medicine Physicians",78.0,109.4,100.0,"H",325040],
+  ["Psychiatrists",80.5,109.4,100.0,"H",350786],["Radiologists",98.8,109.4,28.1,"H",609684],
+  ["Paramedics",18.4,17,76.1,"H",54000],["Licensed Practical Nurses",23.0,17,70.4,"H",62000],
+  ["Nursing Assistants",8.5,17,70.4,"H",40000],["Dental Assistants",14.5,17,44.9,"H",48000],
+  ["Firefighters",21.4,17,70.4,"P",59000],["Police and Sheriff's Patrol Officers",30.2,3.3,81.8,"P",77000],
+  ["Security Guards",6.8,3.3,40.3,"P",38000],["Chefs and Head Cooks",21.9,3.3,31.9,"P",60000],
+  ["Cooks, Restaurant",5.9,0,16.4,"P",37000],["Bartenders",3.1,0,36.0,"P",34000],
+  ["Waiters and Waitresses",3.1,0,31.9,"P",34000],["Janitors and Cleaners",5.0,0,0.0,"P",36000],
+  ["Landscaping and Groundskeeping Workers",6.8,0,0.0,"P",38000],["Hairdressers and Cosmetologists",5.0,17,54.5,"P",36000],
+  ["Childcare Workers",1.1,3.3,76.1,"P",32000],["Cashiers",0.0,0,24.6,"O",31000],
+  ["Retail Salespersons",4.0,0,31.9,"O",35000],["Real Estate Sales Agents",19.6,3.3,59.7,"O",56000],
+  ["Customer Service Representatives",10.1,3.3,44.9,"O",42000],["Secretaries and Administrative Assistants",13.1,3.3,36.0,"O",46000],
+  ["Office Clerks, General",9.3,3.3,21.4,"O",41000],["Farmworkers and Laborers, Crop",4.0,0,0.0,"T",35000],
+  ["Carpenters",21.4,3.3,28.1,"T",59000],["Construction Laborers",13.1,0,16.4,"T",46000],
+  ["Electricians",23.2,3.3,31.9,"T",62350],["Plumbers, Pipefitters, and Steamfitters",23.0,3.3,31.9,"T",62000],
+  ["Automotive Service Technicians",15.9,17,31.9,"T",50000],["HVAC Mechanics and Installers",21.4,17,31.9,"T",59000],
+  ["Bakers",5.0,0,0.0,"T",36000],["Machinists",17.8,3.3,15.0,"T",53000],
+  ["Welders, Cutters, Solderers, and Brazers",16.5,3.3,15.0,"T",51000],["Airline Pilots, Copilots, and Flight Engineers",67.8,32.9,65.0,"T",239200],
+  ["Air Traffic Controllers",51.2,24.6,65.0,"T",145000],["Heavy and Tractor-Trailer Truck Drivers",20.8,17,16.4,"T",58000],
+  ["Laborers and Freight, Stock, and Material Movers",6.8,0,0.0,"T",38000],
 ];
 
 /* ============ the three axes ============
@@ -465,11 +466,21 @@ function perturb(d, sig){
 function flatDir(){
   return norm([Math.abs(gauss()), Math.abs(gauss()), Math.abs(gauss())]);
 }
-function nearestOcc(p){
+/* Some occupations now sit on exactly the same point -- Janitors and Bakers
+   both pay $36k, need no credential and score zero emotional labour, and the
+   model has nothing left to tell them apart. Without a tie-break the one later
+   in the array can never be the answer, so it reads as 0% difficulty when it
+   is really 0% distinguishable. `prefer` breaks an exact tie toward whichever
+   occupation was aimed at; with no target the first match stands. */
+function nearestOcc(p, prefer){
   let best = Infinity, bi = 0;
   for(let i = 0; i < OCC.length; i++){
     const d = (p[0]-OCC[i][1])**2 + (p[1]-OCC[i][2])**2 + (p[2]-OCC[i][3])**2;
     if(d < best){ best = d; bi = i; }
+  }
+  if(prefer !== undefined && prefer !== bi){
+    const dp = (p[0]-OCC[prefer][1])**2 + (p[1]-OCC[prefer][2])**2 + (p[2]-OCC[prefer][3])**2;
+    if(dp <= best + 1e-9){ bi = prefer; best = dp; }
   }
   return {i: bi, dist: Math.sqrt(best)};
 }
@@ -519,7 +530,7 @@ function growStage(choice){
   s.locked = true;
   if(nurture) s.nurtured++; else s.aimed++;
 
-  const where = nearestOcc(to);
+  const where = nearestOcc(to, g ? undefined : s.target);
   s.log.push((g
       ? (nurture ? "You fed the vine hard." : "You let the vine find its own way.")
       : (nurture ? "You fed the structure rather than steering it." : "You trued the structure toward " + OCC[s.target][0] + "."))
@@ -589,7 +600,7 @@ function spaceSvg(s){
   });
   /* an axis line out of the origin corner, name set past its end, so each
      dimension reads as a direction rather than a word floating in the box */
-  [[[AXIS[0]*0.99,0,0],"pay"],[[0,AXIS[1]*0.99,0],"education"],[[0,0,AXIS[2]*0.99],"contact"]].forEach(a => {
+  [[[AXIS[0]*0.99,0,0],"pay"],[[0,AXIS[1]*0.99,0],"education"],[[0,0,AXIS[2]*0.99],"emotional labour"]].forEach(a => {
     const o = project([0,0,0]), e = project(a[0]);
     const p = project([a[0][0]*1.17, a[0][1]*1.17, a[0][2]*1.17]);
     push(1e4, '<line x1="' + o.x.toFixed(1) + '" y1="' + o.y.toFixed(1) +
@@ -599,7 +610,7 @@ function spaceSvg(s){
   });
 
   /* the cloud */
-  const near = s.segs.length ? nearestOcc(s.pos).i : -1;
+  const near = s.segs.length ? nearestOcc(s.pos, g ? undefined : s.target).i : -1;
   OCC.forEach((o, i) => {
     const p = project([o[1], o[2], o[3]]);
     const isT = !g && i === s.target, isN = i === near;
@@ -662,9 +673,9 @@ function spaceSvg(s){
   const pos = s.segs.length ? s.pos : [0,0,0];
   const w2 = s.segs.length ? OCC[nearestOcc(s.pos).i][0] : "nothing yet";
   return '<svg class="spacesvg" id="space" tabindex="0" viewBox="-168 -146 336 292" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
-      'Occupation space, ' + OCC.length + ' occupations by pay, education and human contact. ' +
+      'Occupation space, ' + OCC.length + ' occupations by pay, education and emotional labour. ' +
       s.segs.length + ' of ' + TOTAL_STAGES + ' stages grown, now at pay ' + money(payAt(pos[0])) +
-      ', schooling to ' + edReached(pos[1]) + ', contact ' + Math.round(pos[2]) +
+      ', schooling to ' + edReached(pos[1]) + ', emotional labour ' + Math.round(pos[2]) +
       ', nearest occupation ' + esc(w2) + '. The figures are in the table below.">' +
     '<g aria-hidden="true" transform="translate(0,6)">' + items.map(i => i.svg).join("") + '</g></svg>';
 }
@@ -686,10 +697,10 @@ function occTable(s){
   }).join("");
   return '<div class="scroll"><table>' +
     '<caption>The child is at pay ' + money(payAt(pos[0])) + ', schooling to ' + edReached(pos[1]) +
-      ', contact ' + Math.round(pos[2]) + ' after ' + s.segs.length + ' of ' + TOTAL_STAGES +
+      ', emotional labour ' + Math.round(pos[2]) + ' after ' + s.segs.length + ' of ' + TOTAL_STAGES +
       ' stages. These are the occupations nearest that point; whichever is closest at the end is the career.</caption>' +
     '<thead><tr><th scope="col">Occupation</th><th scope="col">Median pay</th>' +
-      '<th scope="col">Education</th><th scope="col">Contact pctl</th>' +
+      '<th scope="col">Education</th><th scope="col">Emotional labour</th>' +
       '<th scope="col">Distance now</th><th scope="col">Field</th></tr></thead>' +
     '<tbody>' + body + '</tbody></table></div>';
 }
@@ -715,7 +726,7 @@ function playPlan(ti, nAim){
     p = clampPt([p[0]+dir[0]*len, p[1]+dir[1]*len, p[2]+dir[2]*len]);
     h = dir;
   }
-  return nearestOcc(p).i;
+  return nearestOcc(p, ti).i;
 }
 /* Score the whole catalogue once at load: for each occupation, the best it can
    be played, over every aim/nurture split. 100 runs per split means the hit
@@ -807,10 +818,10 @@ function render(){
         const o = OCC[i], far = Math.round(reachOf(o)), od = DIFFICULTY[i].pct;
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
           (s.locked ? " disabled" : "") +
-          ' aria-label="' + esc(o[0]) + ': reached in about ' + od + ' percent of runs, ' + far +
-            ' units out. Median pay ' + money(o[5]) + ', needs a ' + edLabel(o[2]) +
-            ', contact percentile ' + o[3] + '">' +
-          '<span>' + esc(o[0]) + '</span><small>' + od + '% &middot; ' +
+          ' aria-label="' + esc(o[0]) + ': ' + far +
+            ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', needs a ' + edLabel(o[2]) +
+            ', emotional labour ' + o[3] + '">' +
+          '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
             money(o[5]) + ' &middot; ' + edLabel(o[2]) + '</small></button>';
       }).join("");
     const t = OCC[s.target], pct = estimateOdds(s.target);
@@ -819,9 +830,12 @@ function render(){
        of disturbing the disclosure behaviour in some browsers. */
     el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) + '</span><small>' +
       (s.locked ? "locked" : "change") + ' ▾</small></span>';
+    /* a measured 0 means the sample could not resolve it, not that it cannot
+       happen: the rarest here land about one run in five hundred */
     el("odds").textContent = t[0] + " sits " + Math.round(reachOf(t)) +
-      " units out. Played as well as it can be, it comes out in about " + pct.pct +
-      "% of runs — best with " + (pct.aim === 0 ? "no aiming at all, pure growth"
+      " units out. Played as well as it can be, it comes out in " +
+      (pct.pct ? "about " + pct.pct + "% of runs" : "well under 1% of runs") +
+      " — best with " + (pct.aim === 0 ? "no aiming at all, pure growth"
         : pct.aim === TOTAL_STAGES ? "aiming every stage"
         : pct.aim + " stage" + (pct.aim === 1 ? "" : "s") + " aimed and " +
           (TOTAL_STAGES - pct.aim) + " nurtured") + ".";
@@ -831,7 +845,7 @@ function render(){
   el("timeline").innerHTML = Array.from({length: TOTAL_STAGES}, (_, i) =>
     '<span class="dot ' + (i < s.stage-1 ? "done" : i === s.stage-1 && !s.over ? "current" : "") + '"></span>').join("");
 
-  const w = s.segs.length ? nearestOcc(s.pos) : null;
+  const w = s.segs.length ? nearestOcc(s.pos, g ? undefined : s.target) : null;
 
   /* the scoreboard, in place of the old wellbeing meter: what you pointed at,
      and where they are actually heading */
@@ -870,7 +884,8 @@ function finishRun(reason){
   if(s.over) return;
   s.over = true;
   const g = s.mode === "gardener";
-  const w = s.segs.length ? nearestOcc(s.pos) : {i: 0, dist: 0};
+  const tie = s.mode === "gardener" ? undefined : s.target;
+  const w = s.segs.length ? nearestOcc(s.pos, tie) : {i: 0, dist: 0};
   const career = OCC[w.i];
   const hitTarget = !g && w.i === s.target;
   /* the only question left: did they arrive where you pointed them */
