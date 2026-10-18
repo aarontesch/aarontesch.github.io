@@ -93,7 +93,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 /* ---- the three-dimensional space ---- */
 .space{position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;
   background:linear-gradient(160deg,#eef4e9,#f8f0df);border:1px solid #dde5d6}
-.spacesvg{display:block;width:100%;height:370px;touch-action:none;cursor:grab}
+.spacesvg{display:block;width:100%;height:376px;touch-action:none;cursor:grab}
 .spacesvg:active{cursor:grabbing}
 .spacesvg .edge{fill:none;stroke:#c3cdbd;stroke-width:1}
 .spacesvg .edge.back{stroke:#dfe5d8}
@@ -108,12 +108,22 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .spacesvg .joint{fill:#7d5334}
 .spacesvg .leaf{fill:#427258}
 .spacesvg .ghostline{fill:none;stroke:#b7a98a;stroke-width:1.5;stroke-dasharray:4 5;opacity:.75}
-.spacehint{position:absolute;right:11px;bottom:9px;font-size:11px;color:var(--muted);
+.spacehint{position:absolute;right:11px;top:9px;font-size:11px;color:var(--muted);
   background:rgba(255,253,248,.82);border-radius:99px;padding:3px 10px;pointer-events:none}
 .viewbtns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
 .viewbtn{border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--muted);background:var(--card)}
 .viewbtn:hover{border-color:var(--sage);color:var(--deep)}
 .viewbtn[aria-pressed="true"]{background:#e3eedd;color:var(--deep);border-color:var(--sage)}
+
+/* the stage choice, laid over the foot of the drawing */
+.spaceactions{position:absolute;left:10px;right:10px;bottom:10px;display:grid;
+  grid-template-columns:1fr 1fr;gap:9px}
+.spaceactions .action{background:rgba(255,253,248,.93);border-color:#cdd8c7;
+  box-shadow:0 4px 14px rgba(45,69,51,.13);backdrop-filter:blur(2px)}
+.spaceactions .action:hover:not([disabled]){background:#f3f9ef;border-color:var(--sage)}
+.spaceactions .action[disabled]{opacity:.5}
+.spaceactions.single{grid-template-columns:1fr}
+@media(max-width:620px){.spaceactions{grid-template-columns:1fr;gap:7px}}
 
 /* ---- accessible table equivalents of the drawing ---- */
 .vizdata{margin:-2px 0 16px}
@@ -176,7 +186,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 @media(max-width:520px){
   .app{padding:20px 14px 36px}
   .strategies,.stats,.resultgrid{grid-template-columns:1fr}
-  .spacesvg{height:300px}
+  .spacesvg{height:380px}
 }
 </style>
 </head>
@@ -186,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 22</span></div>
+    <span class="ver" role="note">build 23</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -210,7 +220,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <section class="hero">
   <div class="eyebrow">A developmental strategy game &middot; prototype</div>
   <h1>Five stages of growth, in a space of real occupations.</h1>
-  <p>Eighty-five real occupations, placed by what they pay, the schooling they ask, and the emotional labour they demand. A child grows five segments through that space.</p>
+  <p>Eighty-five real occupations, placed by pay, schooling and emotional labour. A child grows five segments through that space.</p>
 </section>
 
 <section class="layout">
@@ -247,17 +257,9 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       </details>
     </div>
 
-    <h3 class="eyebrow" style="margin:14px 0 9px">This stage</h3>
-    <div class="actions" id="actions">
-      <button class="action" id="btnAim" data-act="aim">
-        <span><b>Aim the growth</b><small id="aimNote">Point this stage at the target</small></span>
-        <span class="cost" id="aimCost">accuracy</span>
-      </button>
-      <button class="action" id="btnNur" data-act="nurture">
-        <span><b>Nurture the growth</b><small id="nurNote">Keep the heading, add a standard deviation of length</small></span>
-        <span class="cost">+1 SD reach</span>
-      </button>
-    </div>
+    <!-- The stage choice used to sit here. It now lives on the drawing itself,
+         where the player is already looking and where the fold cannot push it
+         off a laptop screen. -->
 
     <!-- Both conditions need this. A gardener has nothing else to watch; a
          carpenter needs to see the drift away from the address they named.
@@ -285,6 +287,19 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <div class="space">
       <svg class="spacesvg" id="space" tabindex="0" role="img" aria-label="Occupation space"></svg>
       <div class="spacehint" aria-hidden="true">drag to rotate</div>
+      <!-- the stage choice, over the drawing it acts on. The svg is drawn
+           taller than the visible band so this strip covers empty sky rather
+           than the structure. -->
+      <div class="spaceactions" id="actions" role="group" aria-label="This stage">
+        <button class="action" id="btnAim" data-act="aim">
+          <span><b>Aim the growth</b><small id="aimNote">Point this stage at the target</small></span>
+          <span class="cost" id="aimCost">accuracy</span>
+        </button>
+        <button class="action" id="btnNur" data-act="nurture">
+          <span><b>Nurture the growth</b><small id="nurNote">Keep the heading, +1 SD</small></span>
+          <span class="cost">+1 SD reach</span>
+        </button>
+      </div>
     </div>
     <div class="viewbtns">
       <button class="viewbtn" data-view="iso">Reset view</button>
@@ -611,6 +626,10 @@ function growStage(choice){
    sort. The cube is centred on (50,50,50) and drawn in its own units. */
 const cam = {yaw: -0.62, pitch: 0.40, spin: false};
 const DIST = 300, SCALE = 1.72;
+/* The frame is extended downward and anchored to its top, so the drawing sits
+   in the upper band and the strip the stage buttons occupy stays empty sky. */
+const VIEW = {x:-168, y:-146, w:336, h:292};
+const CONTROL_PAD = 80;
 function project(p){
   const x = p[0]-AXIS[0]/2, y = p[1]-AXIS[1]/2, z = p[2]-AXIS[2]/2;
   const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
@@ -736,7 +755,9 @@ function spaceSvg(s){
   items.sort((a, b) => b.d - a.d);
   const pos = s.segs.length ? s.pos : [0,0,0];
   const w2 = s.segs.length ? OCC[nearestOcc(s.pos).i][0] : "nothing yet";
-  return '<svg class="spacesvg" id="space" tabindex="0" viewBox="-168 -146 336 292" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
+  return '<svg class="spacesvg" id="space" tabindex="0" viewBox="' +
+      [VIEW.x, VIEW.y, VIEW.w, VIEW.h + CONTROL_PAD].join(" ") +
+      '" preserveAspectRatio="xMidYMin meet" role="img" aria-label="' +
       'Occupation space, ' + OCC.length + ' occupations by pay, education and emotional labour. ' +
       s.segs.length + ' of ' + TOTAL_STAGES + ' stages grown, now at pay ' + money(payAt(pos[0])) +
       ', schooling to ' + edReached(pos[1]) + ', emotional labour ' + Math.round(pos[2]) +
