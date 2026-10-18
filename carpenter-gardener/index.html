@@ -177,7 +177,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 17</span></div>
+    <span class="ver" role="note">build 18</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -346,57 +346,58 @@ window.addEventListener("error", function(ev){
 });
 
 /* ============ the occupation cloud ============
-   name, salary percentile, education percentile, human-contact percentile,
-   group code. Percentiles come from the supplied BLS 2025 / Doximity 2026
-   table; the three axes are the whole model, so nothing else is stored. */
+   name, pay coordinate (log-dollars), education coordinate (attainment
+   rarity), human-contact percentile, group code, median pay in dollars.
+   Pay and education are difficulty ladders; contact is still a plain
+   percentile over the catalogue. See the axis notes below. */
 const GROUPS = {M:"Management",B:"Business & finance",C:"Computing & math",E:"Engineering & science",
   S:"Social service & legal",A:"Education & arts",H:"Healthcare",P:"Protective, food & personal service",
   O:"Sales & office",T:"Trades & transport"};
 const GCOL = {M:"#6f559b",B:"#44719f",C:"#28806f",E:"#3a7247",S:"#9c6d1f",A:"#ad5f43",
   H:"#a33f52",P:"#5e7280",O:"#7c7140",T:"#6d5a49"};
 const OCC = [
-  ["Chief Executives",67.8,43,48,"M",239200],["Fortune 500 CEO (illustrative)",209.3,75,48,"M",17000000],
-  ["General and Operations Managers",39.8,43,54,"M",103000],["Marketing Managers",54.7,43,33,"M",161000],
-  ["Financial Managers",54.7,43,27,"M",161000],["Construction Managers",40.8,43,48,"M",106000],
-  ["Medical and Health Services Managers",44.1,43,79,"M",117000],["Human Resources Specialists",28.0,43,67,"B",72000],
-  ["Market Research Analysts",29.8,43,11,"B",76000],["Accountants and Auditors",31.9,43,12,"B",81000],
-  ["Information Security Analysts",46.0,43,31,"C",124000],["Computer User Support Specialists",21.9,29,36,"C",60000],
-  ["Software Developers",48.3,43,18,"C",133080],["Mathematicians",44.9,75,4,"C",120000],
-  ["Statisticians",40.2,75,5,"C",104000],["Data Scientists",45.0,43,2,"C",120230],
-  ["Architects",37.5,43,40,"E",96000],["Civil Engineers",38.5,43,27,"E",99000],
-  ["Electrical Engineers",42.3,43,33,"E",111000],["Mechanical Engineers",39.6,43,60,"E",102320],
-  ["Medical Scientists",38.9,83,57,"E",100000],["Physicists",53.6,83,10,"E",156000],
-  ["Economists",43.8,75,7,"E",116000],["Clinical and Counseling Psychologists",37.5,83,42,"E",96000],
-  ["Educational, Guidance, and Career Counselors",24.1,75,85,"S",64000],["Child, Family, and School Social Workers",19.0,43,94,"S",55000],
-  ["Clergy",20.8,43,48,"S",58000],["Lawyers",52.6,83,67,"S",151160],
-  ["Judges and Magistrates",52.5,83,57,"S",151000],["Paralegals and Legal Assistants",22.5,40,42,"S",61000],
-  ["Mathematical Science Teachers, Postsecondary",31.5,83,31,"A",80000],["English Language and Literature Teachers, Postsecondary",31.7,83,37,"A",80470],
-  ["Elementary School Teachers",24.1,43,85,"A",64000],["Secondary School Teachers",25.1,43,76,"A",66000],
-  ["Librarians",24.6,75,23,"A",65000],["Fine Artists",25.1,43,1,"A",66000],
-  ["Graphic Designers",22.5,43,30,"A",61000],["News Analysts, Reporters, and Journalists",20.8,43,42,"A",58000],
-  ["Writers and Authors",28.0,43,7,"A",72000],["Dentists, General",56.9,83,94,"H",172000],
-  ["Pharmacists",49.3,83,60,"H",137000],["Physician Assistants",48.3,75,93,"H",133000],
-  ["Physical Therapists",39.2,83,94,"H",101000],["Veterinarians",46.3,83,85,"H",125000],
-  ["Registered Nurses",36.7,43,85,"H",93600],["Nurse Practitioners",47.3,75,67,"H",129000],
-  ["Anesthesiologists",95.9,83,99,"H",557131],["Family Medicine Physicians",78.0,83,99,"H",325040],
-  ["Psychiatrists",80.5,83,54,"H",350786],["Radiologists",98.8,83,21,"H",609684],
-  ["Paramedics",18.4,30,37,"H",54000],["Licensed Practical Nurses",23.0,30,79,"H",62000],
-  ["Nursing Assistants",8.5,30,79,"H",40000],["Dental Assistants",14.5,30,76,"H",48000],
-  ["Firefighters",21.4,30,18,"P",59000],["Police and Sheriff's Patrol Officers",30.2,13,45,"P",77000],
-  ["Security Guards",6.8,13,85,"P",38000],["Chefs and Head Cooks",21.9,13,48,"P",60000],
+  ["Chief Executives",67.8,32.9,48,"M",239200],["Fortune 500 CEO (illustrative)",209.3,66.2,48,"M",17000000],
+  ["General and Operations Managers",39.8,32.9,54,"M",103000],["Marketing Managers",54.7,32.9,33,"M",161000],
+  ["Financial Managers",54.7,32.9,27,"M",161000],["Construction Managers",40.8,32.9,48,"M",106000],
+  ["Medical and Health Services Managers",44.1,32.9,79,"M",117000],["Human Resources Specialists",28.0,32.9,67,"B",72000],
+  ["Market Research Analysts",29.8,32.9,11,"B",76000],["Accountants and Auditors",31.9,32.9,12,"B",81000],
+  ["Information Security Analysts",46.0,32.9,31,"C",124000],["Computer User Support Specialists",21.9,15.6,36,"C",60000],
+  ["Software Developers",48.3,32.9,18,"C",133080],["Mathematicians",44.9,66.2,4,"C",120000],
+  ["Statisticians",40.2,66.2,5,"C",104000],["Data Scientists",45.0,32.9,2,"C",120230],
+  ["Architects",37.5,32.9,40,"E",96000],["Civil Engineers",38.5,32.9,27,"E",99000],
+  ["Electrical Engineers",42.3,32.9,33,"E",111000],["Mechanical Engineers",39.6,32.9,60,"E",102320],
+  ["Medical Scientists",38.9,109.4,57,"E",100000],["Physicists",53.6,109.4,10,"E",156000],
+  ["Economists",43.8,66.2,7,"E",116000],["Clinical and Counseling Psychologists",37.5,109.4,42,"E",96000],
+  ["Educational, Guidance, and Career Counselors",24.1,66.2,85,"S",64000],["Child, Family, and School Social Workers",19.0,32.9,94,"S",55000],
+  ["Clergy",20.8,32.9,48,"S",58000],["Lawyers",52.6,109.4,67,"S",151160],
+  ["Judges and Magistrates",52.5,109.4,57,"S",151000],["Paralegals and Legal Assistants",22.5,24.6,42,"S",61000],
+  ["Mathematical Science Teachers, Postsecondary",31.5,109.4,31,"A",80000],["English Language and Literature Teachers, Postsecondary",31.7,109.4,37,"A",80470],
+  ["Elementary School Teachers",24.1,32.9,85,"A",64000],["Secondary School Teachers",25.1,32.9,76,"A",66000],
+  ["Librarians",24.6,66.2,23,"A",65000],["Fine Artists",25.1,32.9,1,"A",66000],
+  ["Graphic Designers",22.5,32.9,30,"A",61000],["News Analysts, Reporters, and Journalists",20.8,32.9,42,"A",58000],
+  ["Writers and Authors",28.0,32.9,7,"A",72000],["Dentists, General",56.9,109.4,94,"H",172000],
+  ["Pharmacists",49.3,109.4,60,"H",137000],["Physician Assistants",48.3,66.2,93,"H",133000],
+  ["Physical Therapists",39.2,109.4,94,"H",101000],["Veterinarians",46.3,109.4,85,"H",125000],
+  ["Registered Nurses",36.7,32.9,85,"H",93600],["Nurse Practitioners",47.3,66.2,67,"H",129000],
+  ["Anesthesiologists",95.9,109.4,99,"H",557131],["Family Medicine Physicians",78.0,109.4,99,"H",325040],
+  ["Psychiatrists",80.5,109.4,54,"H",350786],["Radiologists",98.8,109.4,21,"H",609684],
+  ["Paramedics",18.4,17,37,"H",54000],["Licensed Practical Nurses",23.0,17,79,"H",62000],
+  ["Nursing Assistants",8.5,17,79,"H",40000],["Dental Assistants",14.5,17,76,"H",48000],
+  ["Firefighters",21.4,17,18,"P",59000],["Police and Sheriff's Patrol Officers",30.2,3.3,45,"P",77000],
+  ["Security Guards",6.8,3.3,85,"P",38000],["Chefs and Head Cooks",21.9,3.3,48,"P",60000],
   ["Cooks, Restaurant",5.9,0,23,"P",37000],["Bartenders",3.1,0,60,"P",34000],
   ["Waiters and Waitresses",3.1,0,79,"P",34000],["Janitors and Cleaners",5.0,0,13,"P",36000],
-  ["Landscaping and Groundskeeping Workers",6.8,0,0,"P",38000],["Hairdressers and Cosmetologists",5.0,30,67,"P",36000],
-  ["Childcare Workers",1.1,13,67,"P",32000],["Cashiers",0.0,0,94,"O",31000],
-  ["Retail Salespersons",4.0,0,85,"O",35000],["Real Estate Sales Agents",19.6,13,54,"O",56000],
-  ["Customer Service Representatives",10.1,13,79,"O",42000],["Secretaries and Administrative Assistants",13.1,13,85,"O",46000],
-  ["Office Clerks, General",9.3,13,60,"O",41000],["Farmworkers and Laborers, Crop",4.0,0,6,"T",35000],
-  ["Carpenters",21.4,13,67,"T",59000],["Construction Laborers",13.1,0,45,"T",46000],
-  ["Electricians",23.2,13,67,"T",62350],["Plumbers, Pipefitters, and Steamfitters",23.0,13,23,"T",62000],
-  ["Automotive Service Technicians",15.9,30,20,"T",50000],["HVAC Mechanics and Installers",21.4,30,60,"T",59000],
-  ["Bakers",5.0,0,67,"T",36000],["Machinists",17.8,13,14,"T",53000],
-  ["Welders, Cutters, Solderers, and Brazers",16.5,13,17,"T",51000],["Airline Pilots, Copilots, and Flight Engineers",67.8,43,37,"T",239200],
-  ["Air Traffic Controllers",51.2,40,60,"T",145000],["Heavy and Tractor-Trailer Truck Drivers",20.8,30,26,"T",58000],
+  ["Landscaping and Groundskeeping Workers",6.8,0,0,"P",38000],["Hairdressers and Cosmetologists",5.0,17,67,"P",36000],
+  ["Childcare Workers",1.1,3.3,67,"P",32000],["Cashiers",0.0,0,94,"O",31000],
+  ["Retail Salespersons",4.0,0,85,"O",35000],["Real Estate Sales Agents",19.6,3.3,54,"O",56000],
+  ["Customer Service Representatives",10.1,3.3,79,"O",42000],["Secretaries and Administrative Assistants",13.1,3.3,85,"O",46000],
+  ["Office Clerks, General",9.3,3.3,60,"O",41000],["Farmworkers and Laborers, Crop",4.0,0,6,"T",35000],
+  ["Carpenters",21.4,3.3,67,"T",59000],["Construction Laborers",13.1,0,45,"T",46000],
+  ["Electricians",23.2,3.3,67,"T",62350],["Plumbers, Pipefitters, and Steamfitters",23.0,3.3,23,"T",62000],
+  ["Automotive Service Technicians",15.9,17,20,"T",50000],["HVAC Mechanics and Installers",21.4,17,60,"T",59000],
+  ["Bakers",5.0,0,67,"T",36000],["Machinists",17.8,3.3,14,"T",53000],
+  ["Welders, Cutters, Solderers, and Brazers",16.5,3.3,17,"T",51000],["Airline Pilots, Copilots, and Flight Engineers",67.8,32.9,37,"T",239200],
+  ["Air Traffic Controllers",51.2,24.6,60,"T",145000],["Heavy and Tractor-Trailer Truck Drivers",20.8,17,26,"T",58000],
   ["Laborers and Freight, Stock, and Material Movers",6.8,0,14,"T",38000],
 ];
 
@@ -414,7 +415,7 @@ const OCC = [
    past anything five stages can reach. Money is hard the way it is hard in
    life: each further step costs as much as everything before it. */
 const SAL_PER_DOUBLING = 23;
-const AXIS = [210, 100, 100];                   // the space is a box, not a cube
+const AXIS = [210, 110, 100];                   // the space is a box, not a cube
 const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
 const TOTAL_STAGES = 5;
 
@@ -549,6 +550,25 @@ const CORNERS = [[0,0,0],[X,0,0],[X,0,Z],[0,0,Z],[0,Y,0],[X,Y,0],[X,Y,Z],[0,Y,Z]
 const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
 /* the salary axis is log-dollars, so show dollars; a coordinate would mean
    nothing to a reader and a percentile would now be a lie */
+/* Education is no longer a percentile either. It is 23 units per HALVING of
+   the share of adults who get that far, so each credential costs what the one
+   before it cost again -- which is why a doctorate now sits 43 units past a
+   master's where the occupation percentile put it 8. Shares are US Census CPS
+   figures for adults 25 and over, approximate. A coordinate is meaningless to
+   a reader, so always show the credential. */
+const ED_LEVELS = [[0,"no credential"],[3.3,"high school"],[15.6,"some college"],
+  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[66.2,"master's"],[109.4,"doctorate"]];
+function edLabel(c){
+  let best = ED_LEVELS[0];
+  for(const L of ED_LEVELS) if(Math.abs(L[0]-c) < Math.abs(best[0]-c)) best = L;
+  return best[1];
+}
+function edReached(c){            // the highest rung a position has actually cleared
+  let best = ED_LEVELS[0];
+  for(const L of ED_LEVELS) if(c >= L[0] - 0.01) best = L;
+  return best[1];
+}
+
 /* invert the axis: a salary coordinate back into the pay it represents */
 const payAt = s => 31000 * Math.pow(2, s / SAL_PER_DOUBLING);
 const money = w => w >= 1000000 ? "$" + (w/1000000).toFixed(1).replace(".0","") + "M"
@@ -644,7 +664,7 @@ function spaceSvg(s){
   return '<svg class="spacesvg" id="space" tabindex="0" viewBox="-168 -146 336 292" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
       'Occupation space, ' + OCC.length + ' occupations by pay, education and human contact. ' +
       s.segs.length + ' of ' + TOTAL_STAGES + ' stages grown, now at pay ' + money(payAt(pos[0])) +
-      ', education ' + Math.round(pos[1]) + ', contact ' + Math.round(pos[2]) +
+      ', schooling to ' + edReached(pos[1]) + ', contact ' + Math.round(pos[2]) +
       ', nearest occupation ' + esc(w2) + '. The figures are in the table below.">' +
     '<g aria-hidden="true" transform="translate(0,6)">' + items.map(i => i.svg).join("") + '</g></svg>';
 }
@@ -661,15 +681,15 @@ function occTable(s){
     const o = OCC[r.i], isT = !g && r.i === s.target;
     return '<tr' + (isT ? ' aria-current="true"' : '') + '>' +
       '<th scope="row">' + esc(o[0]) + (isT ? ' (target)' : '') + '</th>' +
-      '<td>' + money(o[5]) + '</td><td>' + o[2] + '</td><td>' + o[3] + '</td>' +
+      '<td>' + money(o[5]) + '</td><td>' + edLabel(o[2]) + '</td><td>' + o[3] + '</td>' +
       '<td>' + r.d.toFixed(1) + '</td><td>' + esc(GROUPS[o[4]]) + '</td></tr>';
   }).join("");
   return '<div class="scroll"><table>' +
-    '<caption>The child is at pay ' + money(payAt(pos[0])) + ', education ' + Math.round(pos[1]) +
+    '<caption>The child is at pay ' + money(payAt(pos[0])) + ', schooling to ' + edReached(pos[1]) +
       ', contact ' + Math.round(pos[2]) + ' after ' + s.segs.length + ' of ' + TOTAL_STAGES +
       ' stages. These are the occupations nearest that point; whichever is closest at the end is the career.</caption>' +
     '<thead><tr><th scope="col">Occupation</th><th scope="col">Median pay</th>' +
-      '<th scope="col">Education pctl</th><th scope="col">Contact pctl</th>' +
+      '<th scope="col">Education</th><th scope="col">Contact pctl</th>' +
       '<th scope="col">Distance now</th><th scope="col">Field</th></tr></thead>' +
     '<tbody>' + body + '</tbody></table></div>';
 }
@@ -788,10 +808,10 @@ function render(){
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
           (s.locked ? " disabled" : "") +
           ' aria-label="' + esc(o[0]) + ': reached in about ' + od + ' percent of runs, ' + far +
-            ' units out. Median pay ' + money(o[5]) + ', education percentile ' + o[2] +
+            ' units out. Median pay ' + money(o[5]) + ', needs a ' + edLabel(o[2]) +
             ', contact percentile ' + o[3] + '">' +
           '<span>' + esc(o[0]) + '</span><small>' + od + '% &middot; ' +
-            money(o[5]) + ' &middot; ed ' + o[2] + ' &middot; con ' + o[3] + '</small></button>';
+            money(o[5]) + ' &middot; ' + edLabel(o[2]) + '</small></button>';
       }).join("");
     const t = OCC[s.target], pct = estimateOdds(s.target);
     /* the one-line summary carries the current target, so the list stays shut.
