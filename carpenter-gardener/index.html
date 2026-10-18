@@ -6,7 +6,12 @@
 <title>Garden or Blueprint?</title>
 <style>
 :root{
-  --ink:#17221d; --muted:#6f7f74; --paper:#f6f3eb; --card:#fffdf8;
+  /* --muted was #6f7f74, which came to 3.61:1 on the page background and
+     4.03:1 on a hovered .action -- under 4.5:1 everywhere it was used, not
+     just on hover. #5a6a5f is the same sage grey at 4.90:1 worst case.
+     Check any new value against .action:hover #f6fbf3 and the page top
+     #e6f0e2, which are the two tightest backgrounds. */
+  --ink:#17221d; --muted:#5a6a5f; --paper:#f6f3eb; --card:#fffdf8;
   --line:#d9dfd5; --sage:#9bbca0; --deep:#315a43; --sun:#e4ad4b; --rose:#d47d70;
   --shadow:0 18px 50px rgba(45,69,51,.12);
 }
@@ -14,7 +19,14 @@
 body{margin:0;color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   background:radial-gradient(circle at 10% 0%,#e6f0e2,transparent 35%),var(--paper)}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
-button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+/* the sun ring was only 1.99:1 against the card and page backgrounds, under
+   the 3:1 that a focus indicator needs; --deep is 7.73:1. The sun is kept as
+   an outer glow so the focus style still looks like the rest of the design. */
+button:focus-visible,summary:focus-visible{outline:3px solid var(--deep);outline-offset:3px;
+  box-shadow:0 0 0 6px rgba(228,173,75,.45)}
+/* label/value pairs, not form fields -- a <label> with no control is wrong */
+.vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 .app{max-width:1200px;margin:auto;padding:28px 22px 46px}
 
 /* ---- top bar ---- */
@@ -24,6 +36,8 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .ver{font-weight:800;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
   border:1px solid var(--line);border-radius:99px;padding:3px 9px;background:var(--card)}
 .eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--muted);font-weight:800}
+/* section labels are real headings; strip the default h3 box so they look identical */
+h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .reset{border:1px solid var(--line);border-radius:99px;padding:9px 15px;color:var(--muted)}
 .reset:hover{border-color:var(--sage);color:var(--deep)}
 
@@ -48,7 +62,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 
 /* ---- strategy cards ---- */
 .strategies{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:19px}
-.strategy{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:15px;text-align:left;min-height:132px;transition:.2s}
+.strategy{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:15px;text-align:left;min-height:132px;transition:background-color .2s,border-color .2s,transform .2s}
 .strategy:hover:not([disabled]){transform:translateY(-2px);border-color:var(--sage)}
 .strategy.active{background:var(--deep);border-color:var(--deep);color:#fff}
 .strategy[disabled]{opacity:.45;cursor:not-allowed}
@@ -62,7 +76,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .coins{font-size:21px;font-weight:800;color:var(--deep);white-space:nowrap}
 .actions{display:grid;gap:10px}
 .action{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;
-  border:1px solid var(--line);background:var(--card);border-radius:15px;padding:13px 14px;text-align:left;transition:.2s}
+  border:1px solid var(--line);background:var(--card);border-radius:15px;padding:13px 14px;text-align:left;transition:background-color .2s,border-color .2s}
 .action:hover:not([disabled]){border-color:var(--sage);background:#f6fbf3}
 .action[disabled]{opacity:.45;cursor:not-allowed}
 .action b{display:block}
@@ -143,7 +157,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .dot.current{background:var(--sun)}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 .stat{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fffefa}
-.stat label{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}
+.stat .statlabel{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}
 .stat strong{font-size:17px}
 
 .log{border-top:1px solid var(--line);padding-top:17px}
@@ -151,6 +165,8 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .tip{margin-top:18px;padding:13px 15px;border-left:4px solid var(--sun);background:#fff8e8;border-radius:0 12px 12px 0;color:#5e512d;font-size:13px}
 .tip.sage{border-color:var(--sage);background:#f0f7ed;color:#3f5545}
 .tip b{display:block;margin-bottom:3px}
+/* the tip box's lead-in is a section heading, styled to match the old <b> */
+.tip .tiphead{display:block;margin:0 0 3px;font:inherit;font-weight:800;letter-spacing:0;text-transform:none;color:inherit}
 .footer{color:var(--muted);font-size:12px;margin:19px 4px 0;display:flex;justify-content:space-between;gap:15px}
 
 /* ---- modal ---- */
@@ -189,7 +205,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver">build 8</span></div>
+    <span class="ver" role="note">build 9</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -214,16 +230,19 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
         <div class="eyebrow">Year <span id="year">1</span> &middot; <span id="stageName">Foundations</span></div>
         <h2>Choose your approach</h2>
       </div>
-      <div class="badge" id="turnBadge">Turn 1 / 12</div>
+      <!-- both badges report changing state, so they carry role="status" -->
+      <div class="badge" id="turnBadge" role="status">Turn 1 / 12</div>
     </div>
 
+    <!-- a toggle pair: which one is chosen was carried only by a CSS class,
+         so aria-pressed is set here and kept in step by render() -->
     <div class="strategies">
-      <button class="strategy active" data-mode="carpenter">
+      <button class="strategy active" data-mode="carpenter" aria-pressed="true">
         <div class="glyph" aria-hidden="true">&#9724;</div>
         <strong>The Carpenter</strong>
         <span>Build toward one chosen career.</span>
       </button>
-      <button class="strategy" data-mode="gardener">
+      <button class="strategy" data-mode="gardener" aria-pressed="false">
         <div class="glyph" aria-hidden="true">&#8961;</div>
         <strong>The Gardener</strong>
         <span>Offer conditions for many futures.</span>
@@ -236,9 +255,9 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
     </div>
 
     <div id="carpenterControls">
-      <div class="eyebrow" style="margin-bottom:9px">Blueprint target</div>
+      <h3 class="eyebrow" style="margin-bottom:9px">Blueprint target</h3>
       <div class="actions" id="careers" style="margin-bottom:18px"></div>
-      <div class="eyebrow" style="margin-bottom:9px">Actions</div>
+      <h3 class="eyebrow" style="margin-bottom:9px">Actions</h3>
       <div class="actions">
         <button class="action" data-act="board" data-cost="4">
           <span><b>Buy &amp; nail a board</b><small>Climb toward the target &middot; costs a turn</small></span>
@@ -252,9 +271,9 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
     </div>
 
     <div id="gardenerControls" style="display:none">
-      <div class="eyebrow" style="margin-bottom:9px">Offer an opportunity</div>
+      <h3 class="eyebrow" style="margin-bottom:9px">Offer an opportunity</h3>
       <div class="opps" id="opps"></div>
-      <div class="eyebrow" style="margin:18px 0 9px">Tend the conditions</div>
+      <h3 class="eyebrow" style="margin:18px 0 9px">Tend the conditions</h3>
       <div class="actions">
         <button class="action" data-act="sun" data-cost="3">
           <span><b>Give sunlight</b><small>Attention and encouragement</small></span>
@@ -282,7 +301,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
         <div class="eyebrow">What happened</div>
         <h2 id="dashTitle">A structure under construction</h2>
       </div>
-      <div class="badge" id="modeBadge">Carpenter</div>
+      <div class="badge" id="modeBadge" role="status"><span class="vh">Strategy: </span>Carpenter</div>
     </div>
 
     <div class="viz" id="viz"></div>
@@ -308,13 +327,13 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
     <p id="progress" style="margin:0 0 4px;color:#4f5e54;font-size:14px"></p>
 
     <div class="log">
-      <div class="eyebrow" id="principleLabel">Design principle</div>
+      <h3 class="eyebrow" id="principleLabel">Design principle</h3>
       <p id="principle">A blueprint rewards precision, but it can make adaptation expensive.</p>
-      <div class="eyebrow" style="margin-top:14px">Recent turns</div>
+      <h3 class="eyebrow" style="margin-top:14px">Recent turns</h3>
       <div id="log" aria-live="polite"></div>
     </div>
 
-    <div class="tip sage"><b>How to play</b>Pick a strategy before your first action&mdash;it locks once the run is under way. Most actions cost resources and one of your twelve turns; enrolling for a term costs resources only, so schooling competes for the purse rather than the clock. Play both strategies to unlock the side-by-side comparison.</div>
+    <div class="tip sage"><h3 class="tiphead">How to play</h3>Pick a strategy before your first action&mdash;it locks once the run is under way. Most actions cost resources and one of your twelve turns; enrolling for a term costs resources only, so schooling competes for the purse rather than the clock. Play both strategies to unlock the side-by-side comparison.</div>
   </div>
 
 </section>
@@ -384,6 +403,8 @@ function vineSvg(s){
   let out = '<svg class="vinesvg" viewBox="0 0 ' + W + ' ' + H +
     '" preserveAspectRatio="xMidYMax meet" role="img" aria-label="The vine: ' +
     s.opps.length + ' domains offered, ' + s.support + ' supportive branches.">' +
+    // one labelled image; the detail lives in the table beside it
+    '<g aria-hidden="true">' +
     // drawn wider than the viewBox so the ground reaches the panel edges
     '<rect x="-600" y="' + GROUND + '" width="1600" height="' + (H-GROUND) +
       '" fill="#d8c79b"/><line x1="-600" y1="' + GROUND + '" x2="1000" y2="' + GROUND +
@@ -410,7 +431,7 @@ function vineSvg(s){
     const y = GROUND - 30 - k * 26;
     out += '<circle class="knot" cx="' + (200 + (k % 2 ? 7 : -7)) + '" cy="' + y + '" r="5"/>';
   }
-  return out + '</svg>';
+  return out + '</g></svg>';
 }
 
 /* Each grade reads off the plumb line in two ways at once. WARP_DEG is how far
@@ -559,6 +580,10 @@ function blueprintSvg(s){
       '<linearGradient id="bpTot" x1="0" x2="1"><stop offset="0" stop-color="#b97853"/>' +
         '<stop offset="1" stop-color="#d69b68"/></linearGradient>' +
     '</defs>' +
+    /* The svg is one labelled image and the figures are published in the table
+       beside it, so nothing inside should be exposed as its own node -- every
+       <text> was otherwise reported as an element with no role or name. */
+    '<g aria-hidden="true">' +
     '<rect x="-900" y="0" width="2400" height="' + y1 + '" fill="#d8c79b"/>' +
     '<line x1="-900" y1="0" x2="1500" y2="0" stroke="#b9a578" stroke-width="2"/>' +
     reach + trainBar + cross +
@@ -571,7 +596,7 @@ function blueprintSvg(s){
           '" text-anchor="middle">' + lean + '&#176; off plumb</text>'
       : "") +
     dots +
-    '</svg>';
+    '</g></svg>';
 }
 
 /* ============ state ============ */
@@ -664,7 +689,10 @@ function render(){
   const have = usableBoards(s);
 
   document.querySelectorAll(".strategy").forEach(b=>{
-    b.classList.toggle("active", b.dataset.mode === s.mode);
+    const chosen = b.dataset.mode === s.mode;
+    b.classList.toggle("active", chosen);
+    // the pressed state must be exposed, not just painted on
+    b.setAttribute("aria-pressed", chosen ? "true" : "false");
     b.disabled = s.locked;
     b.title = s.locked ? "Strategy locks once the run is under way. Reset to switch." : "";
   });
@@ -675,7 +703,8 @@ function render(){
   el("year").textContent = Math.ceil(s.turn/3);
   el("stageName").textContent = STAGES[Math.min(3, Math.floor((s.turn-1)/3))];
   el("turnBadge").textContent = "Turn " + Math.min(s.turn, TOTAL_TURNS) + " / " + TOTAL_TURNS;
-  el("modeBadge").textContent = g ? "Gardener" : "Carpenter";
+  // "Carpenter" alone is not a sentence; the hidden prefix makes it one
+  el("modeBadge").innerHTML = '<span class="vh">Strategy: </span>' + (g ? "Gardener" : "Carpenter");
   el("resources").textContent = s.money + " ◇";
   el("incomeNote").textContent = s.over ? "run finished" : "+" + INCOME + " ◇ accrues each turn";
 
@@ -703,8 +732,9 @@ function render(){
     : [["Wellbeing", s.health],["Open paths", openPaths(s)],
        ["Climb &middot; usable boards", have.toFixed(1) + " / " + need],
        ["Training", s.training + " / " + CAREERS[s.selected].training]];
+  // these were <label> elements with no form control to label, which is wrong
   el("stats").innerHTML = stats.map(x=>
-    '<div class="stat"><label>' + x[0] + '</label><strong>' + x[1] + '</strong></div>').join("");
+    '<div class="stat"><span class="statlabel">' + x[0] + '</span><strong>' + x[1] + '</strong></div>').join("");
 
   /* progress sentence */
   if(g){
@@ -731,15 +761,22 @@ function render(){
     '<span class="dot ' + (i < s.turn-1 ? "done" : i === s.turn-1 ? "current" : "") + '"></span>'
   ).join("");
 
-  /* career targets as selectable rows */
+  /* Career targets are a radio-like set of toggles. The chosen one was marked
+     only by a class and the word "chosen", and the accessible name fell out of
+     the concatenated text ("Lawyer climb 7 training 10 tolerance 3 chosen"),
+     so both are now stated explicitly. */
   el("careers").innerHTML = Object.keys(CAREERS).map(c=>{
-    const k = CAREERS[c];
-    return '<button class="action' + (c===s.selected?" active":"") + '" data-career="' + c + '"' +
+    const k = CAREERS[c], chosen = c === s.selected;
+    const label = c + ': needs a climb of ' + k.need + ', training of ' + k.training +
+      ', and allows ' + k.tolerance + ' bent board' + (k.tolerance===1?'':'s') + '.';
+    return '<button class="action' + (chosen?" active":"") + '" data-career="' + c + '"' +
+      ' aria-pressed="' + (chosen ? "true" : "false") + '"' +
+      ' aria-label="' + label + '"' +
       (s.boards.length ? " disabled" : "") +
-      ' style="' + (c===s.selected ? "border-color:var(--deep);background:#eef4ea" : "") + '">' +
+      ' style="' + (chosen ? "border-color:var(--deep);background:#eef4ea" : "") + '">' +
       '<span><b>' + c + '</b><small>climb ' + k.need + ' · training ' + k.training +
         ' · tolerance ' + k.tolerance + '</small></span>' +
-      '<span class="cost">' + (c===s.selected ? "chosen" : "select") + '</span></button>';
+      '<span class="cost">' + (chosen ? "chosen" : "select") + '</span></button>';
   }).join("");
 
   /* opportunities */
