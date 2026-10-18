@@ -189,7 +189,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver">build 7</span></div>
+    <span class="ver">build 8</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -271,7 +271,9 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
       </div>
     </div>
 
-    <div class="tip" id="tip">A desirable career has tighter tolerances. A bent board is not a moral failure&mdash;it is a design problem.</div>
+    <!-- render() overwrites this per mode; seeded with the carpenter copy so
+         there is no flash of the wrong text on first paint -->
+    <div class="tip" id="tip">Two things stand between a child and a profession: how high you can build, and how far the schooling reaches. They are not the same obstacle.</div>
   </div>
 
   <div class="panel">
@@ -312,7 +314,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
       <div id="log" aria-live="polite"></div>
     </div>
 
-    <div class="tip sage"><b>How to play</b>Pick a strategy before your first action&mdash;it locks once the run is under way. Each action costs resources and one of your twelve turns. Play both strategies to unlock the side-by-side comparison.</div>
+    <div class="tip sage"><b>How to play</b>Pick a strategy before your first action&mdash;it locks once the run is under way. Most actions cost resources and one of your twelve turns; enrolling for a term costs resources only, so schooling competes for the purse rather than the clock. Play both strategies to unlock the side-by-side comparison.</div>
   </div>
 
 </section>
@@ -541,10 +543,14 @@ function blueprintSvg(s){
 
   return '<svg class="bpsvg" viewBox="' +
       [x0, y0, x1 - x0, y1 - y0].map(v=>v.toFixed(1)).join(" ") +
+      /* "12 of 5 boards" reads like a bug once a run builds past an easy
+         target, so state the count and the requirement as separate facts */
       '" preserveAspectRatio="xMidYMax meet" role="img" aria-label="' +
-      s.boards.length + ' of ' + need + ' boards nailed end to end, leaning ' +
+      s.boards.length + ' board' + (s.boards.length === 1 ? '' : 's') +
+      ' nailed end to end, giving ' + usableBoards(s).toFixed(1) +
+      ' usable climb of the ' + need + ' ' + s.selected + ' needs. Leaning ' +
       lean + ' degrees off plumb. Training ' + s.training + ' of ' +
-      k.training + ' for ' + s.selected + '.">' +
+      k.training + '.">' +
     '<defs>' +
       '<linearGradient id="bpGood" x1="0" x2="1"><stop offset="0" stop-color="#c89555"/>' +
         '<stop offset=".5" stop-color="#e1b672"/><stop offset="1" stop-color="#b9824c"/></linearGradient>' +
