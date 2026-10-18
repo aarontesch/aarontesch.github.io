@@ -176,7 +176,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 14</span></div>
+    <span class="ver" role="note">build 15</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -648,24 +648,40 @@ function occTable(s){
 }
 
 /* ============ honest odds for a chosen target ============
-   Run the real model a few hundred times rather than asserting a number. */
+   Run the real model rather than asserting a number. This used to measure
+   aiming every stage only, which for anything far out is the WORST plan --
+   it quoted 1% for Lawyers when playing well gets 4%. It now reports the
+   best of the aim/nurture splits, and says which split that was, because a
+   quoted figure a player can beat by doing something obvious is worse than
+   no figure at all. */
 const oddsCache = {};
+function playPlan(ti, nAim){
+  const t = OCC[ti];
+  let p = [0,0,0], h = norm([1,1,1]);
+  for(let k = 0; k < TOTAL_STAGES; k++){
+    const aim = k < nAim;
+    const d = [t[1]-p[0], t[2]-p[1], t[3]-p[2]];
+    const L = Math.hypot(d[0],d[1],d[2]);
+    const dir = aim ? perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG) : perturb(h, ANG);
+    let len = MU + gauss()*SIG + (aim ? 0 : SIG);
+    if(len < LEN_FLOOR) len = LEN_FLOOR;
+    if(aim && len > L) len = L;
+    p = [clampPct(p[0]+dir[0]*len), clampPct(p[1]+dir[1]*len), clampPct(p[2]+dir[2]*len)];
+    h = dir;
+  }
+  return nearestOcc(p).i;
+}
 function estimateOdds(ti){
   if(oddsCache[ti] !== undefined) return oddsCache[ti];
-  const t = OCC[ti]; let hit = 0, N = 400;
-  for(let r = 0; r < N; r++){
-    let p = [0,0,0], h = norm([1,1,1]);
-    for(let k = 0; k < TOTAL_STAGES; k++){
-      let d = [t[1]-p[0], t[2]-p[1], t[3]-p[2]];
-      const L = Math.hypot(d[0],d[1],d[2]);
-      const dir = perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG);
-      let len = MU + gauss()*SIG; if(len < LEN_FLOOR) len = LEN_FLOOR; if(len > L) len = L;
-      p = [clampPct(p[0]+dir[0]*len), clampPct(p[1]+dir[1]*len), clampPct(p[2]+dir[2]*len)];
-      h = dir;
-    }
-    if(nearestOcc(p).i === ti) hit++;
+  const N = 300;
+  let best = {pct: -1, aim: 5};
+  for(let a = 0; a <= TOTAL_STAGES; a++){
+    let hit = 0;
+    for(let r = 0; r < N; r++) if(playPlan(ti, a) === ti) hit++;
+    const pct = 100 * hit / N;
+    if(pct > best.pct) best = {pct: pct, aim: a};
   }
-  return (oddsCache[ti] = Math.round(100 * hit / N));
+  return (oddsCache[ti] = {pct: Math.round(best.pct), aim: best.aim});
 }
 
 /* ============ render ============ */
@@ -717,7 +733,11 @@ function render(){
     el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) + '</span><small>' +
       (s.locked ? "locked" : "change") + ' ▾</small></span>';
     el("odds").textContent = t[0] + " sits " + Math.round(reachOf(t)) +
-      " units out. Aiming every stage reaches it in about " + pct + "% of runs.";
+      " units out. Played as well as it can be, it comes out in about " + pct.pct +
+      "% of runs — best with " + (pct.aim === 0 ? "no aiming at all, pure growth"
+        : pct.aim === TOTAL_STAGES ? "aiming every stage"
+        : pct.aim + " stage" + (pct.aim === 1 ? "" : "s") + " aimed and " +
+          (TOTAL_STAGES - pct.aim) + " nurtured") + ".";
   }
 
 
