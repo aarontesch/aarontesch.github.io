@@ -58,6 +58,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .glyph{font-size:17px}
 
 .actions{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.actions.single{grid-template-columns:1fr}
 @media(max-width:620px){.actions{grid-template-columns:1fr}}
 .action{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;
   border:1px solid var(--line);background:var(--card);border-radius:15px;padding:13px 14px;text-align:left;
@@ -177,7 +178,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 19</span></div>
+    <span class="ver" role="note">build 20</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -239,7 +240,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     </div>
 
     <h3 class="eyebrow" style="margin:14px 0 9px">This stage</h3>
-    <div class="actions">
+    <div class="actions" id="actions">
       <button class="action" id="btnAim" data-act="aim">
         <span><b>Aim the growth</b><small id="aimNote">Point this stage at the target</small></span>
         <span class="cost" id="aimCost">accuracy</span>
@@ -486,15 +487,60 @@ function nearestOcc(p, prefer){
 }
 const reachOf = o => Math.hypot(o[1], o[2], o[3]);
 
+/* ============ satisfaction ============
+   How pleased the parent is with where the child arrived, which is a
+   different question from whether the blueprint was met.
+
+   Carpenter: how much of the distance to the named target was closed. Landing
+   on it is 100; never leaving the origin is 0. A near miss still reads as a
+   near miss rather than a flat failure.
+
+   Gardener: how well the child fits the occupation they ended up nearest.
+   No target was named, so the only thing to be satisfied about is whether
+   they landed somewhere a real occupation actually is.
+
+   Steering costs 5 points of the ceiling per aimed stage. A carpenter who
+   aims all five can reach at most 75, and only a parent who never steered can
+   be wholly satisfied -- which is the argument the activity is making. */
+/* FIT_SPAN is the distance at which fit to an occupation has fully decayed.
+   Calibrated, not guessed: a gardener lands a median of 19 units from the
+   nearest occupation, so at 30 the median run scored 35 and 15% scored zero,
+   far too bleak for a condition whose premise is that any arrival is fine. At
+   45 the gardener median is 57, inside the carpenter range of 37 (aiming at
+   Lawyers) to 70 (aiming at Software Developers). That is the point: gardening
+   does not automatically win. It beats over-reaching and loses to a
+   well-chosen target. */
+const FIT_SPAN = 45;
+const AIM_PENALTY = 0.05;
+
+function satisfaction(s){
+  const g = s.mode === "gardener";
+  let raw;
+  if(!s.segs.length){
+    raw = 0;
+  } else if(g){
+    raw = 100 * Math.max(0, 1 - nearestOcc(s.pos).dist / FIT_SPAN);
+  } else {
+    const t = OCC[s.target], start = reachOf(t);
+    const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
+    raw = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
+  }
+  const keep = 1 - AIM_PENALTY * s.aimed;
+  return { raw: Math.round(raw), ceiling: Math.round(100 * keep),
+           value: Math.round(raw * keep) };
+}
+
 /* ============ state ============ */
 let state, history = [];
-function fresh(mode){
+/* `target` carries over a reset: having to re-find your occupation in a list
+   of 85 every time you replay the same experiment is pure friction. */
+function fresh(mode, target){
   return {
     mode: mode || "carpenter",
     locked: false, over: false,
     stage: 1,
     pos: [0,0,0], heading: norm(CENTROID.slice()),
-    segs: [], target: 13, aimed: 0, nurtured: 0,
+    segs: [], target: (target === undefined ? 13 : target), aimed: 0, nurtured: 0,
     log: ["Five stages, one developing life, no guaranteed ending."]
   };
 }
@@ -800,12 +846,14 @@ function render(){
     ? "Nothing here is a failure, because nothing was named. But restraint and hunger land in very different parts of the space."
     : "Aim buys accuracy. Nurture buys reach. The far corner of this space needs both, and you only have five stages.";
 
-  /* the two choices, named for the condition */
-  el("btnAim").querySelector("b").textContent = g ? "Let it grow" : "Aim the growth";
-  el("aimNote").textContent = g ? "Ordinary length, no steering" : "Point this stage at " + OCC[s.target][0];
-  el("btnNur").querySelector("b").textContent = "Nurture the growth";
+  /* A gardener has one move. "Let it grow" was a second button that did the
+     same thing with less of it, which is not a decision; all that is left to
+     choose is how hard to feed, so only that is offered. */
+  el("btnAim").style.display = g ? "none" : "";
+  el("actions").classList.toggle("single", g);
+  el("aimNote").textContent = "Point this stage at " + OCC[s.target][0];
   el("nurNote").textContent = g
-    ? "Feed it hard: +1 SD of length"
+    ? "Feed it. Where it goes is not yours to choose."
     : "Keep the heading, +1 SD of length";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
@@ -857,10 +905,14 @@ function render(){
     : "You are aiming at " + aimingAt + ". " +
       (landed ? "So far they are nearest " + landed + "." : "Nothing has grown yet.");
 
+  const sat = satisfaction(s);
   const stats = [
     ["Stages grown", s.segs.length + " / " + TOTAL_STAGES],
-    ["Position", Math.round(s.pos[0]) + " / " + Math.round(s.pos[1]) + " / " + Math.round(s.pos[2])],
-    ["Nearest now", w ? OCC[w.i][0] : "—"]
+    ["Nearest now", w ? OCC[w.i][0] : "—"],
+    [g ? "Fit to that life" : "Satisfaction", s.segs.length
+      ? sat.value + "%" + (sat.ceiling < 100 ? " of " + sat.ceiling : "")
+      : "—"],
+    ["Aimed / nurtured", s.aimed + " / " + s.nurtured]
   ];
   el("stats").innerHTML = stats.map(x =>
     '<div class="stat"><span class="statlabel">' + x[0] + '</span><strong>' + esc(x[1]) + '</strong></div>').join("");
@@ -888,29 +940,36 @@ function finishRun(reason){
   const w = s.segs.length ? nearestOcc(s.pos, tie) : {i: 0, dist: 0};
   const career = OCC[w.i];
   const hitTarget = !g && w.i === s.target;
+  const sat = satisfaction(s);
   /* the only question left: did they arrive where you pointed them */
   const success = g ? true : hitTarget;
   const r = {mode: s.mode, career: career[0], careerIdx: w.i, target: OCC[s.target][0],
     reach: Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])),
-    pos: s.pos.slice(), hit: hitTarget, aimed: s.aimed, nurtured: s.nurtured, elite: reachOf(career) > 110};
+    pos: s.pos.slice(), hit: hitTarget, aimed: s.aimed, nurtured: s.nurtured, elite: reachOf(career) > 110,
+    sat: sat.value, satCeiling: sat.ceiling};
   history.push(r);
 
   el("resultTitle").textContent = g ? "A life took its own shape."
     : hitTarget ? "The blueprint was met." : "The blueprint was missed.";
 
-  el("resultText").textContent = g
+  el("resultText").textContent = (g
     ? "You named no destination, so none was missed. They ended up at " + career[0] + "." +
       (r.elite ? " That is one of the hardest places in this space to arrive at, and nobody steered." : "")
     : hitTarget
       ? "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
         ". One address out of " + OCC.length + ", and you hit it."
       : "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
-        ". By the blueprint that is a failure. It is also just a life.";
+        ". By the blueprint that is a failure. It is also just a life.")
+    + " " + (sat.ceiling === 100
+      ? "Satisfaction " + sat.value + " out of a possible 100: you never steered, so nothing was deducted."
+      : "Satisfaction " + sat.value + " out of a possible " + sat.ceiling + " — " +
+        s.aimed + " stage" + (s.aimed === 1 ? "" : "s") + " of steering cost " +
+        (100 - sat.ceiling) + " points of the ceiling.");
 
   el("resultGrid").innerHTML = [
-    [g ? "Aimed at" : "You aimed at", g ? "nothing" : OCC[s.target][0]],
     ["Ended up at", career[0]],
     ["Median pay", money(career[5])],
+    ["Satisfaction", sat.value + " / " + sat.ceiling],
     [g ? "Stages fed" : "Aimed / nurtured", g ? s.nurtured + " / " + TOTAL_STAGES : s.aimed + " / " + s.nurtured]
   ].map(x => '<div class="result"><b>' + esc(x[1]) + '</b><span>' + x[0] + '</span></div>').join("");
 
@@ -922,7 +981,8 @@ function finishRun(reason){
       ["Named target met", lastC.hit ? "yes" : "no", "n/a"],
       ["An elite destination", lastC.elite ? "yes" : "no", lastG.elite ? "yes" : "no"],
       ["Distance travelled", lastC.reach, lastG.reach],
-      ["Stages nurtured", lastC.nurtured, lastG.nurtured]];
+      ["Stages nurtured", lastC.nurtured, lastG.nurtured],
+      ["Satisfaction", lastC.sat + " / " + lastC.satCeiling, lastG.sat + " / " + lastG.satCeiling]];
     el("compare").innerHTML = '<table class="cmp"><caption>Your most recent run of each</caption>' +
       '<thead><tr><th scope="col">Measure</th><th scope="col">Carpenter</th><th scope="col">Gardener</th></tr></thead><tbody>' +
       rows.map(x => '<tr><th scope="row">' + x[0] + '</th><td>' + esc(x[1]) + '</td><td>' + esc(x[2]) + '</td></tr>').join("") +
@@ -995,11 +1055,11 @@ document.addEventListener("click", e => {
     return redrawSpace();
   }
 
-  if(e.target.closest("#reset")){ state = fresh(state.mode); return render(); }
-  if(e.target.closest("#again")){ el("modal").classList.remove("show"); state = fresh(state.mode); return render(); }
+  if(e.target.closest("#reset")){ state = fresh(state.mode, state.target); return render(); }
+  if(e.target.closest("#again")){ el("modal").classList.remove("show"); state = fresh(state.mode, state.target); return render(); }
   if(e.target.closest("#switchMode")){
     el("modal").classList.remove("show");
-    state = fresh(state.mode === "carpenter" ? "gardener" : "carpenter");
+    state = fresh(state.mode === "carpenter" ? "gardener" : "carpenter", state.target);
     return render();
   }
 });
