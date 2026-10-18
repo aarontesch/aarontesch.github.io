@@ -33,6 +33,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .reset{border:1px solid var(--line);border-radius:99px;padding:9px 15px;color:var(--muted)}
 .reset:hover{border-color:var(--sage);color:var(--deep)}
 
+.booterr{margin:0 0 16px;padding:13px 15px;border-radius:14px;border:1px solid #e0b4ac;
+  background:#fdeeea;color:#8d3f34;font-size:14px;line-height:1.5}
+.booterr b{display:block;margin-bottom:3px}
+.booterr code{font:12px ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
 .hero{margin-bottom:14px}
 .hero h1{font:700 clamp(23px,2.5vw,30px)/1.04 Georgia,serif;letter-spacing:-.04em;margin:7px 0 9px;max-width:820px}
 .hero p{font-size:14px;color:#4a5850;max-width:780px;margin:0}
@@ -63,8 +67,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .action b{display:block}
 .action small{color:var(--muted);font-size:12.5px;line-height:1.35}
 .cost{border-radius:99px;background:#f4ead2;color:#80601b;padding:5px 9px;font-weight:800;font-size:12px;white-space:nowrap}
-.tgtpick summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;
-  border:1px solid var(--line);background:var(--card);border-radius:15px;padding:12px 14px;font-size:14px;font-weight:750}
+.tgtpick summary{cursor:pointer;list-style:none;border:1px solid var(--line);background:var(--card);
+  border-radius:15px;padding:12px 14px;font-size:14px;font-weight:750}
+.tgtpick summary::-webkit-details-marker{display:none}
+.tgtpick summary .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .tgtpick summary:hover{border-color:var(--sage);background:#f6fbf3}
 .tgtpick summary small{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tgtpick[open] summary{border-radius:15px 15px 0 0;border-bottom-color:transparent}
@@ -170,9 +176,14 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 12</span></div>
+    <span class="ver" role="note">build 13</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
+
+<!-- If the script fails in whatever viewer this is opened in, the page used to
+     just sit there with an empty occupation list and dead buttons. Now it says
+     so, and says what broke. -->
+<div class="booterr" id="bootError" role="alert" hidden></div>
 
 <section class="hero">
   <div class="eyebrow">A developmental strategy game &middot; prototype</div>
@@ -300,6 +311,26 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 
 <script>
 "use strict";
+
+/* ============ boot diagnostics ============
+   This file gets opened from OneDrive, from an LMS viewer, from the desktop
+   and from the Pages URL. If the script dies in one of those, every control
+   silently does nothing and the occupation list comes up empty, which is
+   indistinguishable from a design fault. Say so instead. */
+function showBootError(what, detail){
+  try{
+    var b = document.getElementById("bootError");
+    if(!b) return;
+    b.hidden = false;
+    b.innerHTML = "<b>This page did not start properly, so the controls will not respond.</b>" +
+      "The occupation list will be empty until this is fixed. The error was: <code>" +
+      String(what) + (detail ? " (" + String(detail) + ")" : "") + "</code>";
+  }catch(e){}
+}
+window.addEventListener("error", function(ev){
+  showBootError(ev && ev.message ? ev.message : "script error",
+    ev && ev.lineno ? "line " + ev.lineno : "");
+});
 
 /* ============ the occupation cloud ============
    name, salary percentile, education percentile, human-contact percentile,
@@ -668,9 +699,11 @@ function render(){
       ' aria-label="' + esc(o[0]) + ': salary ' + o[1] + ', education ' + o[2] + ', contact ' + o[3] + '">' +
       '<span>' + esc(o[0]) + '</span><small>' + o[1] + ' / ' + o[2] + ' / ' + o[3] + '</small></button>').join("");
     const t = OCC[s.target], pct = estimateOdds(s.target);
-    // the one-line summary carries the current target, so the list stays shut
-    el("targetSummary").innerHTML = '<span>' + esc(t[0]) + '</span><small>' +
-      (s.locked ? "locked" : "change") + ' ▾</small>';
+    /* the one-line summary carries the current target, so the list stays shut.
+       the flex lives on an inner span: styling <summary> itself has a history
+       of disturbing the disclosure behaviour in some browsers. */
+    el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) + '</span><small>' +
+      (s.locked ? "locked" : "change") + ' ▾</small></span>';
     el("odds").textContent = t[0] + " sits " + Math.round(reachOf(t)) +
       " units out. Aiming every stage reaches it in about " + pct + "% of runs.";
   }
@@ -774,7 +807,7 @@ function bindSpace(){
   const sv = el("space");
   sv.addEventListener("pointerdown", e => {
     drag = {x: e.clientX, y: e.clientY, yaw: cam.yaw, pitch: cam.pitch};
-    sv.setPointerCapture(e.pointerId);
+    try{ sv.setPointerCapture(e.pointerId); }catch(err){}
   });
   sv.addEventListener("pointermove", e => {
     if(!drag) return;
@@ -837,8 +870,13 @@ document.addEventListener("click", e => {
   }
 });
 
-state = fresh();
-render();
+try{
+  state = fresh();
+  render();
+}catch(err){
+  showBootError(err && err.message ? err.message : err, "during first render");
+  throw err;
+}
 </script>
 </body>
 </html>
