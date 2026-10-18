@@ -47,19 +47,6 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .panel h2{font:700 25px/1.05 Georgia,serif;margin:5px 0}
 .badge{border-radius:99px;padding:6px 10px;background:#e8f1e5;color:var(--deep);font-weight:750;font-size:12px;white-space:nowrap}
 
-.strategies{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
-.strategy{border:1px solid var(--line);background:var(--card);border-radius:16px;padding:13px;text-align:left;min-height:78px;
-  transition:background-color .2s,border-color .2s,transform .2s}
-.strategy:hover:not([disabled]){transform:translateY(-2px);border-color:var(--sage)}
-.strategy.active{background:var(--deep);border-color:var(--deep);color:#fff}
-/* only the road not taken fades. Dimming the chosen card too washed the
-   current strategy down to about 1.4:1 against the panel, and that card is
-   the clearest statement of what condition you are playing. */
-.strategy[disabled]:not(.active){opacity:.45}
-.strategy[disabled]{cursor:not-allowed}
-.strategy strong{display:block;margin:3px 0 3px}
-.strategy span{font-size:13px;opacity:.82}
-.glyph{font-size:17px}
 
 .actions{display:grid;gap:10px;grid-template-columns:1fr 1fr}
 .actions.single{grid-template-columns:1fr}
@@ -190,7 +177,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 }
 @media(max-width:520px){
   .app{padding:20px 14px 36px}
-  .strategies,.stats,.resultgrid{grid-template-columns:1fr}
+  .stats,.resultgrid{grid-template-columns:1fr}
   .spacesvg{height:380px}
 }
 </style>
@@ -201,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 27</span></div>
+    <span class="ver" role="note">build 28</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -239,23 +226,14 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       <div class="badge" id="stageBadge" role="status">Stage 1 / 5</div>
     </div>
 
-    <div class="strategies">
-      <button class="strategy active" data-mode="carpenter" aria-pressed="true">
-        <div class="glyph" aria-hidden="true">&#9724;</div>
-        <strong>The Carpenter</strong>
-        <span>Name the destination first.</span>
-      </button>
-      <button class="strategy" data-mode="gardener" aria-pressed="false">
-        <div class="glyph" aria-hidden="true">&#8961;</div>
-        <strong>The Gardener</strong>
-        <span>No steering. Any arrival counts.</span>
-      </button>
-    </div>
+    <!-- There is no longer a condition to pick up front. Carpentry and
+         gardening are both on the table at every stage, which is the whole
+         activity: one life, five decisions, each one or the other. -->
 
     <!-- the 85-row list was 282px tall, which pushed the stage buttons off the
          bottom of a laptop screen. It now opens from a one-line summary. -->
     <div id="targetWrap">
-      <h3 class="eyebrow" style="margin-bottom:9px">Blueprint target</h3>
+      <h3 class="eyebrow" style="margin-bottom:9px">Parental career goal</h3>
       <details class="tgtpick" id="targetDetails">
         <summary id="targetSummary">Choose a target</summary>
         <div class="pick" id="pick" role="group" aria-label="Choose the occupation to aim for"></div>
@@ -286,7 +264,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
         <div class="eyebrow">What happened</div>
         <h2 id="dashTitle">A structure under construction</h2>
       </div>
-      <div class="badge" id="modeBadge" role="status"><span class="vh">Strategy: </span>Carpenter</div>
+      <div class="badge" id="modeBadge"><span class="vh">Approach so far: </span>0 built &middot; 0 grown</div>
     </div>
 
     <div class="space">
@@ -300,10 +278,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
              stage is a choice to act like a carpenter or like a gardener,
              whichever condition the run is nominally in. -->
         <button class="action" id="btnAim" data-act="aim">
-          <span><b>Carpenter: Build the Child Towards a Goal</b><small id="aimNote">Point this stage at the target</small></span>
+          <span><b>Carpenter: Build the Child Towards a Goal</b><small id="aimNote">Push your child to be a Mathematician</small></span>
         </button>
         <button class="action" id="btnNur" data-act="nurture">
-          <span><b>Gardener: Focus on Growing your Child&rsquo;s Natural Inclinations</b><small id="nurNote">Let go of the wheel. Longer growth, no steering.</small></span>
+          <span><b>Gardener: Focus on Growing your Child&rsquo;s Natural Inclinations</b><small id="nurNote">Focus on supporting your child&rsquo;s interests</small></span>
         </button>
       </div>
     </div>
@@ -337,7 +315,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       <div id="log" aria-live="polite"></div>
     </div>
 
-    <div class="tip sage"><h3 class="tiphead">How to play</h3>Pick a strategy before the first stage&mdash;it locks once growth is under way. Each of the five stages is one choice: aim it, or feed it. Aiming buys accuracy; nurturing buys reach. You only get five. Play both strategies to unlock the side-by-side comparison.</div>
+    <div class="tip sage"><h3 class="tiphead">How to play</h3>Name a career goal for your child, then work through five developmental stages. At each one you decide how to parent: carpentry, which points that stage of their development at the goal, or gardening, which supports whatever they are growing into. You only get five stages, and a stage can only be one or the other. Play again to see how a different mix of the two lands.</div>
   </div>
 
 </section>
@@ -357,7 +335,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <div class="compare" id="compare"></div>
     <div class="modalbtns">
       <button class="primary" id="again">Play another run</button>
-      <button class="secondary" id="switchMode">Try the other strategy</button>
+      <button class="secondary" id="closeModal">Look at the space</button>
     </div>
   </div>
 </div>
@@ -560,30 +538,31 @@ const reachOf = o => Math.hypot(o[1], o[2], o[3]);
 const FIT_SPAN = 54;
 const AIM_PENALTY = 0.05;
 
+/* Both halves are reported on every run now, because a run is no longer one
+   condition or the other. The goal figure is the parent's: how much of the
+   distance to the named career was closed. The fit figure is the child's: how
+   near they landed to a real occupation, whatever it turned out to be. A
+   stage can only move one of them, and that is the whole tension. */
 function satisfaction(s){
-  const g = s.mode === "gardener";
-  let raw;
-  if(!s.segs.length){
-    raw = 0;
-  } else if(g){
-    raw = 100 * Math.max(0, 1 - nearestOcc(s.pos).dist / FIT_SPAN);
-  } else {
-    const t = OCC[s.target], start = reachOf(t);
-    const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
-    raw = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
-  }
+  if(!s.segs.length) return {goal: 0, fit: 0, ceiling: 100, value: 0};
+  const t = OCC[s.target], start = reachOf(t);
+  const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
+  const goal = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
+  const fit = 100 * Math.max(0, 1 - nearestOcc(s.pos).dist / FIT_SPAN);
+  /* The ceiling is charged against the goal figure only. Fit measures where
+     the child actually landed; deducting there as well would charge the same
+     stage of steering twice. */
   const keep = 1 - AIM_PENALTY * s.aimed;
-  return { raw: Math.round(raw), ceiling: Math.round(100 * keep),
-           value: Math.round(raw * keep) };
+  return { goal: Math.round(goal), fit: Math.round(fit),
+           ceiling: Math.round(100 * keep), value: Math.round(goal * keep) };
 }
 
 /* ============ state ============ */
 let state, history = [];
 /* `target` carries over a reset: having to re-find your occupation in a list
    of 85 every time you replay the same experiment is pure friction. */
-function fresh(mode, target){
+function fresh(target){
   return {
-    mode: mode || "carpenter",
     locked: false, over: false,
     stage: 1,
     pos: [0,0,0], heading: norm(CENTROID.slice()),
@@ -599,15 +578,13 @@ function fresh(mode, target){
 function growStage(choice){
   const s = state;
   if(s.over) return;
-  const g = s.mode === "gardener";
   const nurture = choice === "nurture";
   let dir;
-  /* Nurturing means letting go of the wheel, so it does not quietly keep the
-     heading the last aim bought. A nurtured stage takes the same flat
-     direction a gardener's does: the carpenter's choice each stage is simply
-     whether to steer or not, and reach cannot be bought while still pointing
-     where you were pointing. */
-  if(g || nurture){
+  /* Gardening means letting go of the wheel, so it does not quietly keep the
+     heading the last push bought. A gardened stage takes a flat direction:
+     the choice each stage is simply whether to steer or not, and reach
+     cannot be bought while still pointing where you were pointing. */
+  if(nurture){
     dir = flatDir();
   } else {
     const t = OCC[s.target];
@@ -617,7 +594,7 @@ function growStage(choice){
   }
   let len = MU + gauss()*SIG + (nurture ? NURTURE_BONUS : 0);
   if(len < LEN_FLOOR) len = LEN_FLOOR;
-  if(!g && !nurture){                                  // do not sail past what you aimed at
+  if(!nurture){                                        // do not sail past what you aimed at
     const t = OCC[s.target];
     const rem = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
     if(len > rem) len = rem;
@@ -629,11 +606,11 @@ function growStage(choice){
   s.locked = true;
   if(nurture) s.nurtured++; else s.aimed++;
 
-  const where = nearestOcc(to, g ? undefined : s.target);
-  s.log.push((g
-      ? (nurture ? "You fed the vine hard." : "You let the vine find its own way.")
-      : (nurture ? "You fed the structure rather than steering it." : "You trued the structure toward " + OCC[s.target][0] + "."))
-    + " It now sits nearest " + OCC[where.i][0] + ".");
+  const where = nearestOcc(to, s.target);
+  s.log.push((nurture
+      ? "You supported whatever they were growing into."
+      : "You pushed them toward " + OCC[s.target][0] + ".")
+    + " They now sit nearest " + OCC[where.i][0] + ".");
 
   s.stage++;
   if(s.stage > TOTAL_STAGES) return finishRun("complete");
@@ -710,7 +687,6 @@ const money = w => w >= 1000000 ? "$" + (w/1000000).toFixed(1).replace(".0","") 
 const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 function spaceSvg(s){
-  const g = s.mode === "gardener";
   const items = [];                      // {d, svg} painted far-to-near
   const push = (d, svg) => items.push({d: d, svg: svg});
 
@@ -733,10 +709,10 @@ function spaceSvg(s){
   });
 
   /* the cloud */
-  const near = s.segs.length ? nearestOcc(s.pos, g ? undefined : s.target).i : -1;
+  const near = s.segs.length ? nearestOcc(s.pos, s.target).i : -1;
   OCC.forEach((o, i) => {
     const p = project([o[1], o[2], o[3]]);
-    const isT = !g && i === s.target, isN = i === near;
+    const isT = i === s.target, isN = i === near;
     push(p.d, '<circle class="occ' + (isN ? " near" : "") + '" cx="' + p.x.toFixed(1) +
       '" cy="' + p.y.toFixed(1) + '" r="' + (2.5 * p.f * (isT || isN ? 1.5 : 1)).toFixed(2) +
       '" fill="' + GCOL[o[4]] + '" opacity="' + (isT || isN ? 1 : 0.72) + '"/>');
@@ -748,9 +724,13 @@ function spaceSvg(s){
     }
   });
 
-  /* what has actually grown */
+  /* What has actually grown. Each stage is drawn as what it was: a board
+     where you built, a vine segment where you let them grow. The structure
+     is now a mixture, which is the point of folding the two approaches into
+     one run. */
   s.segs.forEach((seg, i) => {
     const a = project(seg.from), b = project(seg.to);
+    const g = seg.nurtured;
     const mid = (a.d + b.d) / 2, w = (g ? 4.6 : 9) * ((a.f + b.f) / 2);
     if(g){
       push(mid, '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) +
@@ -764,7 +744,7 @@ function spaceSvg(s){
         '" y2="' + b.y.toFixed(1) + '" stroke="#8a5c39" stroke-width="' + (w + 2.5).toFixed(1) +
         '" stroke-linecap="butt" fill="none"/>' +
         '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) + '" x2="' + b.x.toFixed(1) +
-        '" y2="' + b.y.toFixed(1) + '" stroke="' + (seg.nurtured ? "#e1b672" : "#c89555") +
+        '" y2="' + b.y.toFixed(1) + '" stroke="#c89555' +
         '" stroke-width="' + w.toFixed(1) + '" stroke-linecap="butt" fill="none"/>');
     }
     push(mid - 0.1, '<circle class="joint" cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
@@ -787,7 +767,8 @@ function spaceSvg(s){
   if(s.segs.length){
     const p = project(s.pos), w = nearestOcc(s.pos);
     push(p.d - 1, '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' +
-      (4.2 * p.f).toFixed(2) + '" fill="' + (g ? "#3f7250" : "#8a5c39") + '" stroke="#fffdf8" stroke-width="1.6"/>' +
+      (4.2 * p.f).toFixed(2) + '" fill="' +
+      (s.segs[s.segs.length - 1].nurtured ? "#3f7250" : "#8a5c39") + '" stroke="#fffdf8" stroke-width="1.6"/>' +
       '<text class="reslabel" x="' + (p.x + 10).toFixed(1) + '" y="' + (p.y - 8).toFixed(1) +
       '">' + esc(OCC[w.i][0]) + '</text>');
   }
@@ -807,14 +788,13 @@ function spaceSvg(s){
 
 /* ============ the accessible equivalent ============ */
 function occTable(s){
-  const g = s.mode === "gardener";
   const pos = s.pos;
   const rows = OCC.map((o, i) => ({i: i, d: Math.hypot(o[1]-pos[0], o[2]-pos[1], o[3]-pos[2])}))
     .sort((a, b) => a.d - b.d).slice(0, 10);
-  if(!g && !rows.some(r => r.i === s.target)) rows.push({i: s.target, d: Math.hypot(
+  if(!rows.some(r => r.i === s.target)) rows.push({i: s.target, d: Math.hypot(
     OCC[s.target][1]-pos[0], OCC[s.target][2]-pos[1], OCC[s.target][3]-pos[2])});
   const body = rows.map(r => {
-    const o = OCC[r.i], isT = !g && r.i === s.target;
+    const o = OCC[r.i], isT = r.i === s.target;
     return '<tr' + (isT ? ' aria-current="true"' : '') + '>' +
       '<th scope="row">' + esc(o[0]) + (isT ? ' (target)' : '') + '</th>' +
       '<td>' + money(o[5]) + '</td><td>' + edLabel(o[2]) + '</td><td>' + o[3] + '</td>' +
@@ -901,68 +881,78 @@ const PICK_ORDER = OCC.map((o, i) => i).sort((a, b) =>
 
 /* ============ render ============ */
 const el = id => document.getElementById(id);
+
+/* The occupation names are BLS categories and so are plural: "Lawyers",
+   "Waiters and Waitresses". The stage button has to say "be a Lawyer", so
+   they need singularising. Only the word that ends a noun phrase is touched
+   -- the last word, or one sitting before a comma or an "and" -- which
+   leaves the modifiers alone: "Human Resources Specialists" has to become
+   "Human Resources Specialist", not "Human Resource Specialist". */
+function singularWord(w){
+  if(/[A-Z]{2,}$/.test(w)) return w;              // CEO, HVAC and the like
+  if(/ies$/.test(w)) return w.slice(0, -3) + "y";
+  if(/(ss|ch|sh|x)es$/.test(w)) return w.slice(0, -2);
+  if(/(ss|us|is)$/.test(w)) return w;
+  if(/s$/.test(w)) return w.slice(0, -1);
+  return w;
+}
+function singular(name){
+  const parts = name.split(/(,\s*|\s+and\s+)/);     // keeps the separators
+  for(let i = 0; i < parts.length; i++){
+    if(i % 2) continue;                             // odd entries are separators
+    const chunk = parts[i].split(" ");
+    chunk[chunk.length - 1] = singularWord(chunk[chunk.length - 1]);
+    parts[i] = chunk.join(" ");
+  }
+  return parts.join("");
+}
+function anOcc(name){
+  if(name === "Clergy") return "a member of the Clergy";   // the one collective noun
+  const one = singular(name);
+  // "an HVAC Mechanic" sounds the aitch, so it takes "an" despite the H
+  return (/^[AEIOU]/.test(one) || /^HVAC/.test(one) ? "an " : "a ") + one;
+}
+
 function render(){
-  const s = state, g = s.mode === "gardener";
+  const s = state;
 
-  document.querySelectorAll(".strategy").forEach(b => {
-    const on = b.dataset.mode === s.mode;
-    b.classList.toggle("active", on);
-    b.setAttribute("aria-pressed", on ? "true" : "false");
-    b.disabled = s.locked;
-    b.title = s.locked ? "Strategy locks once growth is under way. Reset to switch." : "";
-  });
-
-  el("targetWrap").style.display = g ? "none" : "block";
-  // the odds line lives below the buttons, so it is not hidden with the target
-  // block; a gardener named no target and must not be shown its chances
-  el("odds").style.display = g ? "none" : "";
-
-  /* Where the child stands, in both conditions. The gardener has nothing else
-     to watch. The carpenter gets the same reading plus the distance still to
-     run, which is the drift the whole condition is about. Kept to two lines:
-     the stage buttons sit close to the fold on a laptop. */
+  /* Where the child stands: the nearest occupation, plus the distance still
+     to run to the named goal. Kept to two lines, because the stage buttons
+     sit close to the fold on a laptop. */
   if(!s.segs.length){
-    el("nowBox").innerHTML = '<span class="waiting">' + (g
-      ? 'Nothing has grown yet. Feed the first stage and see where it goes.'
-      : 'Nothing has grown yet. ' + esc(OCC[s.target][0]) + ' is ' +
-        Math.round(reachOf(OCC[s.target])) + ' away.') + '</span>';
+    el("nowBox").innerHTML = '<span class="waiting">' +
+      'Nothing has grown yet. ' + esc(OCC[s.target][0]) + ' is ' +
+      Math.round(reachOf(OCC[s.target])) + ' away.' + '</span>';
   } else {
-    const n = nearestOcc(s.pos, g ? undefined : s.target), o = OCC[n.i];
+    const n = nearestOcc(s.pos, s.target), o = OCC[n.i];
     const t = OCC[s.target];
     const toTarget = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
     el("nowBox").innerHTML = '<b>' + esc(o[0]) + '</b><small>' +
       money(o[5]) + ' &middot; ' + edLabel(o[2]) + ' &middot; emotional labour ' + Math.round(o[3]) +
-      '<br>' + n.dist.toFixed(1) + ' away' + (g
-        ? (s.over ? ', and this is where they stayed' : ', and still growing')
-        : (s.over ? '. ' + esc(t[0]) + ' finished ' + toTarget.toFixed(1) + ' off'
-                  : '. ' + esc(t[0]) + ' is still ' + toTarget.toFixed(1) + ' away')) +
+      '<br>' + n.dist.toFixed(1) + ' away' +
+      (s.over ? '. ' + esc(t[0]) + ' finished ' + toTarget.toFixed(1) + ' off'
+              : '. ' + esc(t[0]) + ' is still ' + toTarget.toFixed(1) + ' away') +
       '</small>';
   }
   el("stageNo").textContent = Math.min(s.stage, TOTAL_STAGES);
   el("stageName").textContent = STAGE_NAMES[Math.min(TOTAL_STAGES, s.stage) - 1];
   el("stageBadge").textContent = "Stage " + Math.min(s.stage, TOTAL_STAGES) + " / " + TOTAL_STAGES;
-  el("modeBadge").innerHTML = '<span class="vh">Strategy: </span>' + (g ? "Gardener" : "Carpenter");
-  el("dashTitle").textContent = g ? "A vine finding its own way" : "A structure under construction";
-  el("principle").textContent = g
-    ? "You cannot choose where it climbs. You can only choose how much you feed it, and that decides how far from the middle it ends up."
-    : "A blueprint names one address out of eighty-five. Every stage spent correcting the aim is a stage not spent growing.";
-  el("tip").textContent = g
-    ? "Nothing here is a failure, because nothing was named. But restraint and hunger land in very different parts of the space."
-    : "Building points the stage at the target. Growing reaches further but hands back the wheel. You only have five stages, and a stage can only do one of them.";
+  /* the badge used to name the condition. There is no condition any more, so
+     it reports the thing that now varies: the mix of the two approaches. */
+  el("modeBadge").innerHTML = '<span class="vh">Approach so far: </span>' +
+    s.aimed + " built &middot; " + s.nurtured + " grown";
+  el("dashTitle").textContent = "A life taking shape";
+  el("principle").textContent =
+    "A career goal names one address out of eighty-five. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
+  el("tip").textContent =
+    "Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.";
 
-  /* A gardener has one move. "Let it grow" was a second button that did the
-     same thing with less of it, which is not a decision; all that is left to
-     choose is how hard to feed, so only that is offered. */
-  el("btnAim").style.display = g ? "none" : "";
-  el("actions").classList.toggle("single", g);
-  el("aimNote").textContent = "Point this stage at " + OCC[s.target][0];
-  el("nurNote").textContent = g
-    ? "Feed it. Where it goes is not yours to choose."
-    : "Let go of the wheel. Longer growth, but no steering.";
+  el("aimNote").textContent = "Push your child to be " + anOcc(OCC[s.target][0]);
+  el("nurNote").textContent = "Focus on supporting your child’s interests";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
   /* target picker, hardest first */
-  if(!g){
+  {
     el("pick").innerHTML = '<p class="pickhint">Least likely at the top. The figure is how often ' +
       'that occupation comes out when the run is played as well as it can be, measured ' +
       'from the model itself.</p>' +
@@ -997,12 +987,11 @@ function render(){
   el("timeline").innerHTML = Array.from({length: TOTAL_STAGES}, (_, i) =>
     '<span class="dot ' + (i < s.stage-1 ? "done" : i === s.stage-1 && !s.over ? "current" : "") + '"></span>').join("");
 
-  const w = s.segs.length ? nearestOcc(s.pos, g ? undefined : s.target) : null;
+  const w = s.segs.length ? nearestOcc(s.pos, s.target) : null;
 
-  /* the scoreboard, in place of the old wellbeing meter: what you pointed at,
-     and where they are actually heading */
-  const aimingAt = g ? "<b>nothing</b>" : "<b>" + esc(OCC[s.target][0]) + "</b>";
-  const landed = w ? "<b" + (!g && s.over && w.i === s.target ? ">" : (s.over && !g ? ' class="miss">' : ">")) +
+  /* the scoreboard: what you pointed at, and where they are actually heading */
+  const aimingAt = "<b>" + esc(OCC[s.target][0]) + "</b>";
+  const landed = w ? "<b" + (s.over && w.i !== s.target ? ' class="miss">' : ">") +
     esc(OCC[w.i][0]) + "</b>" : null;
   el("outcome").innerHTML = s.over
     ? "You aimed at " + aimingAt + ", and they ended up at " + landed + "."
@@ -1013,19 +1002,22 @@ function render(){
   const stats = [
     ["Stages grown", s.segs.length + " / " + TOTAL_STAGES],
     ["Nearest now", w ? OCC[w.i][0] : "—"],
-    [g ? "Fit to that life" : "Satisfaction", s.segs.length
+    /* both halves, side by side, because the run is no longer one or the
+       other: how near the goal, and how well the life they got fits them */
+    ["Goal satisfaction", s.segs.length
       ? sat.value + "%" + (sat.ceiling < 100 ? " of " + sat.ceiling : "")
       : "—"],
-    ["Aimed / nurtured", s.aimed + " / " + s.nurtured]
+    ["Fit to that life", s.segs.length ? sat.fit + "%" : "—"],
+    ["Built / grown", s.aimed + " / " + s.nurtured],
+    ["Steering cost", s.aimed ? "−" + (100 - sat.ceiling) + " points" : "none"]
   ];
   el("stats").innerHTML = stats.map(x =>
     '<div class="stat"><span class="statlabel">' + x[0] + '</span><strong>' + esc(x[1]) + '</strong></div>').join("");
 
   el("progress").textContent = s.segs.length === 0
     ? "Nothing has grown yet. Left entirely alone, five stages run straight to the middle of the space."
-    : (g ? "The vine is " + Math.round(Math.hypot(s.pos[0],s.pos[1],s.pos[2])) + " units from where it started, nearest " + OCC[w.i][0] + "."
-         : "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) + " away; the target " +
-           OCC[s.target][0] + " is " + Math.hypot(OCC[s.target][1]-s.pos[0], OCC[s.target][2]-s.pos[1], OCC[s.target][3]-s.pos[2]).toFixed(1) + " away.");
+    : "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) + " away; the goal " +
+      OCC[s.target][0] + " is " + Math.hypot(OCC[s.target][1]-s.pos[0], OCC[s.target][2]-s.pos[1], OCC[s.target][3]-s.pos[2]).toFixed(1) + " away.";
 
   el("log").innerHTML = s.log.slice(-4).map(x => '<p>↳ ' + esc(x) + '</p>').join("");
   el("space").outerHTML = spaceSvg(s);
@@ -1040,73 +1032,76 @@ function finishRun(reason){
   const s = state;
   if(s.over) return;
   s.over = true;
-  const g = s.mode === "gardener";
-  const tie = s.mode === "gardener" ? undefined : s.target;
-  const w = s.segs.length ? nearestOcc(s.pos, tie) : {i: 0, dist: 0};
+  const w = s.segs.length ? nearestOcc(s.pos, s.target) : {i: 0, dist: 0};
   const career = OCC[w.i];
-  const hitTarget = !g && w.i === s.target;
+  const hitTarget = w.i === s.target;
   const sat = satisfaction(s);
-  /* the only question left: did they arrive where you pointed them */
-  const success = g ? true : hitTarget;
-  const r = {mode: s.mode, career: career[0], careerIdx: w.i, target: OCC[s.target][0],
+  /* a run is now described by its mix rather than by a condition it was
+     played in: mostly built, mostly grown, or evenly split */
+  const mostlyBuilt = s.aimed > s.nurtured;
+  const r = {career: career[0], careerIdx: w.i, target: OCC[s.target][0],
     reach: Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])),
     pos: s.pos.slice(), hit: hitTarget, aimed: s.aimed, nurtured: s.nurtured, elite: reachOf(career) > 110,
-    firstTarget: OCC[s.firstTarget][0], reaims: s.reaims,
-    sat: sat.value, satCeiling: sat.ceiling};
+    firstTarget: OCC[s.firstTarget][0], reaims: s.reaims, built: mostlyBuilt,
+    sat: sat.value, satCeiling: sat.ceiling, fit: sat.fit};
   history.push(r);
 
-  el("resultTitle").textContent = g ? "A life took its own shape."
-    : hitTarget ? "The blueprint was met." : "The blueprint was missed.";
+  el("resultTitle").textContent = hitTarget ? "The goal was met." : "The goal was missed.";
 
-  /* A carpenter may now re-aim mid-run, so the plan they set out with and the
+  /* The goal may be re-aimed mid-run, so the plan they set out with and the
      plan they finished with can differ. Saying both is the whole point: a
      revised ambition that is then met is a different story from one that
      never moved. */
-  const revised = !g && s.reaims > 0 && s.firstTarget !== s.target;
+  const revised = s.reaims > 0 && s.firstTarget !== s.target;
   const revisionNote = revised
     ? " You set out for " + OCC[s.firstTarget][0] + " and re-aimed " +
       s.reaims + " time" + (s.reaims === 1 ? "" : "s") + " along the way."
     : "";
 
-  el("resultText").textContent = (g
-    ? "You named no destination, so none was missed. They ended up at " + career[0] + "." +
-      (r.elite ? " That is one of the hardest places in this space to arrive at, and nobody steered." : "")
-    : hitTarget
-      ? "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
+  el("resultText").textContent = (hitTarget
+      ? "You aimed at " + OCC[s.target][0] + " and they became " + anOcc(career[0]) +
         ". One address out of " + OCC.length + ", and you hit it." + revisionNote
-      : "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
-        ". By the blueprint that is a failure. It is also just a life." + revisionNote)
+      : "You aimed at " + OCC[s.target][0] + " and they became " + anOcc(career[0]) +
+        ". By the goal that is a failure. It is also just a life." + revisionNote +
+        (r.elite ? " It is also one of the hardest places in this space to arrive at." : ""))
     + " " + (sat.ceiling === 100
-      ? "Satisfaction " + sat.value + " out of a possible 100: you never steered, so nothing was deducted."
-      : "Satisfaction " + sat.value + " out of a possible " + sat.ceiling + " — " +
+      ? "Goal satisfaction " + sat.value + " out of a possible 100: you never steered, so nothing was deducted."
+      : "Goal satisfaction " + sat.value + " out of a possible " + sat.ceiling + " — " +
         s.aimed + " stage" + (s.aimed === 1 ? "" : "s") + " of steering cost " +
-        (100 - sat.ceiling) + " points of the ceiling.");
+        (100 - sat.ceiling) + " points of the ceiling.")
+    + " Fit to the life they actually landed in: " + sat.fit + ".";
 
   el("resultGrid").innerHTML = [
     ["Ended up at", career[0]],
     ["Median pay", money(career[5])],
-    ["Satisfaction", sat.value + " / " + sat.ceiling],
-    [g ? "Stages fed" : "Aimed / nurtured", g ? s.nurtured + " / " + TOTAL_STAGES : s.aimed + " / " + s.nurtured]
+    ["Goal satisfaction", sat.value + " / " + sat.ceiling],
+    ["Fit to that life", sat.fit + "%"],
+    ["Built / grown", s.aimed + " / " + s.nurtured],
+    ["Goal met", hitTarget ? "yes" : "no"]
   ].map(x => '<div class="result"><b>' + esc(x[1]) + '</b><span>' + x[0] + '</span></div>').join("");
 
-  const lastC = [...history].reverse().find(h => h.mode === "carpenter");
-  const lastG = [...history].reverse().find(h => h.mode === "gardener");
-  if(lastC && lastG){
-    const rows = [["Aimed at", lastC.target, "nothing"],
-      ["Ended up at", lastC.career, lastG.career],
-      ["Named target met", lastC.hit ? "yes" : "no", "n/a"],
-      ["An elite destination", lastC.elite ? "yes" : "no", lastG.elite ? "yes" : "no"],
-      ["Distance travelled", lastC.reach, lastG.reach],
-      ["Stages nurtured", lastC.nurtured, lastG.nurtured],
-      ["Satisfaction", lastC.sat + " / " + lastC.satCeiling, lastG.sat + " / " + lastG.satCeiling],
-      ["Re-aimed mid-run", lastC.reaims ? lastC.reaims + " time" + (lastC.reaims===1?"":"s") : "no", "n/a"]];
-    el("compare").innerHTML = '<table class="cmp"><caption>Your most recent run of each</caption>' +
-      '<thead><tr><th scope="col">Measure</th><th scope="col">Carpenter</th><th scope="col">Gardener</th></tr></thead><tbody>' +
+  /* The comparison used to pit one condition against the other. With a single
+     integrated activity there are no conditions to compare, so it compares
+     the mixes the player has actually tried: their last mostly-built run
+     against their last mostly-grown one. */
+  const lastB = [...history].reverse().find(h => h.built);
+  const lastG = [...history].reverse().find(h => !h.built);
+  if(lastB && lastG){
+    const rows = [["Aimed at", lastB.target, lastG.target],
+      ["Ended up at", lastB.career, lastG.career],
+      ["Goal met", lastB.hit ? "yes" : "no", lastG.hit ? "yes" : "no"],
+      ["An elite destination", lastB.elite ? "yes" : "no", lastG.elite ? "yes" : "no"],
+      ["Distance travelled", lastB.reach, lastG.reach],
+      ["Built / grown", lastB.aimed + " / " + lastB.nurtured, lastG.aimed + " / " + lastG.nurtured],
+      ["Goal satisfaction", lastB.sat + " / " + lastB.satCeiling, lastG.sat + " / " + lastG.satCeiling],
+      ["Fit to that life", lastB.fit + "%", lastG.fit + "%"]];
+    el("compare").innerHTML = '<table class="cmp"><caption>Your most recent run of each kind</caption>' +
+      '<thead><tr><th scope="col">Measure</th><th scope="col">Mostly carpentry</th><th scope="col">Mostly gardening</th></tr></thead><tbody>' +
       rows.map(x => '<tr><th scope="row">' + x[0] + '</th><td>' + esc(x[1]) + '</td><td>' + esc(x[2]) + '</td></tr>').join("") +
-      '</tbody></table><p style="color:var(--muted);font-size:12px;margin:12px 0 0">Neither column is the answer. The point is what each strategy made expensive.</p>';
+      '</tbody></table><p style="color:var(--muted);font-size:12px;margin:12px 0 0">Neither column is the answer. The point is what each approach made expensive.</p>';
   } else {
-    el("compare").innerHTML = '<p style="color:var(--muted);font-size:13px;margin:0">Play a ' +
-      (g ? "carpenter" : "gardener") + ' run to unlock the side-by-side comparison.</p>';
+    el("compare").innerHTML = '<p style="color:var(--muted);font-size:13px;margin:0">Play a run that is mostly ' +
+      (mostlyBuilt ? "gardening" : "carpentry") + ' to unlock the side-by-side comparison.</p>';
   }
   render();
   el("modal").classList.add("show");
@@ -1140,13 +1135,6 @@ function redrawSpace(){ el("space").outerHTML = spaceSvg(state); bindSpace(); fi
 
 /* ============ events ============ */
 document.addEventListener("click", e => {
-  const strat = e.target.closest("[data-mode]");
-  if(strat && !strat.disabled){
-    state.mode = strat.dataset.mode;
-    state.log.push(state.mode === "gardener"
-      ? "You loosen your grip on the outcome." : "You choose an address and begin construction.");
-    return render();
-  }
   const pick = e.target.closest("[data-pick]");
   if(pick && !pick.disabled){
     const next = +pick.dataset.pick;
@@ -1177,13 +1165,9 @@ document.addEventListener("click", e => {
     return redrawSpace();
   }
 
-  if(e.target.closest("#reset")){ state = fresh(state.mode, state.target); return render(); }
-  if(e.target.closest("#again")){ el("modal").classList.remove("show"); state = fresh(state.mode, state.target); return render(); }
-  if(e.target.closest("#switchMode")){
-    el("modal").classList.remove("show");
-    state = fresh(state.mode === "carpenter" ? "gardener" : "carpenter", state.target);
-    return render();
-  }
+  if(e.target.closest("#reset")){ state = fresh(state.target); return render(); }
+  if(e.target.closest("#again")){ el("modal").classList.remove("show"); state = fresh(state.target); return render(); }
+  if(e.target.closest("#closeModal")){ el("modal").classList.remove("show"); return; }
 });
 
 /* the buttons rewrap as the window changes, so the strip is re-measured */
