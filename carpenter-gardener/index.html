@@ -65,13 +65,13 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .actions.single{grid-template-columns:1fr}
 @media(max-width:620px){.actions{grid-template-columns:1fr}}
 .action{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;
-  border:1px solid var(--line);background:var(--card);border-radius:15px;padding:13px 14px;text-align:left;
+  border:1px solid var(--line);background:var(--card);border-radius:15px;padding:11px 13px;text-align:left;
   transition:background-color .2s,border-color .2s}
 .action:hover:not([disabled]){border-color:var(--sage);background:#f6fbf3}
 .action[disabled]{opacity:.45;cursor:not-allowed}
 .action b{display:block}
-.action small{color:var(--muted);font-size:12.5px;line-height:1.35}
-.cost{border-radius:99px;background:#f4ead2;color:#80601b;padding:5px 9px;font-weight:800;font-size:12px;white-space:nowrap}
+.action small{color:var(--muted);font-size:12.5px;line-height:1.3}
+.cost{border-radius:99px;background:#f4ead2;color:#80601b;padding:4px 8px;font-weight:800;font-size:11px;white-space:nowrap}
 .tgtpick summary{cursor:pointer;list-style:none;border:1px solid var(--line);background:var(--card);
   border-radius:15px;padding:12px 14px;font-size:14px;font-weight:750}
 .tgtpick summary::-webkit-details-marker{display:none}
@@ -186,7 +186,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 21</span></div>
+    <span class="ver" role="note">build 22</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -247,13 +247,6 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       </details>
     </div>
 
-    <!-- A gardener names no target, so this slot would otherwise be empty.
-         It carries the only thing they can watch: where the child is now. -->
-    <div id="gardenerWrap" style="display:none">
-      <h3 class="eyebrow" style="margin-bottom:9px">Where they are now</h3>
-      <div class="nowbox" id="gardenerNow" role="status"></div>
-    </div>
-
     <h3 class="eyebrow" style="margin:14px 0 9px">This stage</h3>
     <div class="actions" id="actions">
       <button class="action" id="btnAim" data-act="aim">
@@ -265,6 +258,16 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
         <span class="cost">+1 SD reach</span>
       </button>
     </div>
+
+    <!-- Both conditions need this. A gardener has nothing else to watch; a
+         carpenter needs to see the drift away from the address they named.
+         It sits BELOW the buttons deliberately: it is feedback on the last
+         choice, and putting it above pushed the buttons off a laptop screen. -->
+    <div id="nowWrap">
+      <h3 class="eyebrow" style="margin:14px 0 9px">Where they are now</h3>
+      <div class="nowbox" id="nowBox" role="status"></div>
+    </div>
+
     <p id="odds" style="margin:10px 2px 0;font-size:13px;color:var(--muted)"></p>
 
     <div class="tip" id="tip"></div>
@@ -849,21 +852,30 @@ function render(){
   });
 
   el("targetWrap").style.display = g ? "none" : "block";
-  el("gardenerWrap").style.display = g ? "block" : "none";
   // the odds line lives below the buttons, so it is not hidden with the target
   // block; a gardener named no target and must not be shown its chances
   el("odds").style.display = g ? "none" : "";
-  if(g){
-    if(!s.segs.length){
-      el("gardenerNow").innerHTML = '<span class="waiting">Nothing has grown yet. ' +
-        'Feed the first stage and see where it goes.</span>';
-    } else {
-      const n = nearestOcc(s.pos), o = OCC[n.i];
-      el("gardenerNow").innerHTML = '<b>' + esc(o[0]) + '</b><small>' +
-        money(o[5]) + ' &middot; ' + edLabel(o[2]) + ' &middot; emotional labour ' + Math.round(o[3]) +
-        '<br>' + n.dist.toFixed(1) + ' away' +
-        (s.over ? ', and this is where they stayed' : ', and still growing') + '</small>';
-    }
+
+  /* Where the child stands, in both conditions. The gardener has nothing else
+     to watch. The carpenter gets the same reading plus the distance still to
+     run, which is the drift the whole condition is about. Kept to two lines:
+     the stage buttons sit close to the fold on a laptop. */
+  if(!s.segs.length){
+    el("nowBox").innerHTML = '<span class="waiting">' + (g
+      ? 'Nothing has grown yet. Feed the first stage and see where it goes.'
+      : 'Nothing has grown yet. ' + esc(OCC[s.target][0]) + ' is ' +
+        Math.round(reachOf(OCC[s.target])) + ' away.') + '</span>';
+  } else {
+    const n = nearestOcc(s.pos, g ? undefined : s.target), o = OCC[n.i];
+    const t = OCC[s.target];
+    const toTarget = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
+    el("nowBox").innerHTML = '<b>' + esc(o[0]) + '</b><small>' +
+      money(o[5]) + ' &middot; ' + edLabel(o[2]) + ' &middot; emotional labour ' + Math.round(o[3]) +
+      '<br>' + n.dist.toFixed(1) + ' away' + (g
+        ? (s.over ? ', and this is where they stayed' : ', and still growing')
+        : (s.over ? '. ' + esc(t[0]) + ' finished ' + toTarget.toFixed(1) + ' off'
+                  : '. ' + esc(t[0]) + ' is still ' + toTarget.toFixed(1) + ' away')) +
+      '</small>';
   }
   el("stageNo").textContent = Math.min(s.stage, TOTAL_STAGES);
   el("stageName").textContent = STAGE_NAMES[Math.min(TOTAL_STAGES, s.stage) - 1];
@@ -885,7 +897,7 @@ function render(){
   el("aimNote").textContent = "Point this stage at " + OCC[s.target][0];
   el("nurNote").textContent = g
     ? "Feed it. Where it goes is not yours to choose."
-    : "Keep the heading, +1 SD of length";
+    : "Keep the heading, +1 SD";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
   /* target picker, hardest first */
