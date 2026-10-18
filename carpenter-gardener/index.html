@@ -177,7 +177,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 16</span></div>
+    <span class="ver" role="note">build 17</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -355,7 +355,7 @@ const GROUPS = {M:"Management",B:"Business & finance",C:"Computing & math",E:"En
 const GCOL = {M:"#6f559b",B:"#44719f",C:"#28806f",E:"#3a7247",S:"#9c6d1f",A:"#ad5f43",
   H:"#a33f52",P:"#5e7280",O:"#7c7140",T:"#6d5a49"};
 const OCC = [
-  ["Chief Executives",93,43,48,"M"],["Fortune 500 CEO (illustrative)",100,43,48,"M"],
+  ["Chief Executives",93,43,48,"M"],["Fortune 500 CEO (illustrative)",100,75,48,"M"],
   ["General and Operations Managers",68,43,54,"M"],["Marketing Managers",89,43,33,"M"],
   ["Financial Managers",89,43,27,"M"],["Construction Managers",70,43,48,"M"],
   ["Medical and Health Services Managers",74,43,79,"M"],["Human Resources Specialists",51,43,67,"B"],
@@ -676,24 +676,42 @@ function playPlan(ti, nAim){
    count IS the percentage. About a quarter of a second for all 85, measured,
    and it makes the list orderable by what actually matters. */
 const DIFFICULTY = (function(){
-  const N = 100, out = [];
-  for(let i = 0; i < OCC.length; i++){
-    let best = {pct: -1, aim: TOTAL_STAGES};
-    for(let a = 0; a <= TOTAL_STAGES; a++){
-      let hit = 0;
-      for(let r = 0; r < N; r++) if(playPlan(i, a) === i) hit++;
-      if(hit > best.pct) best = {pct: hit, aim: a};
+  /* Scored against a fixed seed, not Math.random. At 100 runs the standard
+     error was about 2 points, which is large next to the 1-15% band being
+     sorted: the list reordered itself on every reload and the same occupation
+     could read 3% or 10%. A seeded source plus a bigger sample makes the
+     quoted odds reproducible, so two students comparing screens see the same
+     numbers. Math.random is restored immediately; this block is synchronous,
+     so nothing else can observe the swap. */
+  const N = 300, out = [];
+  const realRandom = Math.random;
+  let seed = 20260117;
+  Math.random = function(){
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  try{
+    for(let i = 0; i < OCC.length; i++){
+      let best = {pct: -1, aim: TOTAL_STAGES};
+      for(let a = 0; a <= TOTAL_STAGES; a++){
+        let hit = 0;
+        for(let r = 0; r < N; r++) if(playPlan(i, a) === i) hit++;
+        const pct = 100 * hit / N;
+        if(pct > best.pct) best = {pct: pct, aim: a};
+      }
+      out.push({pct: Math.round(best.pct), aim: best.aim});
     }
-    out.push(best);
+  } finally {
+    Math.random = realRandom;
   }
   return out;
 })();
 function estimateOdds(ti){ return DIFFICULTY[ti]; }
 
 /* Display order for the target list: least probable first. Distance out is the
-   wrong key for this -- Fortune 500 CEO is extreme on salary alone and so sits
-   only 119 units out, nearer than Dentists at 156, which makes it far more
-   reachable than it ought to feel. Ordering by the model's own measured odds
+   wrong key for this -- Fortune 500 CEO is extreme on salary alone, so even at
+   a master's it sits 134 units out against Dentists at 156 while coming out
+   far more often, because one maxed axis is nearer than three high ones. Ordering by the model's own measured odds
    puts the genuinely improbable at the top and is what the carpenter is really
    choosing between. Ties break on distance, furthest first. */
 const PICK_ORDER = OCC.map((o, i) => i).sort((a, b) =>
