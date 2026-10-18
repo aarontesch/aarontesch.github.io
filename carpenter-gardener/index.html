@@ -75,6 +75,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .tgtpick summary small{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tgtpick[open] summary{border-radius:15px 15px 0 0;border-bottom-color:transparent}
 .pick{max-height:214px;overflow:auto;border:1px solid var(--line);border-top:0;border-radius:0 0 15px 15px;padding:7px;background:var(--card)}
+.pickhint{margin:2px 4px 7px;font-size:11.5px;line-height:1.4;color:var(--muted)}
 .pick button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:7px 9px;border-radius:10px;font-size:13px}
 .pick button:hover:not([disabled]){background:#f0f6ed}
 .pick button[aria-pressed="true"]{background:#e3eedd;font-weight:750}
@@ -176,7 +177,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 15</span></div>
+    <span class="ver" role="note">build 16</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -654,7 +655,6 @@ function occTable(s){
    best of the aim/nurture splits, and says which split that was, because a
    quoted figure a player can beat by doing something obvious is worse than
    no figure at all. */
-const oddsCache = {};
 function playPlan(ti, nAim){
   const t = OCC[ti];
   let p = [0,0,0], h = norm([1,1,1]);
@@ -671,18 +671,33 @@ function playPlan(ti, nAim){
   }
   return nearestOcc(p).i;
 }
-function estimateOdds(ti){
-  if(oddsCache[ti] !== undefined) return oddsCache[ti];
-  const N = 300;
-  let best = {pct: -1, aim: 5};
-  for(let a = 0; a <= TOTAL_STAGES; a++){
-    let hit = 0;
-    for(let r = 0; r < N; r++) if(playPlan(ti, a) === ti) hit++;
-    const pct = 100 * hit / N;
-    if(pct > best.pct) best = {pct: pct, aim: a};
+/* Score the whole catalogue once at load: for each occupation, the best it can
+   be played, over every aim/nurture split. 100 runs per split means the hit
+   count IS the percentage. About a quarter of a second for all 85, measured,
+   and it makes the list orderable by what actually matters. */
+const DIFFICULTY = (function(){
+  const N = 100, out = [];
+  for(let i = 0; i < OCC.length; i++){
+    let best = {pct: -1, aim: TOTAL_STAGES};
+    for(let a = 0; a <= TOTAL_STAGES; a++){
+      let hit = 0;
+      for(let r = 0; r < N; r++) if(playPlan(i, a) === i) hit++;
+      if(hit > best.pct) best = {pct: hit, aim: a};
+    }
+    out.push(best);
   }
-  return (oddsCache[ti] = {pct: Math.round(best.pct), aim: best.aim});
-}
+  return out;
+})();
+function estimateOdds(ti){ return DIFFICULTY[ti]; }
+
+/* Display order for the target list: least probable first. Distance out is the
+   wrong key for this -- Fortune 500 CEO is extreme on salary alone and so sits
+   only 119 units out, nearer than Dentists at 156, which makes it far more
+   reachable than it ought to feel. Ordering by the model's own measured odds
+   puts the genuinely improbable at the top and is what the carpenter is really
+   choosing between. Ties break on distance, furthest first. */
+const PICK_ORDER = OCC.map((o, i) => i).sort((a, b) =>
+  DIFFICULTY[a].pct - DIFFICULTY[b].pct || reachOf(OCC[b]) - reachOf(OCC[a]));
 
 /* ============ render ============ */
 const el = id => document.getElementById(id);
@@ -719,13 +734,20 @@ function render(){
     : "Keep the heading, +1 SD of length";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
-  /* target picker */
+  /* target picker, hardest first */
   if(!g){
-    el("pick").innerHTML = OCC.map((o, i) =>
-      '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
-      (s.locked ? " disabled" : "") +
-      ' aria-label="' + esc(o[0]) + ': salary ' + o[1] + ', education ' + o[2] + ', contact ' + o[3] + '">' +
-      '<span>' + esc(o[0]) + '</span><small>' + o[1] + ' / ' + o[2] + ' / ' + o[3] + '</small></button>').join("");
+    el("pick").innerHTML = '<p class="pickhint">Least likely at the top. The figure is how often ' +
+      'that occupation comes out when the run is played as well as it can be, measured ' +
+      'from the model itself.</p>' +
+      PICK_ORDER.map(i => {
+        const o = OCC[i], far = Math.round(reachOf(o)), od = DIFFICULTY[i].pct;
+        return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
+          (s.locked ? " disabled" : "") +
+          ' aria-label="' + esc(o[0]) + ': reached in about ' + od + ' percent of runs, ' + far +
+            ' units out. Salary ' + o[1] + ', education ' + o[2] + ', contact ' + o[3] + '">' +
+          '<span>' + esc(o[0]) + '</span><small>' + od + '% &middot; ' +
+            o[1] + '/' + o[2] + '/' + o[3] + '</small></button>';
+      }).join("");
     const t = OCC[s.target], pct = estimateOdds(s.target);
     /* the one-line summary carries the current target, so the list stays shut.
        the flex lives on an inner span: styling <summary> itself has a history
