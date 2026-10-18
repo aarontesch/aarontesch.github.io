@@ -176,13 +176,25 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 13</span></div>
+    <span class="ver" role="note">build 14</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
-<!-- If the script fails in whatever viewer this is opened in, the page used to
-     just sit there with an empty occupation list and dead buttons. Now it says
-     so, and says what broke. -->
+<!-- Two different failures look identical from the outside: the script threw,
+     or the script was never allowed to run. The banner below covers the first
+     (it is written by the error handler). It cannot cover the second, because
+     it is itself script -- so <noscript> covers that one. Without this, a
+     viewer that strips scripts shows a normal-looking page whose occupation
+     list is empty and whose every button is dead. -->
+<noscript>
+  <div class="booterr" style="display:block">
+    <b>This viewer is not running the page's JavaScript, so none of it works.</b>
+    The occupation list will be empty and the buttons will not respond. This is
+    usually a preview pane &mdash; OneDrive's web viewer, Teams, or an LMS
+    embed &mdash; which blocks scripts. Download the file and open it in Chrome
+    or Edge, or visit the published page, and it will run normally.
+  </div>
+</noscript>
 <div class="booterr" id="bootError" role="alert" hidden></div>
 
 <section class="hero">
