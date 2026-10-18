@@ -355,64 +355,81 @@ const GROUPS = {M:"Management",B:"Business & finance",C:"Computing & math",E:"En
 const GCOL = {M:"#6f559b",B:"#44719f",C:"#28806f",E:"#3a7247",S:"#9c6d1f",A:"#ad5f43",
   H:"#a33f52",P:"#5e7280",O:"#7c7140",T:"#6d5a49"};
 const OCC = [
-  ["Chief Executives",93,43,48,"M"],["Fortune 500 CEO (illustrative)",100,75,48,"M"],
-  ["General and Operations Managers",68,43,54,"M"],["Marketing Managers",89,43,33,"M"],
-  ["Financial Managers",89,43,27,"M"],["Construction Managers",70,43,48,"M"],
-  ["Medical and Health Services Managers",74,43,79,"M"],["Human Resources Specialists",51,43,67,"B"],
-  ["Market Research Analysts",54,43,11,"B"],["Accountants and Auditors",58,43,12,"B"],
-  ["Information Security Analysts",77,43,31,"C"],["Computer User Support Specialists",37,29,36,"C"],
-  ["Software Developers",82,43,18,"C"],["Mathematicians",75,75,4,"C"],
-  ["Statisticians",69,75,5,"C"],["Data Scientists",76,43,2,"C"],
-  ["Architects",61,43,40,"E"],["Civil Engineers",63,43,27,"E"],
-  ["Electrical Engineers",71,43,33,"E"],["Mechanical Engineers",67,43,60,"E"],
-  ["Medical Scientists",64,83,57,"E"],["Physicists",88,83,10,"E"],
-  ["Economists",73,75,7,"E"],["Clinical and Counseling Psychologists",61,83,42,"E"],
-  ["Educational, Guidance, and Career Counselors",45,75,85,"S"],["Child, Family, and School Social Workers",27,43,94,"S"],
-  ["Clergy",30,43,48,"S"],["Lawyers",87,83,67,"S"],
-  ["Judges and Magistrates",86,83,57,"S"],["Paralegals and Legal Assistants",39,40,42,"S"],
-  ["Mathematical Science Teachers, Postsecondary",56,83,31,"A"],["English Lit. Teachers, Postsecondary",57,83,37,"A"],
-  ["Elementary School Teachers",45,43,85,"A"],["Secondary School Teachers",49,43,76,"A"],
-  ["Librarians",48,75,23,"A"],["Fine Artists",49,43,1,"A"],
-  ["Graphic Designers",39,43,30,"A"],["News Analysts, Reporters, and Journalists",30,43,42,"A"],
-  ["Writers and Authors",51,43,7,"A"],["Dentists, General",92,83,94,"H"],
-  ["Pharmacists",83,83,60,"H"],["Physician Assistants",81,75,93,"H"],
-  ["Physical Therapists",65,83,94,"H"],["Veterinarians",79,83,85,"H"],
-  ["Registered Nurses",60,43,85,"H"],["Nurse Practitioners",80,75,67,"H"],
-  ["Anesthesiologists",98,83,99,"H"],["Family Medicine Physicians",95,83,99,"H"],
-  ["Psychiatrists",96,83,54,"H"],["Radiologists",99,83,21,"H"],
-  ["Paramedics",26,30,37,"H"],["Licensed Practical Nurses",42,30,79,"H"],
-  ["Nursing Assistants",15,30,79,"H"],["Dental Assistants",21,30,76,"H"],
-  ["Firefighters",33,30,18,"P"],["Police and Sheriff's Patrol Officers",55,13,45,"P"],
-  ["Security Guards",12,13,85,"P"],["Chefs and Head Cooks",37,13,48,"P"],
-  ["Cooks, Restaurant",11,0,23,"P"],["Bartenders",2,0,60,"P"],
-  ["Waiters and Waitresses",2,0,79,"P"],["Janitors and Cleaners",7,0,13,"P"],
-  ["Landscaping and Groundskeeping Workers",12,0,0,"P"],["Hairdressers and Cosmetologists",7,30,67,"P"],
-  ["Childcare Workers",1,13,67,"P"],["Cashiers",0,0,94,"O"],
-  ["Retail Salespersons",5,0,85,"O"],["Real Estate Sales Agents",29,13,54,"O"],
-  ["Customer Service Representatives",18,13,79,"O"],["Secretaries and Administrative Assistants",19,13,85,"O"],
-  ["Office Clerks, General",17,13,60,"O"],["Farmworkers and Laborers, Crop",5,0,6,"T"],
-  ["Carpenters",33,13,67,"T"],["Construction Laborers",19,0,45,"T"],
-  ["Electricians",44,13,67,"T"],["Plumbers, Pipefitters, and Steamfitters",42,13,23,"T"],
-  ["Automotive Service Technicians",23,30,20,"T"],["HVAC Mechanics and Installers",33,30,60,"T"],
-  ["Bakers",7,0,67,"T"],["Machinists",25,13,14,"T"],
-  ["Welders, Cutters, Solderers, and Brazers",24,13,17,"T"],["Airline Pilots, Copilots, and Flight Engineers",93,43,37,"T"],
-  ["Air Traffic Controllers",85,40,60,"T"],["Heavy and Tractor-Trailer Truck Drivers",30,30,26,"T"],
-  ["Laborers and Freight, Stock, and Material Movers",12,0,14,"T"],
+  ["Chief Executives",67.8,43,48,"M",239200],["Fortune 500 CEO (illustrative)",209.3,75,48,"M",17000000],
+  ["General and Operations Managers",39.8,43,54,"M",103000],["Marketing Managers",54.7,43,33,"M",161000],
+  ["Financial Managers",54.7,43,27,"M",161000],["Construction Managers",40.8,43,48,"M",106000],
+  ["Medical and Health Services Managers",44.1,43,79,"M",117000],["Human Resources Specialists",28.0,43,67,"B",72000],
+  ["Market Research Analysts",29.8,43,11,"B",76000],["Accountants and Auditors",31.9,43,12,"B",81000],
+  ["Information Security Analysts",46.0,43,31,"C",124000],["Computer User Support Specialists",21.9,29,36,"C",60000],
+  ["Software Developers",48.3,43,18,"C",133080],["Mathematicians",44.9,75,4,"C",120000],
+  ["Statisticians",40.2,75,5,"C",104000],["Data Scientists",45.0,43,2,"C",120230],
+  ["Architects",37.5,43,40,"E",96000],["Civil Engineers",38.5,43,27,"E",99000],
+  ["Electrical Engineers",42.3,43,33,"E",111000],["Mechanical Engineers",39.6,43,60,"E",102320],
+  ["Medical Scientists",38.9,83,57,"E",100000],["Physicists",53.6,83,10,"E",156000],
+  ["Economists",43.8,75,7,"E",116000],["Clinical and Counseling Psychologists",37.5,83,42,"E",96000],
+  ["Educational, Guidance, and Career Counselors",24.1,75,85,"S",64000],["Child, Family, and School Social Workers",19.0,43,94,"S",55000],
+  ["Clergy",20.8,43,48,"S",58000],["Lawyers",52.6,83,67,"S",151160],
+  ["Judges and Magistrates",52.5,83,57,"S",151000],["Paralegals and Legal Assistants",22.5,40,42,"S",61000],
+  ["Mathematical Science Teachers, Postsecondary",31.5,83,31,"A",80000],["English Language and Literature Teachers, Postsecondary",31.7,83,37,"A",80470],
+  ["Elementary School Teachers",24.1,43,85,"A",64000],["Secondary School Teachers",25.1,43,76,"A",66000],
+  ["Librarians",24.6,75,23,"A",65000],["Fine Artists",25.1,43,1,"A",66000],
+  ["Graphic Designers",22.5,43,30,"A",61000],["News Analysts, Reporters, and Journalists",20.8,43,42,"A",58000],
+  ["Writers and Authors",28.0,43,7,"A",72000],["Dentists, General",56.9,83,94,"H",172000],
+  ["Pharmacists",49.3,83,60,"H",137000],["Physician Assistants",48.3,75,93,"H",133000],
+  ["Physical Therapists",39.2,83,94,"H",101000],["Veterinarians",46.3,83,85,"H",125000],
+  ["Registered Nurses",36.7,43,85,"H",93600],["Nurse Practitioners",47.3,75,67,"H",129000],
+  ["Anesthesiologists",95.9,83,99,"H",557131],["Family Medicine Physicians",78.0,83,99,"H",325040],
+  ["Psychiatrists",80.5,83,54,"H",350786],["Radiologists",98.8,83,21,"H",609684],
+  ["Paramedics",18.4,30,37,"H",54000],["Licensed Practical Nurses",23.0,30,79,"H",62000],
+  ["Nursing Assistants",8.5,30,79,"H",40000],["Dental Assistants",14.5,30,76,"H",48000],
+  ["Firefighters",21.4,30,18,"P",59000],["Police and Sheriff's Patrol Officers",30.2,13,45,"P",77000],
+  ["Security Guards",6.8,13,85,"P",38000],["Chefs and Head Cooks",21.9,13,48,"P",60000],
+  ["Cooks, Restaurant",5.9,0,23,"P",37000],["Bartenders",3.1,0,60,"P",34000],
+  ["Waiters and Waitresses",3.1,0,79,"P",34000],["Janitors and Cleaners",5.0,0,13,"P",36000],
+  ["Landscaping and Groundskeeping Workers",6.8,0,0,"P",38000],["Hairdressers and Cosmetologists",5.0,30,67,"P",36000],
+  ["Childcare Workers",1.1,13,67,"P",32000],["Cashiers",0.0,0,94,"O",31000],
+  ["Retail Salespersons",4.0,0,85,"O",35000],["Real Estate Sales Agents",19.6,13,54,"O",56000],
+  ["Customer Service Representatives",10.1,13,79,"O",42000],["Secretaries and Administrative Assistants",13.1,13,85,"O",46000],
+  ["Office Clerks, General",9.3,13,60,"O",41000],["Farmworkers and Laborers, Crop",4.0,0,6,"T",35000],
+  ["Carpenters",21.4,13,67,"T",59000],["Construction Laborers",13.1,0,45,"T",46000],
+  ["Electricians",23.2,13,67,"T",62350],["Plumbers, Pipefitters, and Steamfitters",23.0,13,23,"T",62000],
+  ["Automotive Service Technicians",15.9,30,20,"T",50000],["HVAC Mechanics and Installers",21.4,30,60,"T",59000],
+  ["Bakers",5.0,0,67,"T",36000],["Machinists",17.8,13,14,"T",53000],
+  ["Welders, Cutters, Solderers, and Brazers",16.5,13,17,"T",51000],["Airline Pilots, Copilots, and Flight Engineers",67.8,43,37,"T",239200],
+  ["Air Traffic Controllers",51.2,40,60,"T",145000],["Heavy and Tractor-Trailer Truck Drivers",20.8,30,26,"T",58000],
+  ["Laborers and Freight, Stock, and Material Movers",6.8,0,14,"T",38000],
 ];
 
-/* ============ the growth model ============
-   Five segments from the origin. Left entirely alone they run straight at
-   the middle of the space, so the likeliest life is the population average:
-   five plain segments of MU reach (50,50,50) exactly.
-     aim     -> re-point this segment at the target, ordinary length
-     nurture -> keep the heading you already have, +1 SD of length
-   Aim buys accuracy, nurture buys reach, and you only get five of them. */
+/* ============ the three axes ============
+   Education and contact are percentiles and stop at 100. Salary is NOT a
+   percentile: pay is exponential, and a percentile axis hides that. The 99th
+   percentile earns $609,684 and the 100th earns $17,000,000 -- twenty-eight
+   times the money, one point apart -- which made chasing extreme pay far too
+   easy, because the top of a percentile axis is only ever one step past the
+   next occupation down.
+
+   The salary coordinate is 23 units per DOUBLING of median pay, measured from
+   the lowest-paid occupation in the set. The real catalogue then spans about
+   0-100 as before, and the illustrative $17M row runs off to 209, which is
+   past anything five stages can reach. Money is hard the way it is hard in
+   life: each further step costs as much as everything before it. */
+const SAL_PER_DOUBLING = 23;
+const AXIS = [210, 100, 100];                   // the space is a box, not a cube
 const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
 const TOTAL_STAGES = 5;
-const CENTRE = 50;
-const MU  = Math.sqrt(3 * CENTRE * CENTRE) / TOTAL_STAGES;  // 17.32
-const SIG = 0.65 * MU;                                      // wide: nurture must buy real reach
-const ANG = 15 * Math.PI / 180;                             // heading noise per segment
+
+/* The middle of the space is now the cloud's own centre of mass rather than a
+   fixed (50,50,50): with a stretched salary axis those are no longer the same
+   point, and the whole premise is that an untouched life lands on the average. */
+const CENTROID = (function(){
+  const c = [0,0,0];
+  OCC.forEach(o => { c[0] += o[1]; c[1] += o[2]; c[2] += o[3]; });
+  return c.map(v => v / OCC.length);
+})();
+const CENTRE_DIST = Math.hypot(CENTROID[0], CENTROID[1], CENTROID[2]);
+const MU  = CENTRE_DIST / TOTAL_STAGES;   // five plain segments land on the average life
+const SIG = 0.65 * MU;                    // wide: nurture must buy real reach
+const ANG = 15 * Math.PI / 180;           // heading noise per segment
 /* a wide length distribution is what lets nurture buy real reach, but an
    unfloored draw can produce a stage that visibly does nothing */
 const LEN_FLOOR = 0.3 * MU;
@@ -425,7 +442,9 @@ function gauss(){
   const r = Math.sqrt(-2 * Math.log(u)), t = 2 * Math.PI * Math.random();
   spare = r * Math.sin(t); return r * Math.cos(t);
 }
-const clampPct = v => v < 0 ? 0 : v > 100 ? 100 : v;
+/* each axis has its own extent now, so clamping is per axis */
+const clampAx = (v, a) => v < 0 ? 0 : v > AXIS[a] ? AXIS[a] : v;
+const clampPt = p => [clampAx(p[0],0), clampAx(p[1],1), clampAx(p[2],2)];
 const norm = v => { const L = Math.hypot(v[0],v[1],v[2]) || 1; return [v[0]/L, v[1]/L, v[2]/L]; };
 
 /* tilt a unit vector by a gaussian angle, in a uniformly random plane */
@@ -462,7 +481,7 @@ function fresh(mode){
     mode: mode || "carpenter",
     locked: false, over: false,
     stage: 1,
-    pos: [0,0,0], heading: norm([1,1,1]),
+    pos: [0,0,0], heading: norm(CENTROID.slice()),
     segs: [], target: 13, aimed: 0, nurtured: 0,
     log: ["Five stages, one developing life, no guaranteed ending."]
   };
@@ -493,7 +512,7 @@ function growStage(choice){
     if(len > rem) len = rem;
   }
   const from = s.pos.slice();
-  const to = [clampPct(from[0]+dir[0]*len), clampPct(from[1]+dir[1]*len), clampPct(from[2]+dir[2]*len)];
+  const to = clampPt([from[0]+dir[0]*len, from[1]+dir[1]*len, from[2]+dir[2]*len]);
   s.segs.push({from: from, to: to, nurtured: nurture, len: len});
   s.pos = to; s.heading = dir;
   s.locked = true;
@@ -517,7 +536,7 @@ function growStage(choice){
 const cam = {yaw: -0.62, pitch: 0.40, spin: false};
 const DIST = 300, SCALE = 1.72;
 function project(p){
-  const x = p[0]-CENTRE, y = p[1]-CENTRE, z = p[2]-CENTRE;
+  const x = p[0]-AXIS[0]/2, y = p[1]-AXIS[1]/2, z = p[2]-AXIS[2]/2;
   const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
   const X = x*cy - z*sy, Z = x*sy + z*cy;
   const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
@@ -525,8 +544,15 @@ function project(p){
   const f = DIST / (DIST + D);
   return {x: X*f*SCALE, y: -Y*f*SCALE, d: D, f: f};
 }
-const CORNERS = [[0,0,0],[100,0,0],[100,0,100],[0,0,100],[0,100,0],[100,100,0],[100,100,100],[0,100,100]];
+const X = AXIS[0], Y = AXIS[1], Z = AXIS[2];
+const CORNERS = [[0,0,0],[X,0,0],[X,0,Z],[0,0,Z],[0,Y,0],[X,Y,0],[X,Y,Z],[0,Y,Z]];
 const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+/* the salary axis is log-dollars, so show dollars; a coordinate would mean
+   nothing to a reader and a percentile would now be a lie */
+/* invert the axis: a salary coordinate back into the pay it represents */
+const payAt = s => 31000 * Math.pow(2, s / SAL_PER_DOUBLING);
+const money = w => w >= 1000000 ? "$" + (w/1000000).toFixed(1).replace(".0","") + "M"
+  : "$" + Math.round(w/1000) + "k";
 const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
 function spaceSvg(s){
@@ -543,7 +569,7 @@ function spaceSvg(s){
   });
   /* an axis line out of the origin corner, name set past its end, so each
      dimension reads as a direction rather than a word floating in the box */
-  [[[104,0,0],"salary"],[[0,104,0],"education"],[[0,0,104],"contact"]].forEach(a => {
+  [[[AXIS[0]*0.99,0,0],"pay"],[[0,AXIS[1]*0.99,0],"education"],[[0,0,AXIS[2]*0.99],"contact"]].forEach(a => {
     const o = project([0,0,0]), e = project(a[0]);
     const p = project([a[0][0]*1.17, a[0][1]*1.17, a[0][2]*1.17]);
     push(1e4, '<line x1="' + o.x.toFixed(1) + '" y1="' + o.y.toFixed(1) +
@@ -595,7 +621,7 @@ function spaceSvg(s){
   if(!s.over && s.segs.length < TOTAL_STAGES){
     let q = s.pos.slice();
     for(let i = s.segs.length; i < TOTAL_STAGES; i++){
-      const n = [clampPct(q[0]+s.heading[0]*MU), clampPct(q[1]+s.heading[1]*MU), clampPct(q[2]+s.heading[2]*MU)];
+      const n = clampPt([q[0]+s.heading[0]*MU, q[1]+s.heading[1]*MU, q[2]+s.heading[2]*MU]);
       const a = project(q), b = project(n);
       push((a.d + b.d) / 2, '<line class="ghostline" x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) +
         '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '"/>');
@@ -616,8 +642,8 @@ function spaceSvg(s){
   const pos = s.segs.length ? s.pos : [0,0,0];
   const w2 = s.segs.length ? OCC[nearestOcc(s.pos).i][0] : "nothing yet";
   return '<svg class="spacesvg" id="space" tabindex="0" viewBox="-168 -146 336 292" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
-      'Occupation space, ' + OCC.length + ' occupations by salary, education and human contact percentile. ' +
-      s.segs.length + ' of ' + TOTAL_STAGES + ' stages grown, now at salary ' + Math.round(pos[0]) +
+      'Occupation space, ' + OCC.length + ' occupations by pay, education and human contact. ' +
+      s.segs.length + ' of ' + TOTAL_STAGES + ' stages grown, now at pay ' + money(payAt(pos[0])) +
       ', education ' + Math.round(pos[1]) + ', contact ' + Math.round(pos[2]) +
       ', nearest occupation ' + esc(w2) + '. The figures are in the table below.">' +
     '<g aria-hidden="true" transform="translate(0,6)">' + items.map(i => i.svg).join("") + '</g></svg>';
@@ -635,14 +661,14 @@ function occTable(s){
     const o = OCC[r.i], isT = !g && r.i === s.target;
     return '<tr' + (isT ? ' aria-current="true"' : '') + '>' +
       '<th scope="row">' + esc(o[0]) + (isT ? ' (target)' : '') + '</th>' +
-      '<td>' + o[1] + '</td><td>' + o[2] + '</td><td>' + o[3] + '</td>' +
+      '<td>' + money(o[5]) + '</td><td>' + o[2] + '</td><td>' + o[3] + '</td>' +
       '<td>' + r.d.toFixed(1) + '</td><td>' + esc(GROUPS[o[4]]) + '</td></tr>';
   }).join("");
   return '<div class="scroll"><table>' +
-    '<caption>The child is at salary ' + Math.round(pos[0]) + ', education ' + Math.round(pos[1]) +
+    '<caption>The child is at pay ' + money(payAt(pos[0])) + ', education ' + Math.round(pos[1]) +
       ', contact ' + Math.round(pos[2]) + ' after ' + s.segs.length + ' of ' + TOTAL_STAGES +
       ' stages. These are the occupations nearest that point; whichever is closest at the end is the career.</caption>' +
-    '<thead><tr><th scope="col">Occupation</th><th scope="col">Salary pctl</th>' +
+    '<thead><tr><th scope="col">Occupation</th><th scope="col">Median pay</th>' +
       '<th scope="col">Education pctl</th><th scope="col">Contact pctl</th>' +
       '<th scope="col">Distance now</th><th scope="col">Field</th></tr></thead>' +
     '<tbody>' + body + '</tbody></table></div>';
@@ -657,7 +683,7 @@ function occTable(s){
    no figure at all. */
 function playPlan(ti, nAim){
   const t = OCC[ti];
-  let p = [0,0,0], h = norm([1,1,1]);
+  let p = [0,0,0], h = norm(CENTROID.slice());
   for(let k = 0; k < TOTAL_STAGES; k++){
     const aim = k < nAim;
     const d = [t[1]-p[0], t[2]-p[1], t[3]-p[2]];
@@ -666,7 +692,7 @@ function playPlan(ti, nAim){
     let len = MU + gauss()*SIG + (aim ? 0 : SIG);
     if(len < LEN_FLOOR) len = LEN_FLOOR;
     if(aim && len > L) len = L;
-    p = [clampPct(p[0]+dir[0]*len), clampPct(p[1]+dir[1]*len), clampPct(p[2]+dir[2]*len)];
+    p = clampPt([p[0]+dir[0]*len, p[1]+dir[1]*len, p[2]+dir[2]*len]);
     h = dir;
   }
   return nearestOcc(p).i;
@@ -762,9 +788,10 @@ function render(){
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
           (s.locked ? " disabled" : "") +
           ' aria-label="' + esc(o[0]) + ': reached in about ' + od + ' percent of runs, ' + far +
-            ' units out. Salary ' + o[1] + ', education ' + o[2] + ', contact ' + o[3] + '">' +
+            ' units out. Median pay ' + money(o[5]) + ', education percentile ' + o[2] +
+            ', contact percentile ' + o[3] + '">' +
           '<span>' + esc(o[0]) + '</span><small>' + od + '% &middot; ' +
-            o[1] + '/' + o[2] + '/' + o[3] + '</small></button>';
+            money(o[5]) + ' &middot; ed ' + o[2] + ' &middot; con ' + o[3] + '</small></button>';
       }).join("");
     const t = OCC[s.target], pct = estimateOdds(s.target);
     /* the one-line summary carries the current target, so the list stays shut.
@@ -848,7 +875,7 @@ function finishRun(reason){
   el("resultGrid").innerHTML = [
     [g ? "Aimed at" : "You aimed at", g ? "nothing" : OCC[s.target][0]],
     ["Ended up at", career[0]],
-    ["Salary / Educ / Contact", career[1] + " / " + career[2] + " / " + career[3]],
+    ["Median pay", money(career[5])],
     [g ? "Stages fed" : "Aimed / nurtured", g ? s.nurtured + " / " + TOTAL_STAGES : s.aimed + " / " + s.nurtured]
   ].map(x => '<div class="result"><b>' + esc(x[1]) + '</b><span>' + x[0] + '</span></div>').join("");
 
