@@ -52,7 +52,11 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
   transition:background-color .2s,border-color .2s,transform .2s}
 .strategy:hover:not([disabled]){transform:translateY(-2px);border-color:var(--sage)}
 .strategy.active{background:var(--deep);border-color:var(--deep);color:#fff}
-.strategy[disabled]{opacity:.45;cursor:not-allowed}
+/* only the road not taken fades. Dimming the chosen card too washed the
+   current strategy down to about 1.4:1 against the panel, and that card is
+   the clearest statement of what condition you are playing. */
+.strategy[disabled]:not(.active){opacity:.45}
+.strategy[disabled]{cursor:not-allowed}
 .strategy strong{display:block;margin:3px 0 3px}
 .strategy span{font-size:13px;opacity:.82}
 .glyph{font-size:17px}
@@ -76,6 +80,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .tgtpick summary small{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tgtpick[open] summary{border-radius:15px 15px 0 0;border-bottom-color:transparent}
 .pick{max-height:214px;overflow:auto;border:1px solid var(--line);border-top:0;border-radius:0 0 15px 15px;padding:7px;background:var(--card)}
+.nowbox{border:1px solid var(--line);background:var(--card);border-radius:15px;padding:12px 14px}
+.nowbox b{display:block;font-size:15px;font-weight:800;margin-bottom:2px}
+.nowbox small{display:block;color:var(--muted);font-size:12.5px;line-height:1.5;font-variant-numeric:tabular-nums}
+.nowbox .waiting{color:var(--muted);font-weight:600;font-size:14px}
 .pickhint{margin:2px 4px 7px;font-size:11.5px;line-height:1.4;color:var(--muted)}
 .pick button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:7px 9px;border-radius:10px;font-size:13px}
 .pick button:hover:not([disabled]){background:#f0f6ed}
@@ -178,7 +186,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 20</span></div>
+    <span class="ver" role="note">build 21</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -237,6 +245,13 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
         <summary id="targetSummary">Choose a target</summary>
         <div class="pick" id="pick" role="group" aria-label="Choose the occupation to aim for"></div>
       </details>
+    </div>
+
+    <!-- A gardener names no target, so this slot would otherwise be empty.
+         It carries the only thing they can watch: where the child is now. -->
+    <div id="gardenerWrap" style="display:none">
+      <h3 class="eyebrow" style="margin-bottom:9px">Where they are now</h3>
+      <div class="nowbox" id="gardenerNow" role="status"></div>
     </div>
 
     <h3 class="eyebrow" style="margin:14px 0 9px">This stage</h3>
@@ -834,6 +849,22 @@ function render(){
   });
 
   el("targetWrap").style.display = g ? "none" : "block";
+  el("gardenerWrap").style.display = g ? "block" : "none";
+  // the odds line lives below the buttons, so it is not hidden with the target
+  // block; a gardener named no target and must not be shown its chances
+  el("odds").style.display = g ? "none" : "";
+  if(g){
+    if(!s.segs.length){
+      el("gardenerNow").innerHTML = '<span class="waiting">Nothing has grown yet. ' +
+        'Feed the first stage and see where it goes.</span>';
+    } else {
+      const n = nearestOcc(s.pos), o = OCC[n.i];
+      el("gardenerNow").innerHTML = '<b>' + esc(o[0]) + '</b><small>' +
+        money(o[5]) + ' &middot; ' + edLabel(o[2]) + ' &middot; emotional labour ' + Math.round(o[3]) +
+        '<br>' + n.dist.toFixed(1) + ' away' +
+        (s.over ? ', and this is where they stayed' : ', and still growing') + '</small>';
+    }
+  }
   el("stageNo").textContent = Math.min(s.stage, TOTAL_STAGES);
   el("stageName").textContent = STAGE_NAMES[Math.min(TOTAL_STAGES, s.stage) - 1];
   el("stageBadge").textContent = "Stage " + Math.min(s.stage, TOTAL_STAGES) + " / " + TOTAL_STAGES;
