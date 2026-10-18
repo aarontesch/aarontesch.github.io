@@ -1,0 +1,86 @@
+Occupation,D1_duration,D2_stakes,D3_reading,D4_self_regulation,D5_responsibility,Total,Tier,Tier_name,New_coordinate,Old_contact_pctl,Change,Education,Median_pay_USD
+Psychiatrists,4,4,4,4,4,20,T4,Clinical,88,54,+34,doctorate,350786
+Family Medicine Physicians,4,4,4,4,4,20,T4,Clinical,88,99,-11,doctorate,325040
+Clinical and Counseling Psychologists,4,4,4,4,4,20,T4,Clinical,88,42,+46,doctorate,96000
+Nurse Practitioners,3,4,4,4,4,19,T4,Clinical,88,67,+21,master,129000
+Clergy,4,4,3,4,3,18,T4,Clinical,88,48,+40,bachelor,58000
+Police and Sheriff's Patrol Officers,1,4,4,4,4,17,T4,Clinical,88,45,+43,high school,77000
+Physician Assistants,2,4,3,4,4,17,T4,Clinical,88,93,-5,master,133000
+Veterinarians,2,4,3,4,3,16,T4,Clinical,88,85,+3,doctorate,125000
+Registered Nurses,2,4,3,4,3,16,T4,Clinical,88,85,+3,bachelor,93600
+Physical Therapists,3,3,3,3,4,16,T4,Clinical,88,94,-6,doctorate,101000
+Paramedics,1,4,3,4,4,16,T4,Clinical,88,37,+51,certificate,54000
+Judges and Magistrates,1,4,3,4,4,16,T4,Clinical,88,57,+31,doctorate,151000
+Childcare Workers,3,3,3,3,4,16,T4,Clinical,88,67,+21,high school,32000
+Secondary School Teachers,3,3,3,3,3,15,T3,Developmental,50,76,-26,bachelor,66000
+Nursing Assistants,3,3,3,3,3,15,T3,Developmental,50,79,-29,certificate,40000
+Medical and Health Services Managers,3,3,3,3,3,15,T3,Developmental,50,79,-29,bachelor,117000
+Licensed Practical Nurses,3,3,3,3,3,15,T3,Developmental,50,79,-29,certificate,62000
+Lawyers,3,3,3,3,3,15,T3,Developmental,50,67,-17,doctorate,151160
+Human Resources Specialists,3,3,3,3,3,15,T3,Developmental,50,67,-17,bachelor,72000
+General and Operations Managers,3,3,3,3,3,15,T3,Developmental,50,54,-4,bachelor,103000
+Fortune 500 CEO (illustrative),3,3,3,3,3,15,T3,Developmental,50,48,+2,master,17000000
+Firefighters,1,4,2,4,4,15,T3,Developmental,50,18,+32,certificate,59000
+Elementary School Teachers,3,3,3,3,3,15,T3,Developmental,50,85,-35,bachelor,64000
+Chief Executives,3,3,3,3,3,15,T3,Developmental,50,48,+2,bachelor,239200
+Anesthesiologists,1,4,2,3,4,14,T3,Developmental,50,99,-49,doctorate,557131
+Air Traffic Controllers,1,4,1,4,4,14,T3,Developmental,50,60,-10,associate,145000
+Real Estate Sales Agents,3,3,3,2,2,13,T3,Developmental,50,54,-4,high school,56000
+Pharmacists,2,3,2,2,3,12,T3,Developmental,50,60,-10,doctorate,137000
+Hairdressers and Cosmetologists,3,2,3,2,2,12,T3,Developmental,50,67,-17,certificate,36000
+Architects,3,2,2,2,2,11,T2,Coordinative,23,40,-17,bachelor,96000
+Marketing Managers,2,2,2,2,2,10,T2,Coordinative,23,33,-10,bachelor,161000
+Financial Managers,2,2,2,2,2,10,T2,Coordinative,23,27,-4,bachelor,161000
+Dental Assistants,2,2,2,2,2,10,T2,Coordinative,23,76,-53,certificate,48000
+Customer Service Representatives,1,2,2,3,2,10,T2,Coordinative,23,79,-56,high school,42000
+Construction Managers,2,2,2,2,2,10,T2,Coordinative,23,48,-25,bachelor,106000
+Accountants and Auditors,2,2,2,2,2,10,T2,Coordinative,23,12,+11,bachelor,81000
+Security Guards,1,2,2,2,2,9,T2,Coordinative,23,85,-62,high school,38000
+Paralegals and Legal Assistants,2,2,2,2,1,9,T2,Coordinative,23,42,-19,associate,61000
+Software Developers,2,1,2,1,2,8,T2,Coordinative,23,18,+5,bachelor,133080
+Secretaries and Administrative Assistants,2,1,2,2,1,8,T2,Coordinative,23,85,-62,high school,46000
+Librarians,2,1,2,1,2,8,T2,Coordinative,23,23,+0,master,65000
+Computer User Support Specialists,1,1,2,2,2,8,T2,Coordinative,23,36,-13,some college,60000
+Civil Engineers,2,2,1,1,2,8,T2,Coordinative,23,27,-4,bachelor,99000
+Bartenders,1,2,2,2,1,8,T2,Coordinative,23,60,-37,no credential,34000
+Waiters and Waitresses,1,1,2,2,1,7,T1,Transactional,5,79,-74,no credential,34000
+Retail Salespersons,1,1,2,2,1,7,T1,Transactional,5,85,-80,no credential,35000
+Mechanical Engineers,2,1,1,1,2,7,T1,Transactional,5,60,-55,bachelor,102320
+Information Security Analysts,2,1,1,1,2,7,T1,Transactional,5,31,-26,bachelor,124000
+HVAC Mechanics and Installers,2,1,1,1,2,7,T1,Transactional,5,60,-55,certificate,59000
+Graphic Designers,2,1,2,1,1,7,T1,Transactional,5,30,-25,bachelor,61000
+Electricians,2,1,1,1,2,7,T1,Transactional,5,67,-62,high school,62350
+Electrical Engineers,2,1,1,1,2,7,T1,Transactional,5,33,-28,bachelor,111000
+Chefs and Head Cooks,2,1,1,2,1,7,T1,Transactional,5,48,-43,high school,60000
+Automotive Service Technicians,2,1,1,1,2,7,T1,Transactional,5,20,-15,certificate,50000
+Radiologists,0,2,0,1,3,6,T1,Transactional,5,21,-16,doctorate,609684
+Carpenters,2,1,1,1,1,6,T1,Transactional,5,67,-62,high school,59000
+Medical Scientists,1,1,1,1,1,5,T1,Transactional,5,57,-52,doctorate,100000
+Economists,1,1,1,1,1,5,T1,Transactional,5,7,-2,master,116000
+Cashiers,1,1,1,1,1,5,T1,Transactional,5,94,-89,no credential,31000
+"Child, Family, and School Social Workers",4,4,4,4,4,20,T4,Clinical,88,94,-6,bachelor,55000
+"Airline Pilots, Copilots, and Flight Engineers",1,4,1,4,4,14,T3,Developmental,50,37,+13,bachelor,239200
+Statisticians,1,0,1,0,1,3,T0,Incidental,0,5,-5,master,104000
+Market Research Analysts,1,0,1,0,1,3,T0,Incidental,0,11,-11,bachelor,76000
+Data Scientists,1,0,1,0,1,3,T0,Incidental,0,2,-2,bachelor,120230
+"Mathematical Science Teachers, Postsecondary",3,2,2,2,3,12,T3,Developmental,50,31,+19,doctorate,80000
+"English Language and Literature Teachers, Postsecondary",3,2,3,2,3,13,T3,Developmental,50,37,+13,doctorate,80470
+"Educational, Guidance, and Career Counselors",3,3,4,3,4,17,T4,Clinical,88,85,+3,master,64000
+"Dentists, General",2,3,3,3,3,14,T3,Developmental,50,94,-44,doctorate,172000
+Writers and Authors,0,1,1,0,0,2,T0,Incidental,0,7,-7,bachelor,72000
+Physicists,1,0,0,0,1,2,T0,Incidental,0,10,-10,doctorate,156000
+Mathematicians,1,0,0,0,1,2,T0,Incidental,0,4,-4,master,120000
+Heavy and Tractor-Trailer Truck Drivers,0,0,0,1,1,2,T0,Incidental,0,26,-26,certificate,58000
+Construction Laborers,1,0,0,1,0,2,T0,Incidental,0,45,-45,no credential,46000
+"News Analysts, Reporters, and Journalists",1,3,3,2,1,10,T2,Coordinative,23,42,-19,bachelor,58000
+Machinists,1,0,0,0,0,1,T0,Incidental,0,14,-14,high school,53000
+Fine Artists,0,0,1,0,0,1,T0,Incidental,0,1,-1,bachelor,66000
+"Plumbers, Pipefitters, and Steamfitters",2,1,1,1,2,7,T1,Transactional,5,23,-18,high school,62000
+"Office Clerks, General",1,0,1,1,1,4,T1,Transactional,5,60,-55,high school,41000
+Landscaping and Groundskeeping Workers,0,0,0,0,0,0,T0,Incidental,0,0,+0,no credential,38000
+Janitors and Cleaners,0,0,0,0,0,0,T0,Incidental,0,13,-13,no credential,36000
+Bakers,0,0,0,0,0,0,T0,Incidental,0,67,-67,no credential,36000
+"Welders, Cutters, Solderers, and Brazers",1,0,0,0,0,1,T0,Incidental,0,17,-17,high school,51000
+"Laborers and Freight, Stock, and Material Movers",0,0,0,0,0,0,T0,Incidental,0,14,-14,no credential,38000
+"Farmworkers and Laborers, Crop",0,0,0,0,0,0,T0,Incidental,0,6,-6,no credential,35000
+"Cooks, Restaurant",1,0,0,1,0,2,T0,Incidental,0,23,-23,no credential,37000
