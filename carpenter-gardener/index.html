@@ -105,11 +105,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .vizdata tbody tr[aria-current="true"]{background:#eef4ea}
 .vizdata .scroll{max-height:300px;overflow:auto}
 
-.meterwrap{margin-bottom:16px}
-.meterhead{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-bottom:6px}
-.meter{height:12px;background:#dbe4d7;border-radius:99px;overflow:hidden}
-.meter i{display:block;height:100%;border-radius:99px;background:var(--deep);transition:width .35s}
-.meter i.warn{background:var(--rose)}
+.outcome{margin:0 0 16px;padding:12px 15px;border-radius:15px;background:#eef4ea;border:1px solid #d3e0cd;
+  font-size:15px;line-height:1.5;color:#2d4636}
+.outcome b{font-weight:800}
+.outcome .miss{color:#8d3f34}
 .timeline{display:flex;gap:5px;margin-bottom:16px}
 .dot{height:8px;flex:1;border-radius:8px;background:#dbe4d7}
 .dot.done{background:var(--deep)}
@@ -165,7 +164,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 10</span></div>
+    <span class="ver" role="note">build 11</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -209,11 +208,11 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <div class="actions">
       <button class="action" id="btnAim" data-act="aim">
         <span><b>Aim the growth</b><small id="aimNote">Point this stage at the target</small></span>
-        <span class="cost">8 wellbeing</span>
+        <span class="cost" id="aimCost">accuracy</span>
       </button>
       <button class="action" id="btnNur" data-act="nurture">
         <span><b>Nurture the growth</b><small id="nurNote">Keep the heading, add a standard deviation of length</small></span>
-        <span class="cost">18 wellbeing</span>
+        <span class="cost">+1 SD reach</span>
       </button>
     </div>
 
@@ -249,10 +248,8 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       <div id="tableWrap"></div>
     </details>
 
-    <div class="meterwrap">
-      <div class="meterhead"><span id="meterLabel">Wellbeing</span><span id="meterValue">100</span></div>
-      <div class="meter"><i id="meter" style="width:100%"></i></div>
-    </div>
+    <!-- the whole scoreboard: what you pointed at, and where they arrived -->
+    <p class="outcome" id="outcome" role="status"></p>
 
     <div class="timeline" id="timeline"></div>
     <div class="stats" id="stats"></div>
@@ -265,7 +262,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       <div id="log" aria-live="polite"></div>
     </div>
 
-    <div class="tip sage"><h3 class="tiphead">How to play</h3>Pick a strategy before the first stage&mdash;it locks once growth is under way. Each of the five stages is one choice: aim it, or feed it. Aiming buys accuracy; nurturing buys reach, and costs more of the child. Play both strategies to unlock the side-by-side comparison.</div>
+    <div class="tip sage"><h3 class="tiphead">How to play</h3>Pick a strategy before the first stage&mdash;it locks once growth is under way. Each of the five stages is one choice: aim it, or feed it. Aiming buys accuracy; nurturing buys reach. You only get five. Play both strategies to unlock the side-by-side comparison.</div>
   </div>
 
 </section>
@@ -361,7 +358,6 @@ const CENTRE = 50;
 const MU  = Math.sqrt(3 * CENTRE * CENTRE) / TOTAL_STAGES;  // 17.32
 const SIG = 0.65 * MU;                                      // wide: nurture must buy real reach
 const ANG = 15 * Math.PI / 180;                             // heading noise per segment
-const COST_AIM = 8, COST_NUR = 18, WELL_FLOOR = 25;
 /* a wide length distribution is what lets nurture buy real reach, but an
    unfloored draw can produce a stage that visibly does nothing */
 const LEN_FLOOR = 0.3 * MU;
@@ -410,7 +406,7 @@ function fresh(mode){
   return {
     mode: mode || "carpenter",
     locked: false, over: false,
-    stage: 1, health: 100,
+    stage: 1,
     pos: [0,0,0], heading: norm([1,1,1]),
     segs: [], target: 13, aimed: 0, nurtured: 0,
     log: ["Five stages, one developing life, no guaranteed ending."]
@@ -447,7 +443,6 @@ function growStage(choice){
   s.pos = to; s.heading = dir;
   s.locked = true;
   if(nurture) s.nurtured++; else s.aimed++;
-  s.health = Math.max(0, s.health - (nurture ? COST_NUR : COST_AIM));
 
   const where = nearestOcc(to);
   s.log.push((g
@@ -455,10 +450,6 @@ function growStage(choice){
       : (nurture ? "You fed the structure rather than steering it." : "You trued the structure toward " + OCC[s.target][0] + "."))
     + " It now sits nearest " + OCC[where.i][0] + ".");
 
-  if(s.health <= 0){
-    s.log.push("Wellbeing bottomed out. Growth stops here.");
-    return finishRun("collapse");
-  }
   s.stage++;
   if(s.stage > TOTAL_STAGES) return finishRun("complete");
   render();
@@ -643,10 +634,10 @@ function render(){
   el("modeBadge").innerHTML = '<span class="vh">Strategy: </span>' + (g ? "Gardener" : "Carpenter");
   el("dashTitle").textContent = g ? "A vine finding its own way" : "A structure under construction";
   el("principle").textContent = g
-    ? "You cannot choose where it climbs. You can only choose how much you feed it, and feeding costs the child."
+    ? "You cannot choose where it climbs. You can only choose how much you feed it, and that decides how far from the middle it ends up."
     : "A blueprint names one address out of eighty-five. Every stage spent correcting the aim is a stage not spent growing.";
   el("tip").textContent = g
-    ? "Nothing here is a failure. But restraint and hunger land in very different parts of the space."
+    ? "Nothing here is a failure, because nothing was named. But restraint and hunger land in very different parts of the space."
     : "Aim buys accuracy. Nurture buys reach. The far corner of this space needs both, and you only have five stages.";
 
   /* the two choices, named for the condition */
@@ -670,17 +661,23 @@ function render(){
       " units out. Aiming every stage reaches it in about " + pct + "% of runs.";
   }
 
-  /* wellbeing */
-  el("meterValue").textContent = s.health;
-  el("meter").style.width = s.health + "%";
-  el("meter").className = s.health <= 35 ? "warn" : "";
 
   el("timeline").innerHTML = Array.from({length: TOTAL_STAGES}, (_, i) =>
     '<span class="dot ' + (i < s.stage-1 ? "done" : i === s.stage-1 && !s.over ? "current" : "") + '"></span>').join("");
 
   const w = s.segs.length ? nearestOcc(s.pos) : null;
+
+  /* the scoreboard, in place of the old wellbeing meter: what you pointed at,
+     and where they are actually heading */
+  const aimingAt = g ? "<b>nothing</b>" : "<b>" + esc(OCC[s.target][0]) + "</b>";
+  const landed = w ? "<b" + (!g && s.over && w.i === s.target ? ">" : (s.over && !g ? ' class="miss">' : ">")) +
+    esc(OCC[w.i][0]) + "</b>" : null;
+  el("outcome").innerHTML = s.over
+    ? "You aimed at " + aimingAt + ", and they ended up at " + landed + "."
+    : "You are aiming at " + aimingAt + ". " +
+      (landed ? "So far they are nearest " + landed + "." : "Nothing has grown yet.");
+
   const stats = [
-    ["Wellbeing", s.health],
     ["Stages grown", s.segs.length + " / " + TOTAL_STAGES],
     ["Position", Math.round(s.pos[0]) + " / " + Math.round(s.pos[1]) + " / " + Math.round(s.pos[2])],
     ["Nearest now", w ? OCC[w.i][0] : "—"]
@@ -710,44 +707,41 @@ function finishRun(reason){
   const w = s.segs.length ? nearestOcc(s.pos) : {i: 0, dist: 0};
   const career = OCC[w.i];
   const hitTarget = !g && w.i === s.target;
-  const well = s.health > WELL_FLOOR;
-  const success = g ? well : (hitTarget && well);
+  /* the only question left: did they arrive where you pointed them */
+  const success = g ? true : hitTarget;
   const r = {mode: s.mode, career: career[0], careerIdx: w.i, target: OCC[s.target][0],
-    wellbeing: s.health, reach: Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])),
+    reach: Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])),
     pos: s.pos.slice(), hit: hitTarget, aimed: s.aimed, nurtured: s.nurtured, elite: reachOf(career) > 110};
   history.push(r);
 
-  el("resultTitle").textContent = reason === "collapse" ? "The run ended early."
-    : success ? (g ? "A life took its own shape." : "The blueprint was met.")
-    : "The run reached a difficult edge.";
+  el("resultTitle").textContent = g ? "A life took its own shape."
+    : hitTarget ? "The blueprint was met." : "The blueprint was missed.";
 
-  el("resultText").textContent = reason === "collapse"
-    ? "Wellbeing ran out before the fifth stage. Whatever the strategy, the child was the resource being spent."
-    : g
-      ? "No destination was named, so none was missed. The child became: " + career[0] +
-        (r.elite ? " — one of the hardest places in this space to arrive at, and nobody steered." : ".") +
-        (well ? "" : " It cost most of their wellbeing to get there.")
-      : hitTarget
-        ? "The structure reached " + career[0] + (well ? ". The question now is what it cost to hold the shape."
-            : ", but there was very little of the child left by the end.")
-        : "You aimed at " + OCC[s.target][0] + ". The child became: " + career[0] +
-          ". By the blueprint that is a failure. It is also just a life.";
+  el("resultText").textContent = g
+    ? "You named no destination, so none was missed. They ended up at " + career[0] + "." +
+      (r.elite ? " That is one of the hardest places in this space to arrive at, and nobody steered." : "")
+    : hitTarget
+      ? "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
+        ". One address out of " + OCC.length + ", and you hit it."
+      : "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
+        ". By the blueprint that is a failure. It is also just a life.";
 
   el("resultGrid").innerHTML = [
-    ["Became", career[0]],
+    [g ? "Aimed at" : "You aimed at", g ? "nothing" : OCC[s.target][0]],
+    ["Ended up at", career[0]],
     ["Salary / Educ / Contact", career[1] + " / " + career[2] + " / " + career[3]],
-    [g ? "Stages fed" : "Aimed / nurtured", g ? s.nurtured + " / " + TOTAL_STAGES : s.aimed + " / " + s.nurtured],
-    ["Wellbeing", s.health]
+    [g ? "Stages fed" : "Aimed / nurtured", g ? s.nurtured + " / " + TOTAL_STAGES : s.aimed + " / " + s.nurtured]
   ].map(x => '<div class="result"><b>' + esc(x[1]) + '</b><span>' + x[0] + '</span></div>').join("");
 
   const lastC = [...history].reverse().find(h => h.mode === "carpenter");
   const lastG = [...history].reverse().find(h => h.mode === "gardener");
   if(lastC && lastG){
-    const rows = [["Career reached", lastC.career, lastG.career],
-      ["Distance travelled", lastC.reach, lastG.reach],
-      ["An elite destination", lastC.elite ? "yes" : "no", lastG.elite ? "yes" : "no"],
+    const rows = [["Aimed at", lastC.target, "nothing"],
+      ["Ended up at", lastC.career, lastG.career],
       ["Named target met", lastC.hit ? "yes" : "no", "n/a"],
-      ["Wellbeing at the end", lastC.wellbeing, lastG.wellbeing]];
+      ["An elite destination", lastC.elite ? "yes" : "no", lastG.elite ? "yes" : "no"],
+      ["Distance travelled", lastC.reach, lastG.reach],
+      ["Stages nurtured", lastC.nurtured, lastG.nurtured]];
     el("compare").innerHTML = '<table class="cmp"><caption>Your most recent run of each</caption>' +
       '<thead><tr><th scope="col">Measure</th><th scope="col">Carpenter</th><th scope="col">Gardener</th></tr></thead><tbody>' +
       rows.map(x => '<tr><th scope="row">' + x[0] + '</th><td>' + esc(x[1]) + '</td><td>' + esc(x[2]) + '</td></tr>').join("") +
