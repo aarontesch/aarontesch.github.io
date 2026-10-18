@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 23</span></div>
+    <span class="ver" role="note">build 24</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -296,7 +296,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
           <span class="cost" id="aimCost">accuracy</span>
         </button>
         <button class="action" id="btnNur" data-act="nurture">
-          <span><b>Nurture the growth</b><small id="nurNote">Keep the heading, +1 SD</small></span>
+          <span><b>Nurture the growth</b><small id="nurNote">Let go of the wheel. +1 SD, no steering.</small></span>
           <span class="cost">+1 SD reach</span>
         </button>
       </div>
@@ -574,6 +574,9 @@ function fresh(mode, target){
     stage: 1,
     pos: [0,0,0], heading: norm(CENTROID.slice()),
     segs: [], target: (target === undefined ? 13 : target), aimed: 0, nurtured: 0,
+    /* what was named before any growth. Re-aiming mid-run is allowed, so the
+       result can say what the plan was as well as what it became. */
+    firstTarget: (target === undefined ? 13 : target), reaims: 0,
     log: ["Five stages, one developing life, no guaranteed ending."]
   };
 }
@@ -585,10 +588,13 @@ function growStage(choice){
   const g = s.mode === "gardener";
   const nurture = choice === "nurture";
   let dir;
-  if(g){
-    dir = flatDir();                                   // nobody steers a garden
-  } else if(nurture){
-    dir = perturb(s.heading, ANG);                     // keep going the way you were
+  /* Nurturing means letting go of the wheel, so it does not quietly keep the
+     heading the last aim bought. A nurtured stage takes the same flat
+     direction a gardener's does: the carpenter's choice each stage is simply
+     whether to steer or not, and reach cannot be bought while still pointing
+     where you were pointing. */
+  if(g || nurture){
+    dir = flatDir();
   } else {
     const t = OCC[s.target];
     let d = [t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]];
@@ -804,7 +810,7 @@ function playPlan(ti, nAim){
     const aim = k < nAim;
     const d = [t[1]-p[0], t[2]-p[1], t[3]-p[2]];
     const L = Math.hypot(d[0],d[1],d[2]);
-    const dir = aim ? perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG) : perturb(h, ANG);
+    const dir = aim ? perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG) : flatDir();
     let len = MU + gauss()*SIG + (aim ? 0 : SIG);
     if(len < LEN_FLOOR) len = LEN_FLOOR;
     if(aim && len > L) len = L;
@@ -908,7 +914,7 @@ function render(){
     : "A blueprint names one address out of eighty-five. Every stage spent correcting the aim is a stage not spent growing.";
   el("tip").textContent = g
     ? "Nothing here is a failure, because nothing was named. But restraint and hunger land in very different parts of the space."
-    : "Aim buys accuracy. Nurture buys reach. The far corner of this space needs both, and you only have five stages.";
+    : "Aim buys accuracy. Nurture buys reach but hands back the wheel. You only have five stages, and a stage can only do one of them.";
 
   /* A gardener has one move. "Let it grow" was a second button that did the
      same thing with less of it, which is not a decision; all that is left to
@@ -918,7 +924,7 @@ function render(){
   el("aimNote").textContent = "Point this stage at " + OCC[s.target][0];
   el("nurNote").textContent = g
     ? "Feed it. Where it goes is not yours to choose."
-    : "Keep the heading, +1 SD";
+    : "Let go of the wheel. +1 SD of length, no steering.";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
   /* target picker, hardest first */
@@ -929,7 +935,7 @@ function render(){
       PICK_ORDER.map(i => {
         const o = OCC[i], far = Math.round(reachOf(o)), od = DIFFICULTY[i].pct;
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
-          (s.locked ? " disabled" : "") +
+          (s.over ? " disabled" : "") +
           ' aria-label="' + esc(o[0]) + ': ' + far +
             ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', needs a ' + edLabel(o[2]) +
             ', emotional labour ' + o[3] + '">' +
@@ -941,7 +947,7 @@ function render(){
        the flex lives on an inner span: styling <summary> itself has a history
        of disturbing the disclosure behaviour in some browsers. */
     el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) + '</span><small>' +
-      (s.locked ? "locked" : "change") + ' ▾</small></span>';
+      (s.over ? "run over" : s.segs.length ? "re-aim" : "change") + ' ▾</small></span>';
     /* a measured 0 means the sample could not resolve it, not that it cannot
        happen: the rarest here land about one run in five hundred */
     el("odds").textContent = t[0] + " sits " + Math.round(reachOf(t)) +
@@ -1010,20 +1016,31 @@ function finishRun(reason){
   const r = {mode: s.mode, career: career[0], careerIdx: w.i, target: OCC[s.target][0],
     reach: Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])),
     pos: s.pos.slice(), hit: hitTarget, aimed: s.aimed, nurtured: s.nurtured, elite: reachOf(career) > 110,
+    firstTarget: OCC[s.firstTarget][0], reaims: s.reaims,
     sat: sat.value, satCeiling: sat.ceiling};
   history.push(r);
 
   el("resultTitle").textContent = g ? "A life took its own shape."
     : hitTarget ? "The blueprint was met." : "The blueprint was missed.";
 
+  /* A carpenter may now re-aim mid-run, so the plan they set out with and the
+     plan they finished with can differ. Saying both is the whole point: a
+     revised ambition that is then met is a different story from one that
+     never moved. */
+  const revised = !g && s.reaims > 0 && s.firstTarget !== s.target;
+  const revisionNote = revised
+    ? " You set out for " + OCC[s.firstTarget][0] + " and re-aimed " +
+      s.reaims + " time" + (s.reaims === 1 ? "" : "s") + " along the way."
+    : "";
+
   el("resultText").textContent = (g
     ? "You named no destination, so none was missed. They ended up at " + career[0] + "." +
       (r.elite ? " That is one of the hardest places in this space to arrive at, and nobody steered." : "")
     : hitTarget
       ? "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
-        ". One address out of " + OCC.length + ", and you hit it."
+        ". One address out of " + OCC.length + ", and you hit it." + revisionNote
       : "You aimed at " + OCC[s.target][0] + " and ended up at " + career[0] +
-        ". By the blueprint that is a failure. It is also just a life.")
+        ". By the blueprint that is a failure. It is also just a life." + revisionNote)
     + " " + (sat.ceiling === 100
       ? "Satisfaction " + sat.value + " out of a possible 100: you never steered, so nothing was deducted."
       : "Satisfaction " + sat.value + " out of a possible " + sat.ceiling + " — " +
@@ -1046,7 +1063,8 @@ function finishRun(reason){
       ["An elite destination", lastC.elite ? "yes" : "no", lastG.elite ? "yes" : "no"],
       ["Distance travelled", lastC.reach, lastG.reach],
       ["Stages nurtured", lastC.nurtured, lastG.nurtured],
-      ["Satisfaction", lastC.sat + " / " + lastC.satCeiling, lastG.sat + " / " + lastG.satCeiling]];
+      ["Satisfaction", lastC.sat + " / " + lastC.satCeiling, lastG.sat + " / " + lastG.satCeiling],
+      ["Re-aimed mid-run", lastC.reaims ? lastC.reaims + " time" + (lastC.reaims===1?"":"s") : "no", "n/a"]];
     el("compare").innerHTML = '<table class="cmp"><caption>Your most recent run of each</caption>' +
       '<thead><tr><th scope="col">Measure</th><th scope="col">Carpenter</th><th scope="col">Gardener</th></tr></thead><tbody>' +
       rows.map(x => '<tr><th scope="row">' + x[0] + '</th><td>' + esc(x[1]) + '</td><td>' + esc(x[2]) + '</td></tr>').join("") +
@@ -1096,7 +1114,12 @@ document.addEventListener("click", e => {
   }
   const pick = e.target.closest("[data-pick]");
   if(pick && !pick.disabled){
-    state.target = +pick.dataset.pick;
+    const next = +pick.dataset.pick;
+    if(next !== state.target){
+      // before anything grows this is still choosing; after, it is a revision
+      if(state.segs.length) state.reaims++; else state.firstTarget = next;
+      state.target = next;
+    }
     el("targetDetails").open = false;   // collapse back to the one-line summary
     return render();
   }
