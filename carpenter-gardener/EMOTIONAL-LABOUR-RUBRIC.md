@@ -1,7 +1,8 @@
 # Emotional labour: a rubric for the third axis
 
-**Status: draft for review.** Nothing here is measured. The tier shares in
-particular are estimates and are the part most worth your judgement.
+**Status: draft for review.** Nothing here is measured. The 425 dimension
+scores are my judgement and the curve that prices them is a choice; both are
+worth arguing with.
 
 ## Why replace contact
 
@@ -68,53 +69,69 @@ Score each 0–4. Total 0–20.
 
 ## From score to coordinate
 
-The rubric total places an occupation in a tier. The tiers carry the
-exponential spacing, using the same unit as the other two axes: **23 units per
-halving of the share of the workforce that works at that level or above.**
+The rubric total **is** the measure. It is used directly:
 
-| total | tier | | share of workforce at or above | coordinate |
-|---|---|---|---|---|
-| 0–3 | **T0 Incidental** | work on things, not people | 100% | 0 |
-| 4–7 | **T1 Transactional** | brief scripted exchanges | 64% | 15 |
-| 8–11 | **T2 Coordinative** | sustained working relationships, tact, negotiation | 50% | 23 |
-| 12–15 | **T3 Developmental** | responsible for someone's growth or recovery over time | 22% | 50 |
-| 16–20 | **T4 Clinical** | routine distress and crisis, contained | 7% | 88 |
+```
+coordinate = 0                                  when total = 0
+coordinate = 15 + 85 × ((total − 1) / 19)^1.4   otherwise
+```
 
-The axis then runs 0–88, comparable to education's 0–110 and pay's 0–210.
+| total | coord | | total | coord | | total | coord |
+|---|---|---|---|---|---|---|---|
+| 0 | 0.0 | | 7 | 31.9 | | 14 | 65.0 |
+| 1 | 15.0 | | 8 | 36.0 | | 15 | 70.4 |
+| 2 | 16.4 | | 9 | 40.3 | | 16 | 76.1 |
+| 3 | 18.6 | | 10 | 44.9 | | 17 | 81.8 |
+| 4 | 21.4 | | 11 | 49.6 | | 18 | 87.7 |
+| 5 | 24.6 | | 12 | 54.5 | | 19 | 93.8 |
+| 6 | 28.1 | | 13 | 59.7 | | 20 | 100.0 |
 
-**T1 was first set at 5 and raised to 15.** A brief transaction can matter a
-great deal to whether the work succeeds — a cashier or a waiter who cannot
-manage a counter is not doing the job — and 5 put that almost at the floor. In
-the ladder's own terms the raise is a claim that fewer of the workforce are at
-transactional level or above than first assumed, about 64% rather than 85%,
-with the rest in genuinely object-focused work. The step from T1 to T2 is
-correspondingly small, which is right: transactional and coordinative work are
-not far apart in how common they are.
+Three things are doing work here.
 
-**The share column is the weak point.** It is my estimate of how much of US
-employment sits at each tier, not a measured distribution, and it sets the
-entire spacing. If T4 is nearer 4% the top stretches to 103; if it is 12% it
-compresses to 70.
+**The 15-point floor.** Any interpersonal demand at all starts at 15, because
+a brief transaction can matter a great deal to whether the work succeeds — a
+cashier or a waiter who cannot manage a counter is not doing the job. Only a
+total of exactly zero, where the rubric found no demand on any of the five
+dimensions, sits at the origin. The step from nothing to something is real and
+the scale should show it.
+
+**The 1.4 exponent** keeps the character of the other two axes: each further
+step costs more than the one before. It is mild, because the rubric total is
+already an ordinal sum rather than a physical quantity like dollars.
+
+**The 0–100 range** leaves the axis comparable to education's 0–110 and pay's
+0–210.
+
+### Why not tiers
+
+An earlier draft bucketed the totals into five tiers spaced by estimated
+workforce share. Two problems. The totals discriminate across 21 levels and
+the tiers threw that away — eleven occupations shared a total of 15 and were
+indistinguishable from three others on 12. And the spacing depended on my
+estimates of how US employment distributes across the tiers, which were the
+least defensible numbers in the document. Using the total directly needs no
+such estimate: the rubric is the instrument, and the curve only decides how
+steeply its steps are priced.
 
 ## Worked examples
 
-| occupation | D1 | D2 | D3 | D4 | D5 | total | tier | new | old contact |
-|---|---|---|---|---|---|---|---|---|---|
-| Radiologists | 0 | 1 | 0 | 1 | 1 | 3 | T0 | 0 | 21 |
-| Farmworkers | 0 | 0 | 0 | 0 | 0 | 0 | T0 | 0 | 6 |
-| Cashiers | 1 | 1 | 1 | 1 | 1 | 5 | T1 | 15 | **94** |
-| Waiters and Waitresses | 1 | 1 | 2 | 2 | 1 | 7 | T1 | 15 | 79 |
-| Electricians | 2 | 1 | 1 | 1 | 2 | 7 | T1 | 15 | 67 |
-| Software Developers | 2 | 1 | 2 | 1 | 2 | 8 | T2 | 23 | 18 |
-| Accountants and Auditors | 2 | 2 | 2 | 2 | 2 | 10 | T2 | 23 | 12 |
-| Lawyers | 3 | 3 | 3 | 3 | 3 | 15 | T3 | 50 | 67 |
-| Elementary School Teachers | 3 | 3 | 3 | 3 | 3 | 15 | T3 | 50 | 85 |
-| Registered Nurses | 2 | 4 | 3 | 4 | 3 | 16 | T4 | 88 | 85 |
-| Child and Family Social Workers | 4 | 4 | 4 | 4 | 4 | 20 | T4 | 88 | 94 |
-| Psychiatrists | 4 | 4 | 4 | 4 | 4 | 20 | T4 | 88 | **54** |
+| occupation | D1 | D2 | D3 | D4 | D5 | total | coord | old contact |
+|---|---|---|---|---|---|---|---|---|
+| Farmworkers | 0 | 0 | 0 | 0 | 0 | 0 | 0.0 | 6 |
+| Radiologists | 0 | 1 | 0 | 1 | 1 | 3 | 18.6 | 21 |
+| Cashiers | 1 | 1 | 1 | 1 | 1 | 5 | 24.6 | **94** |
+| Waiters and Waitresses | 1 | 1 | 2 | 2 | 1 | 7 | 31.9 | 79 |
+| Electricians | 2 | 1 | 1 | 1 | 2 | 7 | 31.9 | 67 |
+| Software Developers | 2 | 1 | 2 | 1 | 2 | 8 | 36.0 | 18 |
+| Accountants and Auditors | 2 | 2 | 2 | 2 | 2 | 10 | 44.9 | 12 |
+| Lawyers | 3 | 3 | 3 | 3 | 3 | 15 | 70.4 | 67 |
+| Elementary School Teachers | 3 | 3 | 3 | 3 | 3 | 15 | 70.4 | 85 |
+| Registered Nurses | 2 | 4 | 3 | 4 | 3 | 16 | 76.1 | 85 |
+| Child and Family Social Workers | 4 | 4 | 4 | 4 | 4 | 20 | 100.0 | 94 |
+| Psychiatrists | 4 | 4 | 4 | 4 | 4 | 20 | 100.0 | **54** |
 
-The two that motivated this invert as intended: the cashier drops 94 → 15, the
-psychiatrist rises 54 → 88.
+The two that motivated this invert as intended: the cashier drops 94 → 25, the
+psychiatrist rises 54 → 100.
 
 ## What it does to the model
 
@@ -133,7 +150,9 @@ axis measures reachability.
 
 ## Open questions
 
-1. **The tier shares.** Guesses. They set the spacing of the whole axis.
+1. **The curve.** The 15-point floor and the 1.4 exponent are judgement, not
+   measurement. The floor says any interpersonal demand is a real step up from
+   none; the exponent says later steps cost more than earlier ones.
 2. **Five dimensions, equally weighted.** D3 and D4 may deserve more weight if
    the construct is EQ specifically rather than emotional labour generally.
 3. **Does the data still carry raw contact?** It may be worth keeping as a
