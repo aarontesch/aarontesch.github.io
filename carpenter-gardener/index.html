@@ -108,6 +108,29 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .vinesvg .knot{fill:var(--sun);stroke:#fff;stroke-width:2}
 .vizempty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;padding:24px;text-align:center}
 
+/* ---- the drawings' accessible table equivalents ---- */
+.vizdata{margin:-6px 0 16px}
+.vizdata summary{cursor:pointer;font-weight:800;font-size:12px;color:var(--deep);padding:5px 0}
+.vizdata summary:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
+.vizdata table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 4px}
+.vizdata caption{caption-side:top;text-align:left;color:var(--muted);font-size:12px;line-height:1.45;padding:0 0 9px}
+.vizdata th,.vizdata td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+.vizdata thead th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.vizdata tbody th{font-weight:750;white-space:nowrap}
+.vizdata tbody td{font-variant-numeric:tabular-nums;color:#4f5e54}
+.vizdata tbody tr[aria-current="true"]{background:#eef4ea}
+.vizdata tbody tr:last-child th,.vizdata tbody tr:last-child td{border-bottom:0}
+
+/* ---- comparison, also a real table ---- */
+.cmp{border-collapse:collapse;width:100%;font-size:14px;margin:4px 0 0}
+.cmp caption{caption-side:top;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);font-weight:800;padding:12px 0 7px}
+.cmp th,.cmp td{text-align:left;padding:7px 9px;border-bottom:1px dotted var(--line)}
+.cmp thead th{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  border-bottom:1px solid var(--line)}
+.cmp td{font-variant-numeric:tabular-nums;white-space:nowrap}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
+
 /* ---- meter + stats ---- */
 .meterwrap{margin-bottom:18px}
 .meterhead{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted);margin-bottom:6px}
@@ -140,10 +163,6 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 .result b{display:block;font-size:21px;color:var(--deep)}
 .result span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
 .compare{border-top:1px solid var(--line);margin-top:4px;padding-top:15px}
-.comparehead{display:flex;justify-content:space-between;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800;padding-bottom:7px;margin-top:12px;border-bottom:1px solid var(--line)}
-.comparerow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:14px}
-.comparerow:last-of-type{border:0}
-.comparerow b{font-variant-numeric:tabular-nums;white-space:nowrap}
 .modalbtns{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
 .primary{background:var(--deep);color:#fff;border-radius:99px;padding:12px 18px;font-weight:800}
 .primary:hover{background:#26492f}
@@ -170,7 +189,7 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver">build 6</span></div>
+    <span class="ver">build 7</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -265,6 +284,15 @@ button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
     </div>
 
     <div class="viz" id="viz"></div>
+
+    <!-- The drawing above is a data graphic: a profession's position encodes a
+         climb and an amount of training. An SVG with an aria-label cannot
+         convey that, so the same figures are published here as a real table,
+         generated from the same state so the two can never disagree. -->
+    <details class="vizdata">
+      <summary id="vizTableSummary">Show these figures as a table</summary>
+      <div id="vizTableWrap"></div>
+    </details>
 
     <div class="meterwrap">
       <div class="meterhead"><span id="meterLabel">Structure toward target</span><span id="meterValue">0%</span></div>
@@ -565,6 +593,62 @@ function openPaths(s){
   return Math.max(1, 6 - Math.floor(usableBoards(s)) - Math.floor(s.precision/4));
 }
 
+/* ============ accessible equivalents of the two drawings ============ */
+/* Both are built from the same state the SVG is built from, so the table and
+   the picture cannot drift apart. Proper table markup with scoped row and
+   column headers and a caption, because this content IS a data table -- it
+   was previously only implied by the position of labels in the graphic. */
+function blueprintTable(s){
+  const have = usableBoards(s);
+  const rows = Object.keys(CAREERS).map(c => {
+    const kc = CAREERS[c];
+    const climbOk = have >= kc.need, trainOk = s.training >= kc.training;
+    const standing = climbOk && trainOk
+      ? "both met"
+      : !climbOk && !trainOk
+        ? "needs " + (kc.need - have).toFixed(1) + " climb, " + (kc.training - s.training) + " training"
+        : !climbOk
+          ? "needs " + (kc.need - have).toFixed(1) + " more climb"
+          : "needs " + (kc.training - s.training) + " more training";
+    return '<tr' + (c === s.selected ? ' aria-current="true"' : '') + '>' +
+      '<th scope="row">' + c + (c === s.selected ? ' (target)' : '') + '</th>' +
+      '<td>' + kc.need + '</td>' +
+      '<td>' + kc.training + '</td>' +
+      '<td>' + kc.tolerance + '</td>' +
+      '<td>' + standing + '</td></tr>';
+  }).join("");
+  return '<table>' +
+    '<caption>Every profession needs a climb (usable boards stacked up) and an amount of ' +
+      'academic training. You currently have ' + have.toFixed(1) + ' climb and ' +
+      s.training + ' training.</caption>' +
+    '<thead><tr>' +
+      '<th scope="col">Profession</th>' +
+      '<th scope="col">Climb needed</th>' +
+      '<th scope="col">Training needed</th>' +
+      '<th scope="col">Bent boards allowed</th>' +
+      '<th scope="col">Your standing</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function vineTable(s){
+  const rows = OPPORTUNITIES.map(o => {
+    const taken = s.opps.some(t => t[0] === o[0]);
+    return '<tr' + (taken ? ' aria-current="true"' : '') + '>' +
+      '<th scope="row">' + o[0] + '</th>' +
+      '<td>' + o[1] + '</td>' +
+      '<td>' + (taken ? "offered" : "not offered yet") + '</td></tr>';
+  }).join("");
+  return '<table>' +
+    '<caption>Domains offered to the vine: ' + s.opps.length + ' of 6 offered, ' +
+      s.support + ' supportive branch' + (s.support === 1 ? "" : "es") + ', ' +
+      openPaths(s) + ' open futures.</caption>' +
+    '<thead><tr>' +
+      '<th scope="col">Domain</th>' +
+      '<th scope="col">Opens toward</th>' +
+      '<th scope="col">Status</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
 /* ============ render ============ */
 const el = id => document.getElementById(id);
 
@@ -692,6 +776,11 @@ function render(){
     el("viz").innerHTML = blueprintSvg(s) +
       (s.boards.length ? "" : '<div class="vizempty">No boards nailed yet. The dashed line is the blueprint&mdash;each board you buy comes out of the mill as it comes.</div>');
   }
+  // the accessible equivalent of whichever drawing is on screen
+  el("vizTableWrap").innerHTML = g ? vineTable(s) : blueprintTable(s);
+  el("vizTableSummary").textContent = g
+    ? "Show the domains as a table"
+    : "Show the professions as a table";
 
   /* hero art tracks the run */
   const grow = g ? Math.min(1, (s.opps.length + s.support)/6) : Math.min(1, have/need);
@@ -845,11 +934,18 @@ function finishRun(reason){
       ["Named target reached", lastC.reached ? "yes" : "no", "n/a"],
       ["Supportive relationships", lastC.support, lastG.support]
     ];
+    /* a genuine two-column comparison, so each strategy's figure sits in its
+       own cell under its own header instead of "x / y" crammed into one */
     el("compare").innerHTML =
-      '<div class="eyebrow">Your most recent run of each</div>' +
-      '<div class="comparehead"><span>Measure</span><span>Carpenter / Gardener</span></div>' +
-      rows.map(x=>'<div class="comparerow"><span>' + x[0] + '</span><b>' + x[1] +
-        ' &nbsp;/&nbsp; ' + x[2] + '</b></div>').join("") +
+      '<table class="cmp">' +
+        '<caption>Your most recent run of each</caption>' +
+        '<thead><tr><th scope="col">Measure</th>' +
+          '<th scope="col">Carpenter</th><th scope="col">Gardener</th></tr></thead>' +
+        '<tbody>' + rows.map(x =>
+          '<tr><th scope="row">' + x[0] + '</th>' +
+          '<td>' + x[1] + '</td><td>' + x[2] + '</td></tr>').join("") +
+        '</tbody>' +
+      '</table>' +
       '<p style="color:var(--muted);font-size:12px;margin:12px 0 0">Neither column is the answer. The point is what each strategy made expensive.</p>';
   } else {
     const other = g ? "carpenter" : "gardener";
