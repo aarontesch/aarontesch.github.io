@@ -190,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 33</span></div>
+    <span class="ver" role="note">build 34</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -464,7 +464,14 @@ const CENTROID = (function(){
   return c.map(v => v / OCC.length);
 })();
 const CENTRE_DIST = Math.hypot(CENTROID[0], CENTROID[1], CENTROID[2]);
-const MU  = CENTRE_DIST / TOTAL_STAGES;   // five plain segments land on the average life
+/* Five plain segments land on the average life. Left at 1.0 with the
+   loosened direction clamp: scaling it up to keep an UNSTEERED walk on the
+   average was measured and backfires, because NURTURE_BONUS is a multiple of
+   MU, so every gardened stage grew too and the elite funnel came straight
+   back (35 distinct careers, Chief Executives 15%). An unsteered walk is not
+   playable anyway -- every gardened stage carries the bonus -- so the dial
+   that matters is the gardened one. */
+const MU  = CENTRE_DIST / TOTAL_STAGES;
 const SIG = 0.65 * MU;                    // spread of ordinary stage length
 /* The reach a nurtured stage buys, kept separate from the noise above. They
    were the same number, which meant extra reach could only be bought by
@@ -502,11 +509,23 @@ function perturb(d, sig){
   const th = gauss() * sig, c = Math.cos(th), s = Math.sin(th);
   return [c*d[0]+s*p[0], c*d[1]+s*p[1], c*d[2]+s*p[2]];
 }
-/* the gardener's flat law: every direction into the positive octant is
-   equally likely, which is what "no steering" has to mean when a percentile
-   cannot fall below zero */
+/* The gardener's flat law. This used to fold a downward draw into an upward
+   one, which is a hidden hand on the wheel: every unsteered stage climbed all
+   three ladders at once, and gardening funnelled half of all children into
+   the same elite medical cluster (Physician Assistants 19%, Chief Executives
+   12%, Anesthesiologists 10%).
+
+   The clamp is loosened rather than removed. A downward draw now stalls that
+   dimension for the stage instead of being turned into progress, so growth is
+   genuinely undirected -- but it still cannot go backwards, because a child
+   does not un-learn a credential and these axes are ladders. Removing the
+   clamp outright was measured and is worse: a symmetric walk from the origin
+   corner loses half of every step to the floor and sinks the median life into
+   farm labour and trucking. Loosened, distinct outcomes go from 52 to 74. */
 function flatDir(){
-  return norm([Math.abs(gauss()), Math.abs(gauss()), Math.abs(gauss())]);
+  const d = [gauss(), gauss(), gauss()].map(v => v < 0 ? 0 : v);
+  // all three drawn negative is rare, but it must not return a zero vector
+  return (d[0] + d[1] + d[2]) < 1e-9 ? norm([1, 1, 1]) : norm(d);
 }
 /* Some occupations now sit on exactly the same point -- Janitors and Bakers
    both pay $36k, need no credential and score zero emotional labour, and the
@@ -539,8 +558,8 @@ const reachOf = o => Math.hypot(o[1], o[2], o[3]);
    Fit: how well the child suits the occupation they ended up nearest,
    whatever it turned out to be.
 
-   Both are scored out of 100, always. Pushing still costs 5% of the measured
-   satisfaction per pushed stage -- a parent who pushes every stage keeps 75%
+   Both are scored out of 100, always. Pushing still costs 8% of the measured
+   satisfaction per pushed stage -- a parent who pushes every stage keeps 60%
    of what they earned -- but it no longer lowers the top of the scale, so
    every run is read against the same 100 and two runs can be set side by
    side without first working out what each one's maximum was. */
@@ -554,7 +573,48 @@ const reachOf = o => Math.hypot(o[1], o[2], o[3]);
    is unchanged -- gardening does not automatically win. It beats over-reaching
    and loses to a well-chosen target. */
 const FIT_SPAN = 54;
-const AIM_PENALTY = 0.05;
+/* Raised from 5%. At 5% a parent who pushed every stage at a modest, nearby
+   career still outscored every other way of playing, which is the opposite of
+   the argument. At 8% pushing loses to supporting for every goal except the
+   easiest one, and "do their best" finishes clearly ahead of all of them. */
+const AIM_PENALTY = 0.08;
+
+/* ---- the reference distribution behind the fit score ----
+   An absolute distance is meaningless to a reader: is 19 units from the
+   nearest occupation good? So fit is scored as a rank instead -- the share of
+   undirected lives that finished further from any occupation than this one
+   did. Built once at load against a fixed seed, the same way DIFFICULTY is,
+   so two students comparing screens read the same numbers. */
+const FIT_REF = (function(){
+  const real = Math.random;
+  let seed = 19740412;
+  Math.random = function(){
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+  };
+  const out = [];
+  try{
+    for(let i = 0; i < 4000; i++){
+      let p = [0, 0, 0];
+      for(let k = 0; k < TOTAL_STAGES; k++){
+        const d = flatDir();
+        let len = MU + gauss() * SIG + NURTURE_BONUS;
+        if(len < LEN_FLOOR) len = LEN_FLOOR;
+        p = clampPt([p[0]+d[0]*len, p[1]+d[1]*len, p[2]+d[2]*len]);
+      }
+      out.push(nearestOcc(p).dist);
+    }
+  } finally {
+    Math.random = real;
+  }
+  return out.sort((a, b) => a - b);
+})();
+/* the share of that reference finishing FURTHER out than this life did */
+function fitRank(dist){
+  let lo = 0, hi = FIT_REF.length;
+  while(lo < hi){ const m = (lo + hi) >> 1; if(FIT_REF[m] < dist) lo = m + 1; else hi = m; }
+  return 100 * (1 - lo / FIT_REF.length);
+}
 
 /* Both halves are reported on every run now, because a run is no longer one
    condition or the other. The goal figure is the parent's: how much of the
@@ -564,14 +624,16 @@ const AIM_PENALTY = 0.05;
 function satisfaction(s){
   if(!s.segs.length) return {goal: 0, fit: 0, value: 0, cost: 0};
   const fit = 100 * Math.max(0, 1 - nearestOcc(s.pos).dist / FIT_SPAN);
-  /* "Do their best" is satisfied in full, every time, and nothing is
-     deducted. The goal and the outcome are the same place, so there is no
-     gap to measure: a parent who asked only for their child's best got
-     exactly what they asked for, whatever career it turned out to be. Any
-     shortfall at all would be a punishment for a goal that cannot be missed.
-     Fit is still computed, because it describes how snugly the life sits on
-     a real occupation, but under this goal it no longer scores. */
-  if(isBest(s.target)) return {goal: 100, fit: Math.round(fit), value: 100, cost: 0};
+  /* "Do their best" is scored by rank, not by distance, and the rank is
+     floored at 50 so the scale runs 50-100. A parent who asked only for
+     their child's best cannot be disappointed -- there was no other life
+     they were hoping for -- so nothing here is a punishment; the half of
+     the scale that is in play says how squarely the life landed on a real
+     occupation rather than between several. The median run reads 75. */
+  if(isBest(s.target)){
+    const v = Math.round(50 + fitRank(nearestOcc(s.pos).dist) / 2);
+    return {goal: v, fit: Math.round(fit), value: v, cost: 0};
+  }
 
   const t = TARGETS[s.target], start = reachOf(t);
   const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
@@ -1059,7 +1121,8 @@ function render(){
       el("odds").textContent = "Doing their best is the one corner of the space no occupation " +
         "sits in, so it cannot be hit or missed. There is no address to steer toward, so " +
         "carpentry is not offered and every stage is a supported one. Whatever life they reach " +
-        "is the one you asked for, so satisfaction is full and nothing is deducted.";
+        "is the one you asked for, so nothing is ever deducted. The score runs from 50 to 100 and " +
+        "says how squarely that life sits on a real occupation rather than between several.";
     } else {
       const pct = estimateOdds(s.target);
       /* a measured 0 means the sample could not resolve it, not that it cannot
@@ -1175,8 +1238,10 @@ function finishRun(reason){
     /* Nothing is withheld under the aspiration, so the sentence states the
        rule rather than reporting a deduction that was never made. */
     + " " + (best
-      ? "Satisfaction 100 out of 100. You asked for their best and this is it: " +
-        "there was no other life you were hoping for, so there is nothing to be disappointed by."
+      ? "Satisfaction " + sat.value + " out of 100, with nothing deducted. You asked for their " +
+        "best and this is it, so there is nothing to be disappointed by; the score says this " +
+        "life sits more squarely on a real occupation than " + Math.round(2 * (sat.value - 50)) +
+        "% of undirected lives do."
       : "Goal satisfaction " + (sat.cost === 0
           ? sat.value + " out of 100: you never pushed, so nothing was deducted."
           : sat.value + " out of 100 — " +
@@ -1186,7 +1251,7 @@ function finishRun(reason){
 
   /* Both figures are scored out of the same 100, so the two rows of faces are
      directly comparable: one face per 10 points earned. Under the aspiration
-     satisfaction is full by definition, so the cells that would price the
+     satisfaction is never deducted from, so the cells that would price the
      shortfall describe the life that was reached instead. */
   el("resultGrid").innerHTML = (best
     ? [["Ended up at", esc(career[0])],
