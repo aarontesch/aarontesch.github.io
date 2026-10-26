@@ -189,7 +189,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 39</span></div>
+    <span class="ver" role="note">build 40</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -539,10 +539,31 @@ function perturb(d, sig){
    clamp outright was measured and is worse: a symmetric walk from the origin
    corner loses half of every step to the floor and sinks the median life into
    farm labour and trucking. Loosened, distinct outcomes go from 52 to 74. */
+/* Pay is not a ratchet, and treating it as one was wrong. Schooling and
+   emotional labour only accumulate -- nobody un-earns a degree or unlearns
+   how to sit with a dying patient -- but earnings fall, and roughly one
+   stage in five they do. So the pay axis is drawn from a distribution that
+   goes negative 20% of the time while keeping the SAME average progress as
+   the other two: a normal with mean m and sd m/z, where z is the
+   80th-percentile z-score. Matching the average climb matters -- simply
+   shifting pay upward until 20% of draws fell below zero would have doubled
+   its rate and handed back the easy-money problem that the stretched salary
+   axis exists to prevent. */
+const RISE = 1 / Math.sqrt(2 * Math.PI);   // mean of a draw clamped at zero
+const Z80 = 0.8416;                        // P(normal < -Z80) = 0.20
+/* 0.55 of that, not all of it. The direction is normalised, and normalising
+   hands ground to whichever axis carries the most variance -- so pay drawn
+   with the same raw mean as the other two still climbed 30% faster than
+   them, piling lives into the high-pay band (mean landing 64,45,44, Airline
+   Pilots 18%). Swept: 0.55 is where all three climb at the same rate again
+   while pay still falls one stage in five. */
+const PAY_MEAN = 0.55 * RISE;
 function flatDir(){
-  const d = [gauss(), gauss(), gauss()].map(v => v < 0 ? 0 : v);
-  // all three drawn negative is rare, but it must not return a zero vector
-  return (d[0] + d[1] + d[2]) < 1e-9 ? norm([1, 1, 1]) : norm(d);
+  const pay = PAY_MEAN + (PAY_MEAN / Z80) * gauss();
+  const ed = gauss(), eq = gauss();
+  const d = [pay, ed < 0 ? 0 : ed, eq < 0 ? 0 : eq];
+  // a near-zero vector has no direction to normalise, and must not be returned
+  return Math.hypot(d[0], d[1], d[2]) < 1e-9 ? norm([1, 1, 1]) : norm(d);
 }
 /* Some occupations now sit on exactly the same point -- Janitors and Bakers
    both pay $36k, need no credential and score zero emotional labour, and the
