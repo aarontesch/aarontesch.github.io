@@ -190,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 32</span></div>
+    <span class="ver" role="note">build 33</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -564,28 +564,21 @@ const AIM_PENALTY = 0.05;
 function satisfaction(s){
   if(!s.segs.length) return {goal: 0, fit: 0, value: 0, cost: 0};
   const fit = 100 * Math.max(0, 1 - nearestOcc(s.pos).dist / FIT_SPAN);
-  let goal;
-  if(isBest(s.target)){
-    /* "Do their best" names no address, so there is no distance to a goal to
-       measure and nothing that can be missed: the goal and the outcome are
-       the same place. Satisfaction is how well they fit the life they
-       actually reached. */
-    goal = fit;
-  } else {
-    const t = TARGETS[s.target], start = reachOf(t);
-    const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
-    goal = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
-  }
+  /* "Do their best" is satisfied in full, every time, and nothing is
+     deducted. The goal and the outcome are the same place, so there is no
+     gap to measure: a parent who asked only for their child's best got
+     exactly what they asked for, whatever career it turned out to be. Any
+     shortfall at all would be a punishment for a goal that cannot be missed.
+     Fit is still computed, because it describes how snugly the life sits on
+     a real occupation, but under this goal it no longer scores. */
+  if(isBest(s.target)) return {goal: 100, fit: Math.round(fit), value: 100, cost: 0};
+
+  const t = TARGETS[s.target], start = reachOf(t);
+  const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
+  const goal = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
   /* The cost of pushing is charged against the goal figure only. Fit measures
      where the child actually landed; deducting there as well would charge the
-     same pushed stage twice.
-
-     No special case is needed to make the aspiration free. Pushing is only
-     offered when a named career is the goal, so a run played entirely under
-     "do their best" has nothing in s.aimed and so pays nothing. A run that
-     pushed toward a named career and then switched still pays for the stages
-     it actually forced, which is both honest and stops the switch being used
-     to wipe the bill. */
+     same pushed stage twice. */
   const keep = 1 - AIM_PENALTY * s.aimed;
   const value = Math.round(goal * keep);
   return { goal: Math.round(goal), fit: Math.round(fit),
@@ -1065,8 +1058,8 @@ function render(){
          land on or fail to land on. Say what is being scored instead. */
       el("odds").textContent = "Doing their best is the one corner of the space no occupation " +
         "sits in, so it cannot be hit or missed. There is no address to steer toward, so " +
-        "carpentry is not offered and every stage is a supported one. Satisfaction is how well " +
-        "the life they do reach suits them, and nothing is deducted.";
+        "carpentry is not offered and every stage is a supported one. Whatever life they reach " +
+        "is the one you asked for, so satisfaction is full and nothing is deducted.";
     } else {
       const pct = estimateOdds(s.target);
       /* a measured 0 means the sample could not resolve it, not that it cannot
@@ -1112,17 +1105,14 @@ function render(){
     best
       ? ["Distance travelled", s.segs.length ? Math.round(Math.hypot(s.pos[0],s.pos[1],s.pos[2])) + " units" : "—"]
       : ["Fit to that life", s.segs.length ? sat.fit + " / 100" : "—"],
-    /* Under the aspiration there is no mix to report -- every stage is a
-       supported one -- so the two cells that count and price pushing give
-       way to what the child has actually reached. The exception is a run
-       that pushed under a named career before switching: that bill is still
-       owed, so it is still shown. */
-    best && !s.aimed
+    /* Under the aspiration nothing is counted against the parent, so the two
+       cells that price pushing give way to what the child has reached. */
+    best
       ? ["Schooling reached", s.segs.length ? edReached(s.pos[1]) : "—"]
       : ["Built / grown", s.aimed + " / " + s.nurtured],
     /* What pushing has cost so far, in points of the figure itself rather
        than points off the top of the scale. */
-    best && !s.aimed
+    best
       ? ["Pay reached", s.segs.length ? money(payAt(s.pos[0])) : "—"]
       : ["Cost of pushing", s.aimed && sat.cost ? "−" + sat.cost + " points" : "none"]
   ];
@@ -1133,7 +1123,7 @@ function render(){
     ? "Nothing has grown yet. Left entirely alone, five stages run straight to the middle of the space."
     : best
       ? "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) +
-        " away. There is no goal to be short of: that distance is the score."
+        " away. There is no goal to be short of, so that distance costs nothing."
       : "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) + " away; the goal " +
         TARGETS[s.target][0] + " is " + Math.hypot(TARGETS[s.target][1]-s.pos[0], TARGETS[s.target][2]-s.pos[1], TARGETS[s.target][3]-s.pos[2]).toFixed(1) + " away.";
 
@@ -1182,33 +1172,27 @@ function finishRun(reason){
         : "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
           ". By the goal that is a failure. It is also just a life." + revisionNote +
           (elite ? " It is also one of the hardest places in this space to arrive at." : ""))
-    /* Under the aspiration there was never a push to charge for, so the
-       sentence says why rather than crediting the parent with restraint
-       they were never asked to exercise. */
-    + " " + (best ? "Satisfaction" : "Goal satisfaction") + " " +
-      (best && !s.aimed
-        ? sat.value + " out of 100, with nothing deducted: there was no address to steer " +
-          "toward, so there was never a stage you forced on them."
-        : sat.cost === 0
+    /* Nothing is withheld under the aspiration, so the sentence states the
+       rule rather than reporting a deduction that was never made. */
+    + " " + (best
+      ? "Satisfaction 100 out of 100. You asked for their best and this is it: " +
+        "there was no other life you were hoping for, so there is nothing to be disappointed by."
+      : "Goal satisfaction " + (sat.cost === 0
           ? sat.value + " out of 100: you never pushed, so nothing was deducted."
           : sat.value + " out of 100 — " +
-            s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") +
-            (best ? " before you let the goal go cost " : " cost ") +
-            sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.")
-    + (best
-      ? " That is how well that life suits them, which is the only thing there was to measure."
-      : " Fit to the life they actually landed in, " + sat.fit + " out of 100.");
+            s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") + " cost " +
+            sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.") +
+        " Fit to the life they actually landed in, " + sat.fit + " out of 100.");
 
   /* Both figures are scored out of the same 100, so the two rows of faces are
      directly comparable: one face per 10 points earned. Under the aspiration
-     the two figures ARE the same number, so the second is dropped rather than
-     printed twice, and the cells that would ask whether an address was hit
-     report the journey instead. */
+     satisfaction is full by definition, so the cells that would price the
+     shortfall describe the life that was reached instead. */
   el("resultGrid").innerHTML = (best
     ? [["Ended up at", esc(career[0])],
        ["Median pay", esc(money(career[5]))],
        ["Satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
-       ["How near that life", esc(w.dist.toFixed(1) + " units away")],
+       ["Stages supported", esc(s.nurtured + " / " + TOTAL_STAGES)],
        ["Distance travelled", esc(Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])) + " units")],
        ["Schooling reached", esc(edReached(s.pos[1]))]]
     : [["Ended up at", esc(career[0])],
