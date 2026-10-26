@@ -190,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 35</span></div>
+    <span class="ver" role="note">build 36</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1227,7 +1227,8 @@ function finishRun(reason){
 
   el("resultText").textContent = (best
       ? "You encouraged them to do their best, and they became " + anOcc(career[0]) +
-        ". You named no address, so none was missed." + revisionNote +
+        ". You didn’t name a specific career they had to reach for your child so they " +
+        "ended up where they were best inclined to be." + revisionNote +
         (elite ? " It is one of the hardest places in this space to arrive at." : "")
       : hitTarget
         ? "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
