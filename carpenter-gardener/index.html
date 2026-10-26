@@ -190,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 36</span></div>
+    <span class="ver" role="note">build 37</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1119,10 +1119,11 @@ function render(){
       /* No odds: the aspiration is not an address, so there is nothing to
          land on or fail to land on. Say what is being scored instead. */
       el("odds").textContent = "Doing their best is the one corner of the space no occupation " +
-        "sits in, so it cannot be hit or missed. There is no address to steer toward, so " +
-        "carpentry is not offered and every stage is a supported one. Whatever life they reach " +
-        "is the one you asked for, so nothing is ever deducted. The score runs from 50 to 100 and " +
-        "says how squarely that life sits on a real occupation rather than between several.";
+        "sits in, so it cannot be hit or missed. You’re not pushing towards a specific " +
+        "career, so pushing towards that goal is not an option and every stage is a supported " +
+        "one. Whatever life they reach is the one you asked for, so nothing is ever deducted. " +
+        "The score runs from 50 to 100 and says how squarely that life sits on a real " +
+        "occupation rather than between several.";
     } else {
       const pct = estimateOdds(s.target);
       /* a measured 0 means the sample could not resolve it, not that it cannot
