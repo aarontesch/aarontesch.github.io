@@ -75,6 +75,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .pick button:hover:not([disabled]){background:#f0f6ed}
 .pick button[aria-pressed="true"]{background:#e3eedd;font-weight:750}
 .pick small{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* the aspiration is pinned above the ranked list, so it is ruled off from it */
+.pick button.aspire{border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;
+  margin-bottom:5px;padding-bottom:9px}
+.pick button.aspire span{font-weight:750}
 
 /* ---- the three-dimensional space ---- */
 .space{position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;
@@ -186,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 29</span></div>
+    <span class="ver" role="note">build 30</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -435,6 +439,22 @@ const AXIS = [210, 110, 100];                   // the space is a box, not a cub
 const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
 const TOTAL_STAGES = 5;
 
+/* A goal that is not an occupation: the far corner of the space, maximal on
+   all three axes at once. "Do their best" is the ambition with no address --
+   the parent is pushing up every ladder rather than toward one job -- so it
+   is kept out of OCC and can never be somewhere a child lands. Targets are
+   indexed into TARGETS, landings into OCC, and the two lists differ by
+   exactly this one entry. It is the default: the activity should open on the
+   ambition most parents would actually own up to. */
+const BEST = ["Encourage children to do their best", AXIS[0], AXIS[1], AXIS[2], "A", 0];
+const BEST_SHORT = "Their best";
+const TARGETS = OCC.concat([BEST]);
+const BEST_I = OCC.length;
+const isBest = i => i === BEST_I;
+/* nearestOcc takes a real occupation index to break ties with, so the
+   aspiration has to be passed as "no preference" wherever it is the goal */
+const tieWith = i => (isBest(i) ? undefined : i);
+
 /* The middle of the space is now the cloud's own centre of mass rather than a
    fixed (50,50,50): with a stretched salary axis those are no longer the same
    point, and the whole premise is that an untouched life lands on the average. */
@@ -543,10 +563,19 @@ const AIM_PENALTY = 0.05;
    stage can only move one of them, and that is the whole tension. */
 function satisfaction(s){
   if(!s.segs.length) return {goal: 0, fit: 0, value: 0, cost: 0};
-  const t = OCC[s.target], start = reachOf(t);
-  const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
-  const goal = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
   const fit = 100 * Math.max(0, 1 - nearestOcc(s.pos).dist / FIT_SPAN);
+  let goal;
+  if(isBest(s.target)){
+    /* "Do their best" names no address, so there is no distance to a goal to
+       measure and nothing that can be missed: the goal and the outcome are
+       the same place. Satisfaction is how well they fit the life they
+       actually reached. */
+    goal = fit;
+  } else {
+    const t = TARGETS[s.target], start = reachOf(t);
+    const now = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
+    goal = start < 1e-9 ? 100 : 100 * Math.max(0, 1 - now / start);
+  }
   /* The cost of pushing is charged against the goal figure only. Fit measures
      where the child actually landed; deducting there as well would charge the
      same pushed stage twice. */
@@ -578,10 +607,10 @@ function fresh(target){
     locked: false, over: false,
     stage: 1,
     pos: [0,0,0], heading: norm(CENTROID.slice()),
-    segs: [], target: (target === undefined ? 13 : target), aimed: 0, nurtured: 0,
+    segs: [], target: (target === undefined ? BEST_I : target), aimed: 0, nurtured: 0,
     /* what was named before any growth. Re-aiming mid-run is allowed, so the
        result can say what the plan was as well as what it became. */
-    firstTarget: (target === undefined ? 13 : target), reaims: 0,
+    firstTarget: (target === undefined ? BEST_I : target), reaims: 0,
     log: ["Five stages, one developing life, no guaranteed ending."]
   };
 }
@@ -599,7 +628,7 @@ function growStage(choice){
   if(nurture){
     dir = flatDir();
   } else {
-    const t = OCC[s.target];
+    const t = TARGETS[s.target];
     let d = [t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]];
     const L = Math.hypot(d[0],d[1],d[2]);
     dir = perturb(L < 1e-9 ? s.heading : [d[0]/L,d[1]/L,d[2]/L], ANG);
@@ -607,7 +636,7 @@ function growStage(choice){
   let len = MU + gauss()*SIG + (nurture ? NURTURE_BONUS : 0);
   if(len < LEN_FLOOR) len = LEN_FLOOR;
   if(!nurture){                                        // do not sail past what you aimed at
-    const t = OCC[s.target];
+    const t = TARGETS[s.target];
     const rem = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
     if(len > rem) len = rem;
   }
@@ -618,10 +647,12 @@ function growStage(choice){
   s.locked = true;
   if(nurture) s.nurtured++; else s.aimed++;
 
-  const where = nearestOcc(to, s.target);
+  const where = nearestOcc(to, tieWith(s.target));
   s.log.push((nurture
       ? "You supported whatever they were growing into."
-      : "You pushed them toward " + OCC[s.target][0] + ".")
+      : isBest(s.target)
+        ? "You pushed them to do their best at everything."
+        : "You pushed them toward " + TARGETS[s.target][0] + ".")
     + " They now sit nearest " + OCC[where.i][0] + ".");
 
   s.stage++;
@@ -721,7 +752,7 @@ function spaceSvg(s){
   });
 
   /* the cloud */
-  const near = s.segs.length ? nearestOcc(s.pos, s.target).i : -1;
+  const near = s.segs.length ? nearestOcc(s.pos, tieWith(s.target)).i : -1;
   OCC.forEach((o, i) => {
     const p = project([o[1], o[2], o[3]]);
     const isT = i === s.target, isN = i === near;
@@ -735,6 +766,17 @@ function spaceSvg(s){
         '">' + esc(o[0]) + '</text>');
     }
   });
+
+  /* The aspiration is not in the cloud, so its marker is drawn on its own: a
+     ring at the far corner with no dot inside it, because there is no
+     occupation there to land on. */
+  if(isBest(s.target)){
+    const p = project([BEST[1], BEST[2], BEST[3]]);
+    push(p.d - 0.1, '<circle class="tgt" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) +
+      '" r="' + (8 * p.f).toFixed(2) + '"/>' +
+      '<text class="tgtlabel" x="' + (p.x + 11 * p.f).toFixed(1) + '" y="' + (p.y + 4).toFixed(1) +
+      '">' + BEST_SHORT + '</text>');
+  }
 
   /* What has actually grown. Each stage is drawn as what it was: a board
      where you built, a vine segment where you let them grow. The structure
@@ -803,8 +845,11 @@ function occTable(s){
   const pos = s.pos;
   const rows = OCC.map((o, i) => ({i: i, d: Math.hypot(o[1]-pos[0], o[2]-pos[1], o[3]-pos[2])}))
     .sort((a, b) => a.d - b.d).slice(0, 10);
-  if(!rows.some(r => r.i === s.target)) rows.push({i: s.target, d: Math.hypot(
-    OCC[s.target][1]-pos[0], OCC[s.target][2]-pos[1], OCC[s.target][3]-pos[2])});
+  /* the goal is pinned into the table so it is never off the bottom of the
+     ten nearest -- unless it is the aspiration, which is not an occupation
+     and so has no row of pay, schooling and emotional labour to show */
+  if(!isBest(s.target) && !rows.some(r => r.i === s.target)) rows.push({i: s.target, d: Math.hypot(
+    TARGETS[s.target][1]-pos[0], TARGETS[s.target][2]-pos[1], TARGETS[s.target][3]-pos[2])});
   const body = rows.map(r => {
     const o = OCC[r.i], isT = r.i === s.target;
     return '<tr' + (isT ? ' aria-current="true"' : '') + '>' +
@@ -931,19 +976,24 @@ function render(){
   /* Where the child stands: the nearest occupation, plus the distance still
      to run to the named goal. Kept to two lines, because the stage buttons
      sit close to the fold on a laptop. */
+  const best = isBest(s.target);
   if(!s.segs.length){
-    el("nowBox").innerHTML = '<span class="waiting">' +
-      'Nothing has grown yet. ' + esc(OCC[s.target][0]) + ' is ' +
-      Math.round(reachOf(OCC[s.target])) + ' away.' + '</span>';
+    el("nowBox").innerHTML = '<span class="waiting">' + (best
+      ? 'Nothing has grown yet. Wherever they get to is where they got to.'
+      : 'Nothing has grown yet. ' + esc(TARGETS[s.target][0]) + ' is ' +
+        Math.round(reachOf(TARGETS[s.target])) + ' away.') + '</span>';
   } else {
-    const n = nearestOcc(s.pos, s.target), o = OCC[n.i];
-    const t = OCC[s.target];
+    const n = nearestOcc(s.pos, tieWith(s.target)), o = OCC[n.i];
+    const t = TARGETS[s.target];
     const toTarget = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
     el("nowBox").innerHTML = '<b>' + esc(o[0]) + '</b><small>' +
       money(o[5]) + ' &middot; ' + edLabel(o[2]) + ' &middot; emotional labour ' + Math.round(o[3]) +
       '<br>' + n.dist.toFixed(1) + ' away' +
-      (s.over ? '. ' + esc(t[0]) + ' finished ' + toTarget.toFixed(1) + ' off'
-              : '. ' + esc(t[0]) + ' is still ' + toTarget.toFixed(1) + ' away') +
+      /* with no address named there is nothing to be "off" by, so the second
+         clause reports the fit that is actually being scored */
+      (best ? (s.over ? ', and that is the life they got' : ', and still growing')
+            : s.over ? '. ' + esc(t[0]) + ' finished ' + toTarget.toFixed(1) + ' off'
+                     : '. ' + esc(t[0]) + ' is still ' + toTarget.toFixed(1) + ' away') +
       '</small>';
   }
   el("stageNo").textContent = Math.min(s.stage, TOTAL_STAGES);
@@ -959,15 +1009,28 @@ function render(){
   el("tip").textContent =
     "Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.";
 
-  el("aimNote").textContent = "Push your child to be " + anOcc(OCC[s.target][0]);
+  /* "be an Encourage children to do their best" is not a sentence, so the
+     aspiration gets its own phrasing for the same button */
+  el("aimNote").textContent = best
+    ? "Push your child to do their very best at everything"
+    : "Push your child to be " + anOcc(TARGETS[s.target][0]);
   el("nurNote").textContent = "Focus on supporting your child’s interests";
   [["btnAim", "aim"], ["btnNur", "nurture"]].forEach(p => { el(p[0]).disabled = s.over; });
 
   /* target picker, hardest first */
   {
-    el("pick").innerHTML = '<p class="pickhint">Least likely at the top. The figure is how often ' +
-      'that occupation comes out when the run is played as well as it can be, measured ' +
-      'from the model itself.</p>' +
+    /* The aspiration is pinned above the list rather than sorted into it: it
+       has no odds to be ranked by, because it cannot be missed. */
+    const bestBtn = '<button class="aspire" data-pick="' + BEST_I + '" aria-pressed="' +
+      (best ? "true" : "false") + '"' + (s.over ? " disabled" : "") +
+      ' aria-label="' + esc(BEST[0]) + ': the far corner of the space, highest pay, ' +
+        'most schooling and most emotional labour at once. No single occupation sits there, ' +
+        'so this goal cannot be missed.">' +
+      '<span>' + esc(BEST[0]) + '</span><small>No address &middot; cannot be missed</small></button>';
+    el("pick").innerHTML = bestBtn +
+      '<p class="pickhint">Then the real occupations, least likely at the top. The figure is ' +
+      'how often that occupation comes out when the run is played as well as it can be, ' +
+      'measured from the model itself.</p>' +
       PICK_ORDER.map(i => {
         const o = OCC[i], far = Math.round(reachOf(o)), od = DIFFICULTY[i].pct;
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
@@ -978,46 +1041,63 @@ function render(){
           '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
             money(o[5]) + ' &middot; ' + edLabel(o[2]) + '</small></button>';
       }).join("");
-    const t = OCC[s.target], pct = estimateOdds(s.target);
+    const t = TARGETS[s.target];
     /* the one-line summary carries the current target, so the list stays shut.
        the flex lives on an inner span: styling <summary> itself has a history
        of disturbing the disclosure behaviour in some browsers. */
     el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) + '</span><small>' +
       (s.over ? "run over" : s.segs.length ? "re-aim" : "change") + ' ▾</small></span>';
-    /* a measured 0 means the sample could not resolve it, not that it cannot
-       happen: the rarest here land about one run in five hundred */
-    el("odds").textContent = t[0] + " sits " + Math.round(reachOf(t)) +
-      " units out. Played as well as it can be, it comes out in " +
-      (pct.pct ? "about " + pct.pct + "% of runs" : "well under 1% of runs") +
-      " — best with " + (pct.aim === 0 ? "no aiming at all, pure growth"
-        : pct.aim === TOTAL_STAGES ? "aiming every stage"
-        : pct.aim + " stage" + (pct.aim === 1 ? "" : "s") + " aimed and " +
-          (TOTAL_STAGES - pct.aim) + " nurtured") + ".";
+    if(best){
+      /* No odds: the aspiration is not an address, so there is nothing to
+         land on or fail to land on. Say what is being scored instead. */
+      el("odds").textContent = "Doing their best is the one corner of the space no occupation " +
+        "sits in, so it cannot be hit or missed. Satisfaction is measured by how well the life " +
+        "they do reach suits them, not by how near this corner they got.";
+    } else {
+      const pct = estimateOdds(s.target);
+      /* a measured 0 means the sample could not resolve it, not that it cannot
+         happen: the rarest here land about one run in five hundred */
+      el("odds").textContent = t[0] + " sits " + Math.round(reachOf(t)) +
+        " units out. Played as well as it can be, it comes out in " +
+        (pct.pct ? "about " + pct.pct + "% of runs" : "well under 1% of runs") +
+        " — best with " + (pct.aim === 0 ? "no aiming at all, pure growth"
+          : pct.aim === TOTAL_STAGES ? "aiming every stage"
+          : pct.aim + " stage" + (pct.aim === 1 ? "" : "s") + " aimed and " +
+            (TOTAL_STAGES - pct.aim) + " nurtured") + ".";
+    }
   }
 
 
   el("timeline").innerHTML = Array.from({length: TOTAL_STAGES}, (_, i) =>
     '<span class="dot ' + (i < s.stage-1 ? "done" : i === s.stage-1 && !s.over ? "current" : "") + '"></span>').join("");
 
-  const w = s.segs.length ? nearestOcc(s.pos, s.target) : null;
+  const w = s.segs.length ? nearestOcc(s.pos, tieWith(s.target)) : null;
 
   /* the scoreboard: what you pointed at, and where they are actually heading */
-  const aimingAt = "<b>" + esc(OCC[s.target][0]) + "</b>";
-  const landed = w ? "<b" + (s.over && w.i !== s.target ? ' class="miss">' : ">") +
+  const aimingAt = "<b>" + esc(TARGETS[s.target][0]) + "</b>";
+  const landed = w ? "<b" + (s.over && !best && w.i !== s.target ? ' class="miss">' : ">") +
     esc(OCC[w.i][0]) + "</b>" : null;
-  el("outcome").innerHTML = s.over
-    ? "You aimed at " + aimingAt + ", and they ended up at " + landed + "."
-    : "You are aiming at " + aimingAt + ". " +
-      (landed ? "So far they are nearest " + landed + "." : "Nothing has grown yet.");
+  el("outcome").innerHTML = best
+    ? (s.over ? "You encouraged them to do their best, and they became " + landed + "."
+      : "You are encouraging them to do their best. " +
+        (landed ? "So far they are nearest " + landed + "." : "Nothing has grown yet."))
+    : s.over
+      ? "You aimed at " + aimingAt + ", and they ended up at " + landed + "."
+      : "You are aiming at " + aimingAt + ". " +
+        (landed ? "So far they are nearest " + landed + "." : "Nothing has grown yet.");
 
   const sat = satisfaction(s);
   const stats = [
     ["Stages grown", s.segs.length + " / " + TOTAL_STAGES],
     ["Nearest now", w ? OCC[w.i][0] : "—"],
-    /* both halves, side by side, because the run is no longer one or the
-       other: how near the goal, and how well the life they got fits them */
-    ["Goal satisfaction", s.segs.length ? sat.value + " / 100" : "—"],
-    ["Fit to that life", s.segs.length ? sat.fit + " / 100" : "—"],
+    /* With an address named these are two different questions: how near the
+       goal, and how well the life they got fits them. With the aspiration
+       they are the same question, so only one is shown and the spare cell
+       reports how far the life travelled instead. */
+    [best ? "Satisfaction" : "Goal satisfaction", s.segs.length ? sat.value + " / 100" : "—"],
+    best
+      ? ["Distance travelled", s.segs.length ? Math.round(Math.hypot(s.pos[0],s.pos[1],s.pos[2])) + " units" : "—"]
+      : ["Fit to that life", s.segs.length ? sat.fit + " / 100" : "—"],
     ["Built / grown", s.aimed + " / " + s.nurtured],
     /* what pushing has cost so far, in points of the figure itself rather
        than points off the top of the scale */
@@ -1028,8 +1108,11 @@ function render(){
 
   el("progress").textContent = s.segs.length === 0
     ? "Nothing has grown yet. Left entirely alone, five stages run straight to the middle of the space."
-    : "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) + " away; the goal " +
-      OCC[s.target][0] + " is " + Math.hypot(OCC[s.target][1]-s.pos[0], OCC[s.target][2]-s.pos[1], OCC[s.target][3]-s.pos[2]).toFixed(1) + " away.";
+    : best
+      ? "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) +
+        " away. There is no goal to be short of: that distance is the score."
+      : "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) + " away; the goal " +
+        TARGETS[s.target][0] + " is " + Math.hypot(TARGETS[s.target][1]-s.pos[0], TARGETS[s.target][2]-s.pos[1], TARGETS[s.target][3]-s.pos[2]).toFixed(1) + " away.";
 
   el("log").innerHTML = s.log.slice(-4).map(x => '<p>↳ ' + esc(x) + '</p>').join("");
   el("space").outerHTML = spaceSvg(s);
@@ -1044,13 +1127,17 @@ function finishRun(reason){
   const s = state;
   if(s.over) return;
   s.over = true;
-  const w = s.segs.length ? nearestOcc(s.pos, s.target) : {i: 0, dist: 0};
+  const best = isBest(s.target);
+  const w = s.segs.length ? nearestOcc(s.pos, tieWith(s.target)) : {i: 0, dist: 0};
   const career = OCC[w.i];
-  const hitTarget = w.i === s.target;
+  /* The aspiration is met by definition: the goal and the outcome are the
+     same place, so there is no address to have missed. */
+  const hitTarget = best || w.i === s.target;
   const sat = satisfaction(s);
   const elite = reachOf(career) > 110;
 
-  el("resultTitle").textContent = hitTarget ? "The goal was met." : "The goal was missed.";
+  el("resultTitle").textContent = best ? "They did their best."
+    : hitTarget ? "The goal was met." : "The goal was missed.";
 
   /* The goal may be re-aimed mid-run, so the plan they set out with and the
      plan they finished with can differ. Saying both is the whole point: a
@@ -1058,33 +1145,49 @@ function finishRun(reason){
      never moved. */
   const revised = s.reaims > 0 && s.firstTarget !== s.target;
   const revisionNote = revised
-    ? " You set out for " + OCC[s.firstTarget][0] + " and re-aimed " +
+    ? " You set out for " + TARGETS[s.firstTarget][0] + " and re-aimed " +
       s.reaims + " time" + (s.reaims === 1 ? "" : "s") + " along the way."
     : "";
 
-  el("resultText").textContent = (hitTarget
-      ? "You aimed at " + OCC[s.target][0] + " and they became " + anOcc(career[0]) +
-        ". One address out of " + OCC.length + ", and you hit it." + revisionNote
-      : "You aimed at " + OCC[s.target][0] + " and they became " + anOcc(career[0]) +
-        ". By the goal that is a failure. It is also just a life." + revisionNote +
-        (elite ? " It is also one of the hardest places in this space to arrive at." : ""))
-    + " " + (sat.cost === 0
-      ? "Goal satisfaction " + sat.value + " out of 100: you never pushed, so nothing was deducted."
-      : "Goal satisfaction " + sat.value + " out of 100 — " +
-        s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") + " cost " +
-        sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.")
-    + " Fit to the life they actually landed in, " + sat.fit + " out of 100.";
+  el("resultText").textContent = (best
+      ? "You encouraged them to do their best, and they became " + anOcc(career[0]) +
+        ". You named no address, so none was missed." + revisionNote +
+        (elite ? " It is one of the hardest places in this space to arrive at." : "")
+      : hitTarget
+        ? "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
+          ". One address out of " + OCC.length + ", and you hit it." + revisionNote
+        : "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
+          ". By the goal that is a failure. It is also just a life." + revisionNote +
+          (elite ? " It is also one of the hardest places in this space to arrive at." : ""))
+    + " " + (best ? "Satisfaction" : "Goal satisfaction") + " " +
+      (sat.cost === 0
+        ? sat.value + " out of 100: you never pushed, so nothing was deducted."
+        : sat.value + " out of 100 — " +
+          s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") + " cost " +
+          sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.")
+    + (best
+      ? " That is how well that life suits them, which is the only thing there was to measure."
+      : " Fit to the life they actually landed in, " + sat.fit + " out of 100.");
 
-  /* Both figures are scored out of the same 100 now, so the two rows of faces
-     are directly comparable: one face per 10 points earned. */
-  el("resultGrid").innerHTML = [
-    ["Ended up at", esc(career[0])],
-    ["Median pay", esc(money(career[5]))],
-    ["Goal satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
-    ["Fit to that life", faces(sat.fit) + '<em class="outof">' + sat.fit + ' / 100</em>'],
-    ["Built / grown", esc(s.aimed + " / " + s.nurtured)],
-    ["Goal met", hitTarget ? "yes" : "no"]
-  ].map(x => '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
+  /* Both figures are scored out of the same 100, so the two rows of faces are
+     directly comparable: one face per 10 points earned. Under the aspiration
+     the two figures ARE the same number, so the second is dropped rather than
+     printed twice, and the cells that would ask whether an address was hit
+     report the journey instead. */
+  el("resultGrid").innerHTML = (best
+    ? [["Ended up at", esc(career[0])],
+       ["Median pay", esc(money(career[5]))],
+       ["Satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
+       ["Distance travelled", esc(Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])) + " units")],
+       ["Built / grown", esc(s.aimed + " / " + s.nurtured)],
+       ["Schooling reached", esc(edReached(s.pos[1]))]]
+    : [["Ended up at", esc(career[0])],
+       ["Median pay", esc(money(career[5]))],
+       ["Goal satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
+       ["Fit to that life", faces(sat.fit) + '<em class="outof">' + sat.fit + ' / 100</em>'],
+       ["Built / grown", esc(s.aimed + " / " + s.nurtured)],
+       ["Goal met", hitTarget ? "yes" : "no"]]
+  ).map(x => '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
 
   render();
   el("modal").classList.add("show");
