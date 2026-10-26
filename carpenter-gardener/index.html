@@ -190,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 30</span></div>
+    <span class="ver" role="note">build 31</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -578,8 +578,14 @@ function satisfaction(s){
   }
   /* The cost of pushing is charged against the goal figure only. Fit measures
      where the child actually landed; deducting there as well would charge the
-     same pushed stage twice. */
-  const keep = 1 - AIM_PENALTY * s.aimed;
+     same pushed stage twice.
+
+     The aspiration is free. The penalty exists to price forcing a child
+     toward one particular life, and "do your best" names no life to force
+     them into -- so pushing every stage under it costs nothing, and the
+     deduction is only ever paid by a parent who had a specific address in
+     mind. */
+  const keep = isBest(s.target) ? 1 : 1 - AIM_PENALTY * s.aimed;
   const value = Math.round(goal * keep);
   return { goal: Math.round(goal), fit: Math.round(fit),
            value: value, cost: Math.round(goal) - value };
@@ -1052,7 +1058,8 @@ function render(){
          land on or fail to land on. Say what is being scored instead. */
       el("odds").textContent = "Doing their best is the one corner of the space no occupation " +
         "sits in, so it cannot be hit or missed. Satisfaction is measured by how well the life " +
-        "they do reach suits them, not by how near this corner they got.";
+        "they do reach suits them, not by how near this corner they got, and pushing costs " +
+        "nothing here because there is no particular life you are pushing them into.";
     } else {
       const pct = estimateOdds(s.target);
       /* a measured 0 means the sample could not resolve it, not that it cannot
@@ -1099,9 +1106,11 @@ function render(){
       ? ["Distance travelled", s.segs.length ? Math.round(Math.hypot(s.pos[0],s.pos[1],s.pos[2])) + " units" : "—"]
       : ["Fit to that life", s.segs.length ? sat.fit + " / 100" : "—"],
     ["Built / grown", s.aimed + " / " + s.nurtured],
-    /* what pushing has cost so far, in points of the figure itself rather
-       than points off the top of the scale */
-    ["Cost of pushing", s.aimed && sat.cost ? "−" + sat.cost + " points" : "none"]
+    /* What pushing has cost so far, in points of the figure itself rather
+       than points off the top of the scale. "free" rather than "none" under
+       the aspiration: the cost is waived by the goal, not merely unspent. */
+    ["Cost of pushing", best ? "free"
+      : s.aimed && sat.cost ? "−" + sat.cost + " points" : "none"]
   ];
   el("stats").innerHTML = stats.map(x =>
     '<div class="stat"><span class="statlabel">' + x[0] + '</span><strong>' + esc(x[1]) + '</strong></div>').join("");
@@ -1159,12 +1168,19 @@ function finishRun(reason){
         : "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
           ". By the goal that is a failure. It is also just a life." + revisionNote +
           (elite ? " It is also one of the hardest places in this space to arrive at." : ""))
+    /* Under the aspiration nothing is deducted however hard you pushed, so
+       the sentence cannot fall back on "you never pushed" -- it has to say
+       why pushing was free. */
     + " " + (best ? "Satisfaction" : "Goal satisfaction") + " " +
-      (sat.cost === 0
-        ? sat.value + " out of 100: you never pushed, so nothing was deducted."
-        : sat.value + " out of 100 — " +
-          s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") + " cost " +
-          sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.")
+      (best
+        ? sat.value + " out of 100, with nothing deducted" +
+          (s.aimed ? ": pushing costs nothing when there is no particular life you are pushing them into."
+                   : ": you never pushed, and there was no address to push toward anyway.")
+        : sat.cost === 0
+          ? sat.value + " out of 100: you never pushed, so nothing was deducted."
+          : sat.value + " out of 100 — " +
+            s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") + " cost " +
+            sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.")
     + (best
       ? " That is how well that life suits them, which is the only thing there was to measure."
       : " Fit to the life they actually landed in, " + sat.fit + " out of 100.");
