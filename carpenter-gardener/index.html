@@ -190,7 +190,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 34</span></div>
+    <span class="ver" role="note">build 35</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1246,13 +1246,13 @@ function finishRun(reason){
           ? sat.value + " out of 100: you never pushed, so nothing was deducted."
           : sat.value + " out of 100 — " +
             s.aimed + " pushed stage" + (s.aimed === 1 ? "" : "s") + " cost " +
-            sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it.") +
-        " Fit to the life they actually landed in, " + sat.fit + " out of 100.");
+            sat.cost + " point" + (sat.cost === 1 ? "" : "s") + " of it."));
 
-  /* Both figures are scored out of the same 100, so the two rows of faces are
-     directly comparable: one face per 10 points earned. Under the aspiration
-     satisfaction is never deducted from, so the cells that would price the
-     shortfall describe the life that was reached instead. */
+  /* One satisfaction figure, drawn as ten faces, one per 10 points earned.
+     Fit used to sit beside it as a second scored row; it is gone from the
+     result because two scores out of 100 side by side invited the reader to
+     treat the larger one as the real verdict. The remaining cells describe
+     the life that was reached rather than scoring it again. */
   el("resultGrid").innerHTML = (best
     ? [["Ended up at", esc(career[0])],
        ["Median pay", esc(money(career[5]))],
@@ -1263,9 +1263,9 @@ function finishRun(reason){
     : [["Ended up at", esc(career[0])],
        ["Median pay", esc(money(career[5]))],
        ["Goal satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
-       ["Fit to that life", faces(sat.fit) + '<em class="outof">' + sat.fit + ' / 100</em>'],
+       ["Goal met", hitTarget ? "yes" : "no"],
        ["Built / grown", esc(s.aimed + " / " + s.nurtured)],
-       ["Goal met", hitTarget ? "yes" : "no"]]
+       ["Cost of pushing", esc(s.aimed && sat.cost ? "−" + sat.cost + " points" : "none")]]
   ).map(x => '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
 
   render();
