@@ -188,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 45</span></div>
+    <span class="ver" role="note">build 46</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1228,7 +1228,7 @@ function render(){
     s.aimed + " built &middot; " + s.nurtured + " grown";
   el("dashTitle").textContent = "A life taking shape";
   el("principle").textContent =
-    "A career goal names one address out of eighty-five. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
+    "A career goal names one specific career out of eighty-five. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
   el("tip").textContent =
     "Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.";
 
@@ -1253,7 +1253,7 @@ function render(){
       ' aria-label="' + esc(BEST[0]) + ': the far corner of the space, highest pay, ' +
         'most schooling and most emotional labour at once. No single occupation sits there, ' +
         'so this goal cannot be missed.">' +
-      '<span>' + esc(BEST[0]) + '</span><small>No address &middot; cannot be missed</small></button>';
+      '<span>' + esc(BEST[0]) + '</span><small>No specific career goal &middot; cannot be missed</small></button>';
     el("pick").innerHTML = bestBtn +
       '<p class="pickhint">Then the real occupations, least likely at the top. The figure is ' +
       'how often that occupation comes out when the run is played as well as it can be, ' +
@@ -1392,7 +1392,7 @@ function finishRun(reason){
         (elite ? " It is one of the hardest places in this space to arrive at." : "")
       : hitTarget
         ? "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
-          ". One address out of " + OCC.length + ", and you hit it." + revisionNote
+          ". One specific career out of " + OCC.length + ", and you hit it." + revisionNote
         : "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
           ". By the goal that is a failure. It is also just a life." + revisionNote +
           (elite ? " It is also one of the hardest places in this space to arrive at." : ""))
