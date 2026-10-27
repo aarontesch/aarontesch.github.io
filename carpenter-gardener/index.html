@@ -188,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 43</span></div>
+    <span class="ver" role="note">build 44</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -725,15 +725,20 @@ function faces(pct){
 let state;
 /* `target` carries over a reset: having to re-find your occupation in a list
    of 85 every time you replay the same experiment is pure friction. */
+/* The activity opens on a named career rather than on the aspiration, so
+   both stage buttons are there from the first move and the choice the
+   activity is about is visible straight away -- under "do their best" there
+   is nothing to steer toward and carpentry is not offered at all. */
+const DEFAULT_TARGET = OCC.findIndex(o => o[0] === "Family Medicine Physicians");
 function fresh(target){
   return {
     locked: false, over: false,
     stage: 1,
     pos: [0,0,0], heading: norm(CENTROID.slice()),
-    segs: [], target: (target === undefined ? BEST_I : target), aimed: 0, nurtured: 0,
+    segs: [], target: (target === undefined ? DEFAULT_TARGET : target), aimed: 0, nurtured: 0,
     /* what was named before any growth. Re-aiming mid-run is allowed, so the
        result can say what the plan was as well as what it became. */
-    firstTarget: (target === undefined ? BEST_I : target), reaims: 0,
+    firstTarget: (target === undefined ? DEFAULT_TARGET : target), reaims: 0,
     log: ["Five stages, one developing life, no guaranteed ending."]
   };
 }
@@ -943,6 +948,17 @@ function spaceSvg(s){
      where you built, a vine segment where you let them grow. The structure
      is now a mixture, which is the point of folding the two approaches into
      one run. */
+  /* Half the drawn thickness of a stage, which is what a joint has to cover.
+     Two stages meeting at an angle leave a wedge open on the outside of the
+     turn, and the wedge is as deep as the material is thick -- so a plank,
+     at 13 units, was showing a visible notch behind a 2.4-unit dot. */
+  const halfThick = seg => {
+    const a = project(seg.from), b = project(seg.to);
+    const w = (seg.nurtured ? 4.6 : 9) * ((a.f + b.f) / 2);
+    return seg.nurtured
+      ? Math.max(2, 0.09 * Math.max(16, w * 5.5))   // the vine's stem, not its leaves
+      : Math.max(10, w * 1.45) / 2;                 // the plank's full thickness
+  };
   s.segs.forEach((seg, i) => {
     const a = project(seg.from), b = project(seg.to);
     const g = seg.nurtured;
@@ -992,12 +1008,21 @@ function spaceSvg(s){
         '" transform="rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1) + ' ' +
         a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ')"/>');
     }
-    /* The joint sits over the seam between two stages, so it has to be the
-       colour of whatever it is joining -- a brown pip on a vine reads as a
-       break rather than a hinge. #4c7602 is sampled from the stem itself. */
-    push(mid - 0.1, '<circle fill="' + (g ? "#4c7602" : "#7d5334") +
-      '" cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
-      '" r="' + (2.4 * a.f).toFixed(2) + '"/>');
+    /* The joint caps the seam where this stage meets the one before it. It
+       is sized to the THICKER of the two, because the wedge the turn opens
+       is as deep as the fatter material, and coloured to match it -- a brown
+       pip on a vine reads as a break rather than a hinge, and a thin green
+       dot on a plank leaves the notch showing. On timber it is stroked with
+       the plank's own outline so it reads as a peg at the joint rather than
+       a blob of paint. Drawn at the joint's own depth, a shade forward, so
+       it sits over both stages instead of behind one of them. */
+    const prev = i > 0 ? s.segs[i-1] : null;
+    const woody = !g || (prev && !prev.nurtured);
+    const r = Math.max(halfThick(seg), prev ? halfThick(prev) : 0);
+    push(a.d - 0.1, '<circle cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
+      '" r="' + r.toFixed(2) + '" fill="' + (woody ? "#bc7a09" : "#4c7602") + '"' +
+      (woody ? ' stroke="#33352f" stroke-width="' + (1.4 * a.f).toFixed(2) + '"' : '') +
+      '/>');
   });
 
   /* where the remaining stages land if nothing changes */
