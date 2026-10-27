@@ -95,7 +95,6 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
   stroke:#f4f1e4;stroke-width:3;paint-order:stroke}
 .spacesvg .reslabel{fill:var(--deep);font:800 12px ui-sans-serif,system-ui,sans-serif;
   stroke:#f4f1e4;stroke-width:3.5;paint-order:stroke}
-.spacesvg .joint{fill:#7d5334}
 .spacesvg .ghostline{fill:none;stroke:#b7a98a;stroke-width:1.5;stroke-dasharray:4 5;opacity:.75}
 .spacehint{position:absolute;right:11px;top:9px;font-size:11px;color:var(--muted);
   background:rgba(255,253,248,.82);border-radius:99px;padding:3px 10px;pointer-events:none}
@@ -189,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 41</span></div>
+    <span class="ver" role="note">build 42</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -855,8 +854,15 @@ const money = w => w >= 1000000 ? "$" + (w/1000000).toFixed(1).replace(".0","") 
   : "$" + Math.round(w/1000) + "k";
 const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-/* the vine art's own width-to-height ratio, so it is never stretched */
-const VINE_ASPECT = 420 / 134;
+/* The vine art's own geometry. VINE_MID is where the stem sits on average,
+   and VINE_CUTS are the x positions where the stem actually crosses that
+   height -- traced off the artwork by following the thickest continuous run
+   of opaque pixels in each column, which finds the stem rather than the
+   tufts fanning out around it. Cutting the art only at these points is what
+   lets consecutive gardened stages join: each window both starts and ends
+   with the stem on the centre line. */
+const VINE_W = 420, VINE_H = 134, VINE_MID = 64;
+const VINE_CUTS = [29, 79, 189, 313, 383];
 
 function spaceSvg(s){
   const items = [];                      // {d, svg} painted far-to-near
@@ -921,21 +927,31 @@ function spaceSvg(s){
          rotated onto it. It is NOT squashed to fit: the whole vine is seven
          tufts long, and crushing all seven into a 30px stage turns them into
          fuzz. The art is placed at its own proportions and clipped to the
-         stage instead, so each stage shows a window of a tuft or two at a
-         legible size -- and the window slides along by stage index, so five
-         gardened stages are not five copies of the same picture. */
+         stage instead, so each stage shows a window of a tuft or two.
+
+         The windows are cut where the stem crosses its own median height
+         (VINE_CUTS), not at arbitrary offsets. That is what makes the stages
+         join up: every window begins and ends with the stem exactly on the
+         centre line, so once that line is laid along the segment, one stage
+         ends where the next begins. Cutting anywhere else left the stem
+         entering high and leaving low, and the vine came apart at the
+         joints. */
       const dx = b.x - a.x, dy = b.y - a.y;
       const L = Math.hypot(dx, dy);
       const vh = Math.max(16, w * 5.5);          // height, and so the stem's weight
-      const vw = vh * VINE_ASPECT;               // its natural width at that height
-      const off = (i % 5) / 5 * Math.max(0, vw - L);
-      const top = (a.y - vh / 2).toFixed(1);
-      defs.push('<clipPath id="vc' + i + '"><rect x="' + a.x.toFixed(1) + '" y="' + top +
-        '" width="' + L.toFixed(1) + '" height="' + vh.toFixed(1) + '"/></clipPath>');
+      const k = i % (VINE_CUTS.length - 1);
+      const wx0 = VINE_CUTS[k], wx1 = VINE_CUTS[k + 1];
+      const xs = L / (wx1 - wx0);                // art units to screen units
+      const artW = VINE_W * xs;
+      const artX = a.x - wx0 * xs;               // puts window start at the segment start
+      const artY = a.y - (VINE_MID / VINE_H) * vh;   // puts the stem on the segment line
+      defs.push('<clipPath id="vc' + i + '"><rect x="' + a.x.toFixed(1) + '" y="' +
+        artY.toFixed(1) + '" width="' + L.toFixed(1) + '" height="' + vh.toFixed(1) +
+        '"/></clipPath>');
       push(mid, '<g transform="rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1) +
         ' ' + a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ')"><g clip-path="url(#vc' + i +
-        ')"><use href="#vineart" x="' + (a.x - off).toFixed(1) + '" y="' + top +
-        '" width="' + vw.toFixed(1) + '" height="' + vh.toFixed(1) + '"/></g></g>');
+        ')"><use href="#vineart" x="' + artX.toFixed(1) + '" y="' + artY.toFixed(1) +
+        '" width="' + artW.toFixed(1) + '" height="' + vh.toFixed(1) + '"/></g></g>');
     } else {
       /* A built stage is the plank art. Unlike the vine it is NOT clipped:
          the vine is a repeating motif and a stage shows a window of it, but
@@ -951,7 +967,11 @@ function spaceSvg(s){
         '" transform="rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1) + ' ' +
         a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ')"/>');
     }
-    push(mid - 0.1, '<circle class="joint" cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
+    /* The joint sits over the seam between two stages, so it has to be the
+       colour of whatever it is joining -- a brown pip on a vine reads as a
+       break rather than a hinge. #4c7602 is sampled from the stem itself. */
+    push(mid - 0.1, '<circle fill="' + (g ? "#4c7602" : "#7d5334") +
+      '" cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
       '" r="' + (2.4 * a.f).toFixed(2) + '"/>');
   });
 
