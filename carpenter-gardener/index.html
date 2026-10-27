@@ -188,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 44</span></div>
+    <span class="ver" role="note">build 45</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1003,26 +1003,28 @@ function spaceSvg(s){
       const dx = b.x - a.x, dy = b.y - a.y;
       const L = Math.hypot(dx, dy);
       const ph = Math.max(10, w * 1.45);      // matches the old board's weight
-      push(mid, '<use href="#plankart" x="' + a.x.toFixed(1) + '" y="' +
-        (a.y - ph/2).toFixed(1) + '" width="' + L.toFixed(1) + '" height="' + ph.toFixed(1) +
+      /* Run the board half its own thickness past each end. Two boards
+         meeting at an angle leave a wedge open on the outside of the turn,
+         and that wedge is never deeper than the material is thick, so the
+         overrun closes it with the artwork itself -- overlapping timber,
+         which is what a built corner looks like. The alternative was a disc
+         over the seam, and a flat disc on grained wood reads as a blob
+         whatever colour it is. */
+      const over = ph / 2;
+      push(mid, '<use href="#plankart" x="' + (a.x - over).toFixed(1) + '" y="' +
+        (a.y - ph/2).toFixed(1) + '" width="' + (L + 2*over).toFixed(1) +
+        '" height="' + ph.toFixed(1) +
         '" transform="rotate(' + (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(1) + ' ' +
         a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ')"/>');
     }
-    /* The joint caps the seam where this stage meets the one before it. It
-       is sized to the THICKER of the two, because the wedge the turn opens
-       is as deep as the fatter material, and coloured to match it -- a brown
-       pip on a vine reads as a break rather than a hinge, and a thin green
-       dot on a plank leaves the notch showing. On timber it is stroked with
-       the plank's own outline so it reads as a peg at the joint rather than
-       a blob of paint. Drawn at the joint's own depth, a shade forward, so
-       it sits over both stages instead of behind one of them. */
+    /* Only vine-to-vine joints get a node. The stem is flat green with no
+       grain, so a green dot the width of the stem disappears into it. Timber
+       needs nothing here: the boards overrun their ends and cover each other,
+       and anything drawn on top of that grain announces itself. */
     const prev = i > 0 ? s.segs[i-1] : null;
-    const woody = !g || (prev && !prev.nurtured);
-    const r = Math.max(halfThick(seg), prev ? halfThick(prev) : 0);
-    push(a.d - 0.1, '<circle cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
-      '" r="' + r.toFixed(2) + '" fill="' + (woody ? "#bc7a09" : "#4c7602") + '"' +
-      (woody ? ' stroke="#33352f" stroke-width="' + (1.4 * a.f).toFixed(2) + '"' : '') +
-      '/>');
+    if(g && (!prev || prev.nurtured))
+      push(a.d - 0.1, '<circle cx="' + a.x.toFixed(1) + '" cy="' + a.y.toFixed(1) +
+        '" r="' + halfThick(seg).toFixed(2) + '" fill="#4c7602"/>');
   });
 
   /* where the remaining stages land if nothing changes */
