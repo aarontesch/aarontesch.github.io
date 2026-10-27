@@ -188,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 47</span></div>
+    <span class="ver" role="note">build 48</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -437,6 +437,27 @@ const OCC = [
   ["Laborers and Freight, Stock, and Material Movers",6.8,0,0.0,"T",38000,2900],
 ];
 
+/* ============ how steep the education ladder is ============
+   The education coordinates above were written at 23 units per halving of
+   the adults who reach a credential, the same rate as pay. That was too
+   gentle: 93% of lives were finishing in a career that needs a bachelor's,
+   and 36% in one that needs a master's, against the 14% of American adults
+   who hold one and the ~4% of jobs that ask for one.
+
+   Doubling the rate puts a degree genuinely further out of reach. It is a
+   pure rescale, because a coordinate is just the rate times log2(1/share),
+   so the whole column and the axis scale together and every credential
+   keeps its meaning. Measured at 2x: master's-level outcomes fall from 36%
+   to 4%, bachelor's from 93% to 68%, and lives finishing below an
+   associate's rise from 7% to 25%.
+
+   It costs reach. 85 occupations were 69 reachable before and are 54 now --
+   the far cluster moves from very hard to out of range. That is the trade:
+   there is no way in this model to make a doctorate rare without also
+   making it distant. */
+const ED_STEEPNESS = 2;
+OCC.forEach(o => { o[2] = +(o[2] * ED_STEEPNESS).toFixed(1); });
+
 /* ============ the three axes ============
    Education and contact are percentiles and stop at 100. Salary is NOT a
    percentile: pay is exponential, and a percentile axis hides that. The 99th
@@ -451,7 +472,7 @@ const OCC = [
    past anything five stages can reach. Money is hard the way it is hard in
    life: each further step costs as much as everything before it. */
 const SAL_PER_DOUBLING = 23;
-const AXIS = [210, 110, 100];                   // the space is a box, not a cube
+const AXIS = [210, 110 * ED_STEEPNESS, 100];     // the space is a box, not a cube
 const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
 const TOTAL_STAGES = 5;
 
@@ -479,7 +500,17 @@ const CENTROID = (function(){
   OCC.forEach(o => { c[0] += o[1]; c[1] += o[2]; c[2] += o[3]; });
   return c.map(v => v / OCC.length);
 })();
-const CENTRE_DIST = Math.hypot(CENTROID[0], CENTROID[1], CENTROID[2]);
+/* Measured on the space as it stood BEFORE education was steepened. This is
+   the whole point of the steepening and it does not work without it: MU is
+   derived from how far out the average life sits, so stretching the
+   education axis moves the centroid out, lengthens every step in
+   proportion, and the child climbs just as far up a longer ladder. Measured
+   with MU left to follow the centroid, steepening education from 23 units
+   per halving all the way to 69 moved bachelor's-level outcomes only from
+   93% to 82% while collapsing variety. Pinned here instead, 2x does real
+   work. Putting degrees further away is meant to make them harder to reach,
+   not to make every childhood longer. */
+const CENTRE_DIST = Math.hypot(CENTROID[0], CENTROID[1] / ED_STEEPNESS, CENTROID[2]);
 /* Five plain segments land on the average life. Left at 1.0 with the
    loosened direction clamp: scaling it up to keep an UNSTEERED walk on the
    average was measured and backfires, because NURTURE_BONUS is a multiple of
@@ -834,14 +865,15 @@ const CORNERS = [[0,0,0],[X,0,0],[X,0,Z],[0,0,Z],[0,Y,0],[X,Y,0],[X,Y,Z],[0,Y,Z]
 const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
 /* the salary axis is log-dollars, so show dollars; a coordinate would mean
    nothing to a reader and a percentile would now be a lie */
-/* Education is no longer a percentile either. It is 23 units per HALVING of
+/* Education is no longer a percentile either. It is 46 units per HALVING of
    the share of adults who get that far, so each credential costs what the one
    before it cost again -- which is why a doctorate now sits 43 units past a
    master's where the occupation percentile put it 8. Shares are US Census CPS
    figures for adults 25 and over, approximate. A coordinate is meaningless to
    a reader, so always show the credential. */
 const ED_LEVELS = [[0,"no credential"],[3.3,"high school"],[15.6,"some college"],
-  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[66.2,"master's"],[109.4,"doctorate"]];
+  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[66.2,"master's"],[109.4,"doctorate"]]
+  .map(L => [+(L[0] * ED_STEEPNESS).toFixed(1), L[1]]);
 function edLabel(c){
   let best = ED_LEVELS[0];
   for(const L of ED_LEVELS) if(Math.abs(L[0]-c) < Math.abs(best[0]-c)) best = L;
