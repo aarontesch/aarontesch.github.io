@@ -188,7 +188,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Garden or Blueprint?
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 42</span></div>
+    <span class="ver" role="note">build 43</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -863,6 +863,31 @@ const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>
    with the stem on the centre line. */
 const VINE_W = 420, VINE_H = 134, VINE_MID = 64;
 const VINE_CUTS = [29, 79, 189, 313, 383];
+/* ANY two cut points make a usable window, not just adjacent ones, because
+   the stem is on the centre line at every one of them. That turns five cuts
+   into ten windows spanning 50 to 354 art units, which is what lets a stage
+   be handed a window about as long as it is -- the difference between a vine
+   and a smear. */
+const VINE_WINDOWS = (function(){
+  const out = [];
+  for(let i = 0; i < VINE_CUTS.length; i++)
+    for(let j = i + 1; j < VINE_CUTS.length; j++)
+      out.push([VINE_CUTS[i], VINE_CUTS[j], VINE_CUTS[j] - VINE_CUTS[i]]);
+  return out;
+})();
+/* Pick the window that needs the least stretching. A stage is L screen units
+   long and vh tall, so measured in the art's own units it wants a window of
+   L * VINE_H / vh wide; the nearer a window is to that, the nearer the art
+   stays to its true proportions. Ties within about 20% go to stage index, so
+   two stages of similar length still get different stretches of vine. */
+function vineWindow(L, vh, i){
+  const want = L * VINE_H / vh;
+  const ranked = VINE_WINDOWS
+    .map(v => ({v: v, off: Math.abs(Math.log(v[2] / want))}))
+    .sort((p, q) => p.off - q.off);
+  const pool = ranked.filter(r => r.off <= ranked[0].off + 0.18);
+  return pool[i % pool.length].v;
+}
 
 function spaceSvg(s){
   const items = [];                      // {d, svg} painted far-to-near
@@ -939,8 +964,8 @@ function spaceSvg(s){
       const dx = b.x - a.x, dy = b.y - a.y;
       const L = Math.hypot(dx, dy);
       const vh = Math.max(16, w * 5.5);          // height, and so the stem's weight
-      const k = i % (VINE_CUTS.length - 1);
-      const wx0 = VINE_CUTS[k], wx1 = VINE_CUTS[k + 1];
+      const win = vineWindow(L, vh, i);
+      const wx0 = win[0], wx1 = win[1];
       const xs = L / (wx1 - wx0);                // art units to screen units
       const artW = VINE_W * xs;
       const artX = a.x - wx0 * xs;               // puts window start at the segment start
