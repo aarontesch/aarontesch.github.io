@@ -217,7 +217,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 74</span></div>
+    <span class="ver" role="note">build 75</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -2037,8 +2037,12 @@ function openResult(){
 }
 function closeResult(){
   el("modal").classList.remove("show");
-  const act = document.querySelector("[data-act]:not([aria-disabled=true])")
-  (act || el("reset")).focus();
+
+  const nextAction = document.querySelector(
+    "[data-act]:not([aria-disabled='true'])"
+  );
+
+  (nextAction || el("reset")).focus();
 }
 document.addEventListener("keydown", e => {
   if(!el("modal").classList.contains("show")) return;
@@ -2097,8 +2101,10 @@ document.addEventListener("click", e => {
     return;
   }
 
-  const act = e.target.closest("[data-act]");
-  if(act && !act.disabled) return growStage(act.dataset.act);
+  const actionButton = e.target.closest("[data-act]");
+if(actionButton && !actionButton.matches('[aria-disabled="true"]')) {
+  return growStage(actionButton.dataset.act);
+}
 
   const view = e.target.closest("[data-view]");
   if(view){
