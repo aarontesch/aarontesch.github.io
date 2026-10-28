@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 53</span></div>
+    <span class="ver" role="note">build 54</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -239,7 +239,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <section class="hero">
   <div class="eyebrow">A developmental strategy game &middot; prototype</div>
   <h1>Five stages of growth, in a space of real occupations.</h1>
-  <p>Eighty-five real occupations, placed by pay, schooling and emotional labour. A child grows through five developmental stages in that space.</p>
+  <p>Ninety real occupations, placed by pay, schooling and emotional labour. A child grows through five developmental stages in that space.</p>
 </section>
 
 <section class="layout">
@@ -472,6 +472,22 @@ const OCC = [
   ["Welders, Cutters, Solderers, and Brazers",16.5,3.3,15.0,"T",51000,430],["Airline Pilots, Copilots, and Flight Engineers",67.8,32.9,65.0,"T",239200,90],
   ["Air Traffic Controllers",51.2,24.6,65.0,"T",145000,22],["Heavy and Tractor-Trailer Truck Drivers",20.8,17,16.4,"T",58000,2100],
   ["Laborers and Freight, Stock, and Material Movers",6.8,0,0.0,"T",38000,2900],
+  /* Five careers that bridge the top of the pay axis. Without them there was
+     a 111-unit hole between Radiologists at $610k and the illustrative CEO
+     at $17m, where every other neighbouring pair sits within 15 units -- so
+     any life that drifted past the doctors had nothing nearer than a Fortune
+     500 CEO and was handed one. These turn that single jump into five steps
+     at 107, 126, 152, 165 and 184.
+
+     Only the neurosurgeon is a clean BLS occupation. The others are real
+     careers without tidy federal categories, so their pay and headcount are
+     my estimates rather than a sourced table -- the same caveat as the
+     employment column, and they are here to be corrected. */
+  ["Neurosurgeons",107.4,109.4,76.1,"H",790000,5],
+  ["Law Firm Equity Partners",126.4,109.4,70.4,"S",1400000,25],
+  ["Private Equity and Hedge Fund Partners",151.7,66.2,59.7,"B",3000000,8],
+  ["Major League Athletes",165.2,3.3,44.9,"A",4500000,3.5],
+  ["Lead Film and Television Actors",184.3,0,49.6,"A",8000000,1],
 ];
 
 /* ============ how steep the education ladder is ============
@@ -481,18 +497,22 @@ const OCC = [
    and 36% in one that needs a master's, against the 14% of American adults
    who hold one and the ~4% of jobs that ask for one.
 
-   Doubling the rate puts a degree genuinely further out of reach. It is a
+   Raising the rate puts a degree further out of reach. It is a
    pure rescale, because a coordinate is just the rate times log2(1/share),
    so the whole column and the axis scale together and every credential
    keeps its meaning. Measured at 2x: master's-level outcomes fall from 36%
    to 4%, bachelor's from 93% to 68%, and lives finishing below an
    associate's rise from 7% to 25%.
 
-   It costs reach. 85 occupations were 69 reachable before and are 54 now --
-   the far cluster moves from very hard to out of range. That is the trade:
-   there is no way in this model to make a doctorate rare without also
-   making it distant. */
-const ED_STEEPNESS = 2;
+   1.4 rather than the 2.0 it was first set to. At 2.0 a doctorate sat at
+   219 while a gardened life travels about 141 in total, so it was not rare
+   from a median start -- it was unreachable, 0% even when every stage was
+   aimed at one. The two cannot both be satisfied: the ladder is one
+   geometric scale, so loosening the top to let a doctorate be reached
+   loosens the bottom as well and bachelor's-level outcomes climb with it.
+   Measured across the sweep, median-start doctorates only become visible
+   around 1.4, and bachelor's costs 63% -> 82% to get there. */
+const ED_STEEPNESS = 1.4;
 OCC.forEach(o => { o[2] = +(o[2] * ED_STEEPNESS).toFixed(1); });
 
 /* ============ the three axes ============
@@ -847,7 +867,7 @@ function faces(pct){
    child worse off than a neutral baseline, and that is not representable
    here without a second mechanism. */
 const PAY_TRANSMIT = 0.40;    // intergenerational income elasticity, US
-const EDU_TRANSMIT = 0.45;    // same order; calibrated against the ladder below
+const EDU_TRANSMIT = 0.15;    // fitted with the ladder, see below
 const EQ_SECURE = 32;         // what a secure, attuned early home banks
 
 /* The slider stops, as [label, value] pairs. Education reuses the
@@ -1444,7 +1464,7 @@ function render(){
     s.aimed + " built &middot; " + s.nurtured + " grown";
   el("dashTitle").textContent = "A life taking shape";
   el("principle").textContent =
-    "A career goal names one specific career out of eighty-five. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
+    "A career goal names one specific career out of ninety. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
   el("tip").textContent =
     "Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.";
 
