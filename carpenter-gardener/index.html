@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 52</span></div>
+    <span class="ver" role="note">build 53</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1574,7 +1574,9 @@ function render(){
     /* Under the aspiration nothing is counted against the parent, so the two
        cells that price pushing give way to what the child has reached. */
     best
-      ? ["Schooling reached", s.segs.length ? edReached(s.pos[1]) : "—"]
+      /* "attained" because this one IS the child's own position, unlike the
+         result grid's cell, which reports what the career asks for */
+      ? ["Schooling attained", s.segs.length ? edReached(s.pos[1]) : "—"]
       : ["Built / grown", s.aimed + " / " + s.nurtured],
     /* What pushing has cost so far, in points of the figure itself rather
        than points off the top of the scale. */
@@ -1663,7 +1665,11 @@ function finishRun(reason){
        ["Satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
        ["Stages supported", esc(s.nurtured + " / " + TOTAL_STAGES)],
        ["Distance travelled", esc(Math.round(Math.hypot(s.pos[0], s.pos[1], s.pos[2])) + " units")],
-       ["Schooling reached", esc(edReached(s.pos[1]))]]
+       /* The CAREER's credential, not the child's coordinate. Every other
+          cell in this grid describes the career, so reading "master's"
+          next to Anesthesiologists looked like the result was wrong when
+          it was two different quantities sitting side by side. */
+       ["Typical schooling", esc(edLabel(career[2]))]]
     : [["Ended up at", esc(career[0])],
        ["Median pay", esc(money(career[5]))],
        ["Goal satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
