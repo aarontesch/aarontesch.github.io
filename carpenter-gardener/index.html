@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 56</span></div>
+    <span class="ver" role="note">build 57</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -239,7 +239,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <section class="hero">
   <div class="eyebrow">A developmental strategy game &middot; prototype</div>
   <h1>Five stages of growth, in a space of real occupations.</h1>
-  <p>A hundred and nine real occupations, placed by pay, schooling and emotional labour. A child grows through five developmental stages in that space.</p>
+  <p>A hundred and fifteen real occupations, placed by pay, schooling and emotional labour. A child grows through five developmental stages in that space.</p>
 </section>
 
 <section class="layout">
@@ -451,7 +451,14 @@ const OCC = [
   ["Writers and Authors",28.0,32.9,16.4,"A",72000,50],["Dentists, General",56.9,109.4,65.0,"H",172000,120],
   ["Pharmacists",49.3,109.4,54.5,"H",137000,330],["Physician Assistants",48.3,66.2,81.8,"H",133000,145],
   ["Physical Therapists",39.2,109.4,76.1,"H",101000,240],["Veterinarians",46.3,109.4,76.1,"H",125000,80],
-  ["Registered Nurses",36.7,32.9,76.1,"H",93600,3200],["Nurse Practitioners",47.3,66.2,93.8,"H",129000,280],
+  /* Nursing's formal minimum is an associate's -- the ADN is still how a
+     large share of nurses qualify -- so it was wrong at a bachelor's, and
+     the promotion above now says what employers really say, which is BSN
+     preferred. Putting it on the rung it belongs on also halves the air
+     traffic control pole, because this is the occupation that genuinely
+     ought to be catching those lives. It catches a quarter of them, which
+     is far too many: nursing is 2% of American employment. */
+  ["Registered Nurses",36.7,24.6,76.1,"H",93600,3200],["Nurse Practitioners",47.3,66.2,93.8,"H",129000,280],
   ["Anesthesiologists",95.9,109.4,65.0,"H",557131,32],["Family Medicine Physicians",78.0,109.4,100.0,"H",325040,110],
   ["Psychiatrists",80.5,109.4,100.0,"H",350786,25],["Radiologists",98.8,109.4,28.1,"H",609684,30],
   ["Paramedics",18.4,17,76.1,"H",54000,95],["Licensed Practical Nurses",23.0,17,70.4,"H",62000,630],
@@ -513,10 +520,45 @@ const OCC = [
   ["Wholesale and Manufacturing Sales Representatives",28.4,3.3,54.5,"O",73000,1400],
   ["Real Estate Brokers",31.0,3.3,59.7,"O",79000,50],
   ["Transportation, Storage, and Distribution Managers",38.5,3.3,54.5,"M",99000,165],
+
+  /* Company on the associate's rung, which after the promotion is where a
+     great many lives come to rest and which held only ten jobs. All five are
+     large, ordinary occupations that pay well without a degree, and the four
+     technologist entries carry the headcount that the imaging and support
+     trades really have. */
+  ["Radiologic Technologists and Technicians",28.6,24.6,49.6,"H",73410,220],
+  ["Aircraft Mechanics and Service Technicians",29.5,24.6,31.9,"T",75400,150],
+  ["Computer Network Support Specialists",27.7,24.6,36.0,"C",71530,170],
+  ["Physical Therapist Assistants",24.1,24.6,76.1,"H",64080,100],
+  ["Commercial Pilots",42.9,17,54.5,"T",113080,50],
+  /* A professor of the subject this activity is for. Entered at a master's
+     rather than at the doctorate the two postsecondary rows above carry,
+     because community college and lecturer posts are a real and common way
+     into the work and the doctorate rung is where careers go to be
+     unreachable. Scored at 59.7 rather than the 70.4 the rubric first gave
+     it, because at 70.4 it sat on top of the careers counsellors, who are
+     eight times as numerous and win every tie: the slot has to be its own
+     to be reachable at all. Aimed at, it comes out 1.6% of the time. */
+  ["Psychology Teachers, Postsecondary",32.3,66.2,59.7,"A",82000,37],
+
   ["Neurosurgeons",107.4,109.4,76.1,"H",790000,5],
   ["Law Firm Equity Partners",126.4,109.4,70.4,"S",1400000,25],
   ["Private Equity and Hedge Fund Partners",151.7,66.2,59.7,"B",3000000,8],
-  ["Major League Athletes",165.2,3.3,44.9,"A",4500000,3.5],
+  /* Scored up from 44.9. The rubric had been read as though the job were
+     the game: it is also the press conference after a loss, the locker room,
+     the agent, the crowd and the knowledge that a bad season ends the
+     career.
+
+     It was meant to make the job rarer and it does not. Measured: at 44.9 it
+     takes 10.1% of lives and at 70.4 it takes 10.7%, because the cloud of
+     finished lives has a median emotional labour of 73 and moving the job up
+     moved it TOWARDS them. Emotional labour is not what decides this one.
+     Lives that land here do so at a mean of $1.64m a year, and in that part
+     of the space there is nothing else to land on at all -- 28% of children
+     finish a life earning over $500,000, which is the number that would
+     actually move it. The score stays at 70.4 because it is the right score,
+     not because it fixed anything. */
+  ["Major League Athletes",165.2,3.3,70.4,"A",4500000,3.5],
   ["Lead Film and Television Actors",184.3,0,49.6,"A",8000000,1],
 ];
 
@@ -550,7 +592,7 @@ const ED_STEEPNESS = 1.4;
    and so on up. Promoting the whole column by a rung is the correction.
 
    Two exceptions. Doctorates stay put -- there is no rung above them. And
-   three jobs really are open to someone with no credential at all, so they
+   five jobs really are open to someone with no credential at all, so they
    alone keep the floor.
 
    Raising what every job asks for, while leaving what children attain
@@ -565,7 +607,8 @@ const ED_STEEPNESS = 1.4;
    control takes 19% of all lives where it took 2%. That wants more
    occupations in the 46-123 band, not a smaller promotion. */
 const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
-  "Laborers and Freight, Stock, and Material Movers"];
+  "Laborers and Freight, Stock, and Material Movers",
+  "Waiters and Waitresses", "Landscaping and Groundskeeping Workers"];
 /* The master's rung also moves: it sat 43 units below a doctorate and now
    sits half that gap higher, so the jobs promoted onto it are genuinely
    harder to reach rather than just relabelled. */
@@ -960,6 +1003,39 @@ const EDU_RUNGS = [0, 3.3, 15.6, 24.6, 32.9, MASTERS_RUNG, 109.4]
 const POP_ED = 23 * ED_STEEPNESS;                              // half of adults clear it
 const POP_PAY = SAL_PER_DOUBLING * Math.log2(48000 / 31000);   // median US earnings
 
+/* How far apart the best and worst parents put a child, on each axis. These
+   are the full travel of the three sliders, and the spread below is written
+   as a fraction of them so that widening a slider widens its luck too. */
+const EDU_SPAN = EDU_TRANSMIT * (EDU_RUNGS[EDU_RUNGS.length - 1] - POP_ED);
+const PAY_SPAN = PAY_TRANSMIT *
+  (SAL_PER_DOUBLING * Math.log2(START_PAY[START_PAY.length - 1] / 31000) - POP_PAY);
+const EQ_SPAN  = EQ_SECURE;
+
+/* The sliders used to hand their advantage on exactly: a doctorate always
+   bought the same head start, a secure home always banked the same reserve.
+   Nothing about what parents pass down is that tidy. A transmission
+   coefficient describes an AVERAGE child, and the spread around that average
+   is as wide as the coefficient is strong -- which is why professors have
+   children who never finish a degree, and why a settled home still produces
+   an adult who flinches.
+
+   So each axis now takes a gaussian draw around the transmitted value, with
+   a standard deviation of half the slider's own travel. Half puts the luck
+   of the draw on the same scale as the entire difference between the best
+   and the worst parents: enough that the sliders load the dice rather than
+   decide the throw.
+
+   The draw goes down as readily as up, which is the point. A doctorate's
+   child can begin with less schooling banked than a labourer's, and a secure
+   home can produce a child who begins with nothing in reserve -- educational
+   downward mobility and emotional regression, neither of which the old
+   straight line could express. It stops at zero, because these axes are
+   ladders up from nothing and there is no less than nothing to hold.
+
+   Drawn once, in fresh(), and kept on the run: re-rolling it on every render
+   would make the child flicker while the parents' sliders stood still. */
+const START_SPREAD = 0.5;
+
 /* Education and pay are transmitted attainments, so they are deviations.
    Emotional labour is not: that slider is the child's early environment,
    not a parent's score, and zero genuinely means nothing banked -- so an
@@ -968,9 +1044,9 @@ const POP_PAY = SAL_PER_DOUBLING * Math.log2(48000 / 31000);   // median US earn
 function startPoint(ed, pay, eq){
   const parentPay = SAL_PER_DOUBLING * Math.log2(START_PAY[pay] / 31000);
   return clampPt([
-    Math.max(0, PAY_TRANSMIT * (parentPay - POP_PAY)),
-    Math.max(0, EDU_TRANSMIT * (EDU_RUNGS[ed] - POP_ED)),
-    EQ_SECURE * START_EQ[eq][1]
+    PAY_TRANSMIT * (parentPay - POP_PAY) + gauss() * START_SPREAD * PAY_SPAN,
+    EDU_TRANSMIT * (EDU_RUNGS[ed] - POP_ED) + gauss() * START_SPREAD * EDU_SPAN,
+    EQ_SECURE * START_EQ[eq][1]        + gauss() * START_SPREAD * EQ_SPAN
   ]);
 }
 
@@ -1527,7 +1603,7 @@ function render(){
     s.aimed + " built &middot; " + s.nurtured + " grown";
   el("dashTitle").textContent = "A life taking shape";
   el("principle").textContent =
-    "A career goal names one specific career out of a hundred and nine. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
+    "A career goal names one specific career out of a hundred and fifteen. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
   el("tip").textContent =
     "Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.";
 
