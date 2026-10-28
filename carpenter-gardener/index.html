@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 57</span></div>
+    <span class="ver" role="note">build 58</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -629,13 +629,42 @@ OCC.forEach(o => {
    easy, because the top of a percentile axis is only ever one step past the
    next occupation down.
 
-   The salary coordinate is 23 units per DOUBLING of median pay, measured from
-   the lowest-paid occupation in the set. The real catalogue then spans about
-   0-100 as before, and the illustrative $17M row runs off to 209, which is
-   past anything five stages can reach. Money is hard the way it is hard in
-   life: each further step costs as much as everything before it. */
-const SAL_PER_DOUBLING = 23;
-const AXIS = [210, 110 * ED_STEEPNESS, 100];     // the space is a box, not a cube
+   The salary coordinate is a fixed number of units per DOUBLING of median
+   pay, measured from the lowest-paid occupation in the set. Money is hard
+   the way it is hard in life: each further step costs as much as everything
+   before it. */
+
+/* ============ how steep the pay ladder is ============
+   Written at 23 units per doubling, which turned out to be far too cheap.
+   A five-stage life spent about a third of its travel on this axis, and a
+   third of the travel at 23 units each was six doublings of income: the
+   median child finished earning $244,000 and 28% of them finished over
+   $500,000 a year. Real American earners: a median near $60,000 and well
+   under 1% over $500,000.
+
+   That one number was behind most of what looked like separate faults. The
+   cloud of finished lives floated above the part of the space where real
+   occupations actually sit, so whatever was cheapest up there caught
+   everybody -- major league athletes took one life in ten at a mean of
+   $1.64m a year, and air traffic control, about the best-paid work in the
+   country that does not need a degree, took one in five.
+
+   Tripled to 69. The whole pay column rescales with it, so every occupation
+   keeps its meaning in dollars while the distance between two incomes
+   triples. Measured over 6,000 lives: the median child now finishes on
+   $69,000, 2.2% finish over $200,000 and none over $500,000; distinct
+   outcomes rise from 79 to 88 and the three commonest outcomes fall from
+   48% of all lives to 29%. Athletes stop being a destination at all.
+
+   It is not free. Holding the walk's reach fixed -- which it must be, or
+   the stretch only makes childhoods longer -- puts seven more careers out
+   of reach even when every stage is aimed at them, 50 of 115 against 43.
+   Chief executives and major league athletes are now goals that cannot be
+   hit rather than goals that are merely improbable. */
+const PAY_STEEPNESS = 3;
+OCC.forEach(o => { o[1] = +(o[1] * PAY_STEEPNESS).toFixed(1); });
+const SAL_PER_DOUBLING = 23 * PAY_STEEPNESS;
+const AXIS = [210 * PAY_STEEPNESS, 110 * ED_STEEPNESS, 100];  // a box, not a cube
 const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
 const TOTAL_STAGES = 5;
 
@@ -673,7 +702,8 @@ const CENTROID = (function(){
    93% to 82% while collapsing variety. Pinned here instead, 2x does real
    work. Putting degrees further away is meant to make them harder to reach,
    not to make every childhood longer. */
-const CENTRE_DIST = Math.hypot(CENTROID[0], CENTROID[1] / ED_STEEPNESS, CENTROID[2]);
+const CENTRE_DIST = Math.hypot(
+  CENTROID[0] / PAY_STEEPNESS, CENTROID[1] / ED_STEEPNESS, CENTROID[2]);
 /* Five plain segments land on the average life. Left at 1.0 with the
    loosened direction clamp: scaling it up to keep an UNSTEERED walk on the
    average was measured and backfires, because NURTURE_BONUS is a multiple of
@@ -818,6 +848,15 @@ function nearestOcc(p, prefer){
   return {i: bi, dist: distTo(p, bi)};
 }
 const reachOf = o => Math.hypot(o[1], o[2], o[3]);
+/* "one of the hardest places in this space to arrive at" was a hardcoded
+   110 units, which stopped meaning anything the moment an axis was
+   rescaled -- tripling pay would have promoted every six-figure job to
+   elite. Taken from the catalogue instead: the furthest tenth of it, which
+   is what the sentence was always trying to say. */
+const ELITE_REACH = (function(){
+  const r = OCC.map(reachOf).sort((a, b) => a - b);
+  return r[Math.floor(r.length * 0.9)];
+})();
 /* how far a goal still is from a given point -- the origin is no longer
    where every childhood begins, so "how far out is it" is a question about
    this child, not about the space */
@@ -1155,7 +1194,12 @@ function fitControls(){
   svg.style.height = (VIEW.h + CONTROL_PAD) + "px";
 }
 function project(p){
-  const x = p[0]-AXIS[0]/2, y = p[1]-AXIS[1]/2, z = p[2]-AXIS[2]/2;
+  /* The pay axis is three times as long as the maths needs it drawn. Shrink
+     it back here and the picture keeps the proportions it has always had,
+     while every distance the model computes uses the stretched axis. Every
+     line, point and label in the drawing comes through this function, so
+     this is the only place it has to happen. */
+  const x = (p[0]-AXIS[0]/2) / PAY_STEEPNESS, y = p[1]-AXIS[1]/2, z = p[2]-AXIS[2]/2;
   const cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
   const X = x*cy - z*sy, Z = x*sy + z*cy;
   const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
@@ -1168,7 +1212,7 @@ const CORNERS = [[0,0,0],[X,0,0],[X,0,Z],[0,0,Z],[0,Y,0],[X,Y,0],[X,Y,Z],[0,Y,Z]
 const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
 /* the salary axis is log-dollars, so show dollars; a coordinate would mean
    nothing to a reader and a percentile would now be a lie */
-/* Education is no longer a percentile either. It is 46 units per HALVING of
+/* Education is no longer a percentile either. It is 32 units per HALVING of
    the share of adults who get that far, so each credential costs what the one
    before it cost again -- which is why a doctorate now sits 22 units past a
    master's where the occupation percentile put it 8. Shares are US Census CPS
@@ -1774,7 +1818,7 @@ function finishRun(reason){
      same place, so there is no address to have missed. */
   const hitTarget = best || w.i === s.target;
   const sat = satisfaction(s);
-  const elite = reachOf(career) > 110;
+  const elite = reachOf(career) >= ELITE_REACH;
 
   el("resultTitle").textContent = best ? "They did their best."
     : hitTarget ? "The goal was met." : "The goal was missed.";
