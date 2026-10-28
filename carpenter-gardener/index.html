@@ -216,7 +216,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 72</span></div>
+    <span class="ver" role="note">build 73</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1836,9 +1836,7 @@ function render(){
 
   /* target picker, hardest first */
   {
-    /* The aspiration is pinned above the list rather than sorted into it: it
-       has no odds to be ranked by, because it cannot be missed. */
-     const sel = el("targetSel");
+    const sel = el("targetSel");
     if(!sel.options.length){
       sel.innerHTML =
         '<option value="' + BEST_I + '">' + esc(BEST[0]) + ' — no specific career goal</option>' +
@@ -1853,33 +1851,6 @@ function render(){
     const t = TARGETS[s.target];
     el("targetCred").innerHTML = best ? "No specific career goal"
       : esc(money(OCC[s.target][5])) + " &middot; " + esc(occCred(OCC[s.target]));
-      '<p class="pickhint">Their best first, then the real occupations, least likely at the ' +
-      'top. The figure is how often that occupation comes out when the run is played as ' +
-      'well as it can be, measured from the model itself.</p>' +
-      '<ul class="picklist" aria-label="Choose the occupation to aim for"><li>' + bestBtn + '</li>' +
-      PICK_ORDER.map(i => {
-        const o = OCC[i], far = Math.round(reachOf(o)), od = DIFFICULTY[i].pct;
-        return '<li><button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
-          (s.over ? " disabled" : "") +
-          ' aria-label="' + esc(o[0]) + ': ' + far +
-            ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', typically ' + occCred(o) +
-            ', emotional labour ' + o[3] + '">' +
-          '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
-            money(o[5]) + ' &middot; ' + occCred(o) + '</small></button></li>';
-      }).join("") + '</ul>';
-    
-    /* the one-line summary carries the current target, so the list stays shut.
-       the flex lives on an inner span: styling <summary> itself has a history
-       of disturbing the disclosure behaviour in some browsers. */
-    /* The schooling the goal asks for, named on the summary rather than only
-       inside the open list. A parent choosing between careers is choosing
-       between educations, and the one line that stays on screen after the
-       list shuts was the one place that did not say so. */
-    const goalCred = best ? "No specific career goal"
-      : esc(money(OCC[s.target][5])) + " &middot; " + esc(occCred(OCC[s.target]));
-    el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) +
-      '<em class="goalcred">' + goalCred + '</em></span><small>' +
-      (s.over ? "run over" : s.segs.length ? "re-aim" : "change") + ' ▾</small></span>';
     if(best){
       /* No odds: the aspiration is not an address, so there is nothing to
          land on or fail to land on. Say what is being scored instead. */
