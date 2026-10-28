@@ -1867,7 +1867,7 @@ function render(){
           '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
             money(o[5]) + ' &middot; ' + occCred(o) + '</small></button></li>';
       }).join("") + '</ul>';
-    const t = TARGETS[s.target];
+    
     /* the one-line summary carries the current target, so the list stays shut.
        the flex lives on an inner span: styling <summary> itself has a history
        of disturbing the disclosure behaviour in some browsers. */
