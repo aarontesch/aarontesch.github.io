@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 58</span></div>
+    <span class="ver" role="note">build 59</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -591,7 +591,8 @@ const ED_STEEPNESS = 1.4;
    people with a diploma, the high-school ones to people with some college,
    and so on up. Promoting the whole column by a rung is the correction.
 
-   Two exceptions. Doctorates stay put -- there is no rung above them. And
+   Two exceptions. Doctorate jobs are set by the rates they should produce
+   rather than promoted, since there is no rung above them. And
    five jobs really are open to someone with no credential at all, so they
    alone keep the floor.
 
@@ -609,12 +610,23 @@ const ED_STEEPNESS = 1.4;
 const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
   "Laborers and Freight, Stock, and Material Movers",
   "Waiters and Waitresses", "Landscaping and Groundskeeping Workers"];
-/* The master's rung also moves: it sat 43 units below a doctorate and now
-   sits half that gap higher, so the jobs promoted onto it are genuinely
-   harder to reach rather than just relabelled. */
-const MASTERS_RUNG = 66.2 + (109.4 - 66.2) / 2;
+/* The top two rungs are set by what they are supposed to produce, not by
+   where the credential table happened to put them. The two numbers that
+   matter: a child of doctorate-holding parents should finish in a
+   doctorate-level career about 5% of the time, and a child starting from
+   the bottom of all three sliders about 0.2% of the time.
+
+   Measured on a 25,000-life sweep, 85 and 104 give 5.8% and 0.26%. The
+   master's rung was 87.8, half way between where the credential table put
+   it and a doctorate; the doctorate rung was 109.4, the table's own figure.
+   Both come down, which is the direction asked for, but only by a nudge --
+   a full rung down, to 66.2 and 87.8, was measured at 15.6% and 2.15%,
+   three times and ten times what those careers should be. The rungs cannot
+   go further down than this without the rates going wrong. */
+const MASTERS_RUNG = 85;
+const DOCTORATE_RUNG = 104;
 const PROMOTE = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
-  32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG, 109.4: 109.4};
+  32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG, 109.4: DOCTORATE_RUNG};
 OCC.forEach(o => {
   const up = NO_CREDENTIAL.indexOf(o[0]) >= 0 ? 0 : PROMOTE[o[2]];
   if(up === undefined) throw new Error("no promotion rung for education " + o[2] + " (" + o[0] + ")");
@@ -1214,12 +1226,12 @@ const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6]
    nothing to a reader and a percentile would now be a lie */
 /* Education is no longer a percentile either. It is 32 units per HALVING of
    the share of adults who get that far, so each credential costs what the one
-   before it cost again -- which is why a doctorate now sits 22 units past a
+   before it cost again -- which is why a doctorate now sits 19 units past a
    master's where the occupation percentile put it 8. Shares are US Census CPS
    figures for adults 25 and over, approximate. A coordinate is meaningless to
    a reader, so always show the credential. */
 const ED_LEVELS = [[0,"no credential"],[3.3,"high school"],[15.6,"some college"],
-  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[MASTERS_RUNG,"master's"],[109.4,"doctorate"]]
+  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[MASTERS_RUNG,"master's"],[DOCTORATE_RUNG,"doctorate"]]
   .map(L => [+(L[0] * ED_STEEPNESS).toFixed(1), L[1]]);
 function edLabel(c){
   let best = ED_LEVELS[0];
