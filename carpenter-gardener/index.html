@@ -2065,7 +2065,7 @@ function openResult(){
 }
 function closeResult(){
   el("modal").classList.remove("show");
-  const act = document.querySelector("[data-act]:not([aria-disabled='true'])");
+  const act = document.querySelector("[data-act]:not([aria-disabled=true])")
   (act || el("reset")).focus();
 }
 document.addEventListener("keydown", e => {
