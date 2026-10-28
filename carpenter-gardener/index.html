@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 59</span></div>
+    <span class="ver" role="note">build 60</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -610,21 +610,16 @@ const ED_STEEPNESS = 1.4;
 const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
   "Laborers and Freight, Stock, and Material Movers",
   "Waiters and Waitresses", "Landscaping and Groundskeeping Workers"];
-/* The top two rungs are set by what they are supposed to produce, not by
-   where the credential table happened to put them. The two numbers that
-   matter: a child of doctorate-holding parents should finish in a
-   doctorate-level career about 5% of the time, and a child starting from
-   the bottom of all three sliders about 0.2% of the time.
-
-   Measured on a 25,000-life sweep, 85 and 104 give 5.8% and 0.26%. The
-   master's rung was 87.8, half way between where the credential table put
-   it and a doctorate; the doctorate rung was 109.4, the table's own figure.
-   Both come down, which is the direction asked for, but only by a nudge --
-   a full rung down, to 66.2 and 87.8, was measured at 15.6% and 2.15%,
-   three times and ten times what those careers should be. The rungs cannot
-   go further down than this without the rates going wrong. */
-const MASTERS_RUNG = 85;
-const DOCTORATE_RUNG = 104;
+/* Both rungs sit where the credential table puts them. They were briefly
+   pulled down to 85 and 104 to make doctorate-level careers come out at
+   the rate they should, which worked but bent the ladder to fix something
+   that was not the ladder's fault: the walk had no memory, so no child
+   ever built on what they had already grown. INCLINE does that job now and
+   these go back to being what they claim to be -- the master's rung half
+   way between the table's figure and a doctorate, the doctorate rung the
+   table's own. */
+const MASTERS_RUNG = 66.2 + (109.4 - 66.2) / 2;
+const DOCTORATE_RUNG = 109.4;
 const PROMOTE = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
   32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG, 109.4: DOCTORATE_RUNG};
 OCC.forEach(o => {
@@ -793,10 +788,34 @@ const Z80 = 0.8416;                        // P(normal < -Z80) = 0.20
    Pilots 18%). Swept: 0.55 is where all three climb at the same rate again
    while pay still falls one stage in five. */
 const PAY_MEAN = 0.55 * RISE;
-function flatDir(){
+/* Growth has a memory. Until now every gardened stage was drawn fresh, with
+   no idea what the child had been growing into, which makes "focus on their
+   natural inclinations" a thing the button says rather than a thing the
+   model does. A child who spent adolescence climbing one ladder is more
+   likely to keep climbing it, and that is the whole difference between a
+   life that compounds and five unrelated coin flips.
+
+   So a gardened stage leans very slightly toward the last gardened
+   direction. 0.02 against a draw whose typical length is about 0.6, so
+   around a thirtieth of the step -- enough to let a leaning accumulate over
+   five stages, nowhere near enough to railroad anyone. Measured on 30,000
+   gardened lives: doctorate-level careers come out 4.9% of the time for
+   children of doctorate-holding parents and 0.25% for children starting at
+   the bottom of all three sliders, where a memoryless walk gave 3.97% and
+   0.18%. That is what the rungs were being bent to produce, and this
+   produces it honestly, with the credentials left where they belong.
+
+   The dial has a sharp response, which is why it is set this low: 0.03
+   gives 5.2%, 0.05 gives 5.8%, 0.1 gives 7.1% and 0.3 gives 12.3%. The
+   cost is variety, since a walk that compounds goes further in fewer
+   directions, and at 0.02 it is barely payable -- 95 distinct outcomes
+   against 94, the three commonest taking 30.6% of lives against 30.1%. */
+const INCLINE = 0.02;
+function flatDir(grown){
   const pay = PAY_MEAN + (PAY_MEAN / Z80) * gauss();
   const ed = gauss(), eq = gauss();
   const d = [pay, ed < 0 ? 0 : ed, eq < 0 ? 0 : eq];
+  if(grown){ d[0] += INCLINE * grown[0]; d[1] += INCLINE * grown[1]; d[2] += INCLINE * grown[2]; }
   // a near-zero vector has no direction to normalise, and must not be returned
   return Math.hypot(d[0], d[1], d[2]) < 1e-9 ? norm([1, 1, 1]) : norm(d);
 }
@@ -922,9 +941,10 @@ const FIT_REF = (function(){
   const out = [];
   try{
     for(let i = 0; i < 4000; i++){
-      let p = [0, 0, 0];
+      let p = [0, 0, 0], grown = null;
       for(let k = 0; k < TOTAL_STAGES; k++){
-        const d = flatDir();
+        const d = flatDir(grown);
+        grown = d;
         let len = MU + gauss() * SIG + NURTURE_BONUS;
         if(len < LEN_FLOOR) len = LEN_FLOOR;
         p = clampPt([p[0]+d[0]*len, p[1]+d[1]*len, p[2]+d[2]*len]);
@@ -1120,6 +1140,9 @@ function fresh(target){
     stage: 1,
     start: from.slice(),                        // where this childhood began
     pos: from.slice(), heading: norm(CENTROID.slice()),
+    /* the direction of the last GARDENED stage, null until there is one --
+       a child has no inclination before they have grown once */
+    grown: null,
     segs: [], target: (target === undefined ? DEFAULT_TARGET : target), aimed: 0, nurtured: 0,
     /* what was named before any growth. Re-aiming mid-run is allowed, so the
        result can say what the plan was as well as what it became. */
@@ -1137,11 +1160,12 @@ function growStage(choice){
   const nurture = choice === "nurture" || isBest(s.target);
   let dir;
   /* Gardening means letting go of the wheel, so it does not quietly keep the
-     heading the last push bought. A gardened stage takes a flat direction:
-     the choice each stage is simply whether to steer or not, and reach
-     cannot be bought while still pointing where you were pointing. */
+     heading the last push bought. A gardened stage leans on `grown`, which
+     only a gardened stage ever sets: what the child has been growing into,
+     never where a parent last pointed them. Reach still cannot be bought by
+     pushing once and then coasting in that direction. */
   if(nurture){
-    dir = flatDir();
+    dir = flatDir(s.grown);
   } else {
     const t = TARGETS[s.target];
     let d = [t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]];
@@ -1159,6 +1183,7 @@ function growStage(choice){
   const to = clampPt([from[0]+dir[0]*len, from[1]+dir[1]*len, from[2]+dir[2]*len]);
   s.segs.push({from: from, to: to, nurtured: nurture, len: len});
   s.pos = to; s.heading = dir;
+  if(nurture) s.grown = dir;
   s.locked = true;
   if(nurture) s.nurtured++; else s.aimed++;
 
@@ -1226,7 +1251,7 @@ const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6]
    nothing to a reader and a percentile would now be a lie */
 /* Education is no longer a percentile either. It is 32 units per HALVING of
    the share of adults who get that far, so each credential costs what the one
-   before it cost again -- which is why a doctorate now sits 19 units past a
+   before it cost again -- which is why a doctorate now sits 22 units past a
    master's where the occupation percentile put it 8. Shares are US Census CPS
    figures for adults 25 and over, approximate. A coordinate is meaningless to
    a reader, so always show the credential. */
@@ -1513,11 +1538,13 @@ function occTable(s){
 function playPlan(ti, nAim, from){
   const t = OCC[ti];
   let p = (from || [0,0,0]).slice(), h = norm(CENTROID.slice());
+  let grown = null;                      // mirrors state.grown in growStage
   for(let k = 0; k < TOTAL_STAGES; k++){
     const aim = k < nAim;
     const d = [t[1]-p[0], t[2]-p[1], t[3]-p[2]];
     const L = Math.hypot(d[0],d[1],d[2]);
-    const dir = aim ? perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG) : flatDir();
+    const dir = aim ? perturb(L < 1e-9 ? h : [d[0]/L,d[1]/L,d[2]/L], ANG) : flatDir(grown);
+    if(!aim) grown = dir;
     let len = MU + gauss()*SIG + (aim ? 0 : NURTURE_BONUS);
     if(len < LEN_FLOOR) len = LEN_FLOOR;
     if(aim && len > L) len = L;
