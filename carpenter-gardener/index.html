@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 60</span></div>
+    <span class="ver" role="note">build 61</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -762,32 +762,38 @@ function perturb(d, sig){
    the same elite medical cluster (Physician Assistants 19%, Chief Executives
    12%, Anesthesiologists 10%).
 
-   The clamp is loosened rather than removed. A downward draw now stalls that
-   dimension for the stage instead of being turned into progress, so growth is
-   genuinely undirected -- but it still cannot go backwards, because a child
-   does not un-learn a credential and these axes are ladders. Removing the
-   clamp outright was measured and is worse: a symmetric walk from the origin
-   corner loses half of every step to the floor and sinks the median life into
-   farm labour and trucking. Loosened, distinct outcomes go from 52 to 74. */
-/* Pay is not a ratchet, and treating it as one was wrong. Schooling and
-   emotional labour only accumulate -- nobody un-earns a degree or unlearns
-   how to sit with a dying patient -- but earnings fall, and roughly one
-   stage in five they do. So the pay axis is drawn from a distribution that
-   goes negative 20% of the time while keeping the SAME average progress as
-   the other two: a normal with mean m and sd m/z, where z is the
-   80th-percentile z-score. Matching the average climb matters -- simply
-   shifting pay upward until 20% of draws fell below zero would have doubled
-   its rate and handed back the easy-money problem that the stretched salary
-   axis exists to prevent. */
+   The clamp was loosened rather than removed, and then removed. A downward
+   draw used to stall that dimension for the stage, on the reasoning that a
+   child does not un-learn a credential. That reasoning was too kind to the
+   model. These coordinates are expected attainment, not certificates in a
+   drawer, and expected attainment falls: a trajectory derails, a place is
+   lost, a settled child comes out of adolescence less able to sit with
+   other people than they went in. All three axes now go backwards.
+
+   What matters is that the AVERAGE progress does not change, because
+   backsliding is meant to widen the spread of lives, not to shorten them
+   all. Each axis is drawn from a normal with mean m and sd m/z, which falls
+   below zero exactly P(normal < -z) of the time while still averaging m.
+   Pay keeps the 20% it had, which is roughly how often real earnings fall.
+   Schooling and emotional labour take 25%, which is what holds their
+   landings where they were. */
 const RISE = 1 / Math.sqrt(2 * Math.PI);   // mean of a draw clamped at zero
 const Z80 = 0.8416;                        // P(normal < -Z80) = 0.20
-/* 0.55 of that, not all of it. The direction is normalised, and normalising
-   hands ground to whichever axis carries the most variance -- so pay drawn
-   with the same raw mean as the other two still climbed 30% faster than
-   them, piling lives into the high-pay band (mean landing 64,45,44, Airline
-   Pilots 18%). Swept: 0.55 is where all three climb at the same rate again
-   while pay still falls one stage in five. */
-const PAY_MEAN = 0.55 * RISE;
+const Z75 = 0.6745;                        // P(normal < -Z75) = 0.25
+/* The three means are not what they look like, because the direction is
+   normalised and normalising rewards whichever axis has the steadiest draw
+   rather than the largest one. The old schooling and emotion draws were a
+   normal clamped at zero, so HALF of every stage's draws were exactly zero
+   -- an atom at the floor that dragged their realised climb far below their
+   nominal mean. Replacing the atom with a distribution that simply goes
+   negative makes them climb much more efficiently at the same nominal mean,
+   so both have to be scaled back to land where they used to. Swept against
+   the median finished life: 0.70, 0.76 and 0.66 hold it at (78, 64, 79)
+   against (81, 63, 77) before, with the median child on $68,000 against
+   $70,000. */
+const PAY_MEAN = 0.66 * RISE;
+const ED_MEAN  = 0.70 * RISE;
+const EQ_MEAN  = 0.76 * RISE;
 /* Growth has a memory. Until now every gardened stage was drawn fresh, with
    no idea what the child had been growing into, which makes "focus on their
    natural inclinations" a thing the button says rather than a thing the
@@ -795,26 +801,26 @@ const PAY_MEAN = 0.55 * RISE;
    likely to keep climbing it, and that is the whole difference between a
    life that compounds and five unrelated coin flips.
 
-   So a gardened stage leans very slightly toward the last gardened
-   direction. 0.02 against a draw whose typical length is about 0.6, so
-   around a thirtieth of the step -- enough to let a leaning accumulate over
-   five stages, nowhere near enough to railroad anyone. Measured on 30,000
-   gardened lives: doctorate-level careers come out 4.9% of the time for
-   children of doctorate-holding parents and 0.25% for children starting at
-   the bottom of all three sliders, where a memoryless walk gave 3.97% and
-   0.18%. That is what the rungs were being bent to produce, and this
-   produces it honestly, with the credentials left where they belong.
+   So a gardened stage leans slightly toward the last gardened direction,
+   enough for a leaning to accumulate over five stages and nowhere near
+   enough to railroad anyone. It is what keeps doctorate-level careers
+   coming out at the rate they should -- 4.51% for children of
+   doctorate-holding parents, 0.26% for children starting at the bottom of
+   all three sliders, where a memoryless walk gives 3.32% and 0.18%.
 
-   The dial has a sharp response, which is why it is set this low: 0.03
-   gives 5.2%, 0.05 gives 5.8%, 0.1 gives 7.1% and 0.3 gives 12.3%. The
-   cost is variety, since a walk that compounds goes further in fewer
-   directions, and at 0.02 it is barely payable -- 95 distinct outcomes
-   against 94, the three commonest taking 30.6% of lives against 30.1%. */
-const INCLINE = 0.02;
+   It was 0.02 before the axes could go backwards and is 0.08 now, because
+   a doctorate needs a long unbroken climb and backsliding keeps breaking
+   it: at 0.02 with backsliding the doctorate rate fell to 3.5%. The dial
+   has a sharp response -- 0.12 gives 4.88%, 0.18 gives 5.87% -- and costs
+   variety, since a walk that compounds goes further in fewer directions,
+   though at 0.08 that cost is not yet visible: 94 distinct outcomes, the
+   three commonest taking 29.7% of lives. */
+const INCLINE = 0.08;
 function flatDir(grown){
   const pay = PAY_MEAN + (PAY_MEAN / Z80) * gauss();
-  const ed = gauss(), eq = gauss();
-  const d = [pay, ed < 0 ? 0 : ed, eq < 0 ? 0 : eq];
+  const ed  = ED_MEAN  + (ED_MEAN  / Z75) * gauss();
+  const eq  = EQ_MEAN  + (EQ_MEAN  / Z75) * gauss();
+  const d = [pay, ed, eq];
   if(grown){ d[0] += INCLINE * grown[0]; d[1] += INCLINE * grown[1]; d[2] += INCLINE * grown[2]; }
   // a near-zero vector has no direction to normalise, and must not be returned
   return Math.hypot(d[0], d[1], d[2]) < 1e-9 ? norm([1, 1, 1]) : norm(d);
