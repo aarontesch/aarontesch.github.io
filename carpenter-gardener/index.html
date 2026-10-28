@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 62</span></div>
+    <span class="ver" role="note">build 63</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -451,14 +451,15 @@ const OCC = [
   ["Writers and Authors",28.0,32.9,16.4,"A",72000,50],["Dentists, General",56.9,109.4,65.0,"H",172000,120],
   ["Pharmacists",49.3,109.4,54.5,"H",137000,330],["Physician Assistants",48.3,66.2,81.8,"H",133000,145],
   ["Physical Therapists",39.2,109.4,76.1,"H",101000,240],["Veterinarians",46.3,109.4,76.1,"H",125000,80],
-  /* Nursing's formal minimum is an associate's -- the ADN is still how a
-     large share of nurses qualify -- so it was wrong at a bachelor's, and
-     the promotion above now says what employers really say, which is BSN
-     preferred. Putting it on the rung it belongs on also halves the air
-     traffic control pole, because this is the occupation that genuinely
-     ought to be catching those lives. It catches a quarter of them, which
-     is far too many: nursing is 2% of American employment. */
-  ["Registered Nurses",36.7,24.6,76.1,"H",93600,3200],["Nurse Practitioners",47.3,66.2,93.8,"H",129000,280],
+  /* Back at a bachelor's, which is what the BLS handbook says. It was moved
+     down to an associate's on the argument that the ADN is still a common
+     way in -- true, but the listed figure is the typical entry-level
+     credential and that is a bachelor's, and the move was doing a job the
+     model should not have been asking it to do: it halved the air traffic
+     control pole, which was really a gap in the education axis and is
+     fixed properly by PROMOTE_FRACTION. With the gap filled, putting
+     nursing back costs almost nothing. */
+  ["Registered Nurses",36.7,32.9,76.1,"H",93600,3200],["Nurse Practitioners",47.3,66.2,93.8,"H",129000,280],
   ["Anesthesiologists",95.9,109.4,65.0,"H",557131,32],["Family Medicine Physicians",78.0,109.4,100.0,"H",325040,110],
   ["Psychiatrists",80.5,109.4,100.0,"H",350786,25],["Radiologists",98.8,109.4,28.1,"H",609684,30],
   ["Paramedics",18.4,17,76.1,"H",54000,95],["Licensed Practical Nurses",23.0,17,70.4,"H",62000,630],
@@ -613,9 +614,9 @@ const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
 const MASTERS_RUNG = 66.2 + (109.4 - 66.2) / 2;
 /* The doctorate rung is 109.4 in the credential table and 118 here. Filling
    the gap below it, which is what PROMOTE_FRACTION does, lets more lives
-   climb through to the top of the ladder, and 112 is what holds
+   climb through to the top of the ladder, and 114 is what holds
    doctorate-level careers at the rate they are supposed to come out at. */
-const DOCTORATE_RUNG = 112;
+const DOCTORATE_RUNG = 114;
 const NEXT_RUNG = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
   32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG};
 
@@ -704,7 +705,15 @@ const occCred = o => CRED_NAME[o[7]];
 const PAY_STEEPNESS = 3;
 OCC.forEach(o => { o[1] = +(o[1] * PAY_STEEPNESS).toFixed(1); });
 const SAL_PER_DOUBLING = 23 * PAY_STEEPNESS;
-const AXIS = [210 * PAY_STEEPNESS, 110 * ED_STEEPNESS, 100];  // a box, not a cube
+/* The education extent was a fixed 110, written when the top rung was 109.4
+   and left behind when the rung moved. At 112 the doctorate sat at 156.8
+   against a ceiling of 154, so it was OUTSIDE the box: clampPt could never
+   put a child there, no child ever reached doctorate-level schooling, and
+   the seventeen doctorate careers were drawn beyond the wireframe. The
+   extent follows the top rung now, with headroom above it, so that reaching
+   a doctorate is something a child does rather than something only the
+   clamp can do. */
+const AXIS = [210 * PAY_STEEPNESS, (DOCTORATE_RUNG + 2) * ED_STEEPNESS, 100];
 const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
 const TOTAL_STAGES = 5;
 
@@ -1062,11 +1071,14 @@ function faces(pct){
    twice as far up the pay axis hands on 0.4 of that distance. No conversion
    and no fudge.
 
-   EDUCATION transmits at roughly the same rate by the usual estimates, and
-   0.45 reproduces the pattern that matters: parents with a bachelor's hand
-   on enough that the child starts around "some college", while parents with
-   a doctorate hand on a start past a bachelor's. It is a head start in
-   expectation, not a guarantee -- the walk still has to cover the rest.
+   EDUCATION transmits at roughly the same rate by the usual estimates, but
+   it is fitted here rather than asserted, because what it has to reproduce
+   is a rate: a child of doctorate-holding parents finishing in a
+   doctorate-level career about 5% of the time. 0.25 does that. It was 0.15,
+   and at 0.15 the same child managed 2.1% -- the 5% only appeared when the
+   pay and home dials were ALSO at the top, which is not what "doctorate
+   parents" means. It is a head start in expectation, not a guarantee; the
+   walk still has to cover the rest.
 
    EMOTIONAL LABOUR is NOT a transmitted attainment and should not be
    modelled as one. The parents' own emotional range is not what is handed
@@ -1083,7 +1095,7 @@ function faces(pct){
    child worse off than a neutral baseline, and that is not representable
    here without a second mechanism. */
 const PAY_TRANSMIT = 0.40;    // intergenerational income elasticity, US
-const EDU_TRANSMIT = 0.15;    // fitted with the ladder, see below
+const EDU_TRANSMIT = 0.25;    // fitted to the doctorate rate, see below
 const EQ_SECURE = 32;         // what a secure, attuned early home banks
 
 /* The slider stops, as [label, value] pairs. Education reuses the
