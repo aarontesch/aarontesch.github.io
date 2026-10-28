@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 54</span></div>
+    <span class="ver" role="note">build 55</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -239,7 +239,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <section class="hero">
   <div class="eyebrow">A developmental strategy game &middot; prototype</div>
   <h1>Five stages of growth, in a space of real occupations.</h1>
-  <p>Ninety real occupations, placed by pay, schooling and emotional labour. A child grows through five developmental stages in that space.</p>
+  <p>A hundred and nine real occupations, placed by pay, schooling and emotional labour. A child grows through five developmental stages in that space.</p>
 </section>
 
 <section class="layout">
@@ -483,6 +483,36 @@ const OCC = [
      careers without tidy federal categories, so their pay and headcount are
      my estimates rather than a sourced table -- the same caveat as the
      employment column, and they are here to be corrected. */
+  /* The missing middle. Two of ninety occupations sat at associate's level
+     against 11% of adults, and fourteen at high school against 28%, leaving
+     the busiest part of the space -- decent pay without a degree -- almost
+     empty: 57% of landings were more than 25 units from any job at all, and
+     the worst-served region centred on good money with modest schooling.
+     Lives drifting through there had nowhere to land but a degree career
+     above it, which is a large part of why bachelor's outcomes ran high.
+
+     Pay is the BLS median, education the credential the work actually asks
+     for, emotional labour scored on the same five-dimension rubric as the
+     rest. Headcounts are rounded recollections, like the column they join. */
+  ["Dental Hygienists",34.2,24.6,44.9,"H",87000,215],
+  ["Radiation Therapists",38.2,24.6,81.8,"H",98000,17],
+  ["Diagnostic Medical Sonographers",33.1,24.6,49.6,"H",84000,84],
+  ["Nuclear Medicine Technologists",36.1,24.6,49.6,"H",92000,18],
+  ["MRI Technologists",32.7,24.6,40.3,"H",83000,40],
+  ["Respiratory Therapists",30.2,24.6,70.4,"H",77000,135],
+  ["Web Developers",33.9,24.6,36.0,"C",86000,90],
+  ["Nuclear Technicians",39.2,24.6,40.3,"E",101000,6],
+  ["Electrical Power-Line Installers",33.5,3.3,36.0,"T",85000,125],
+  ["Elevator and Escalator Installers",39.5,3.3,31.9,"T",102000,25],
+  ["Power Plant Operators",38.9,3.3,40.3,"T",100000,32],
+  ["Detectives and Criminal Investigators",35.7,3.3,81.8,"P",91000,108],
+  ["First-Line Supervisors of Police",39.2,3.3,87.7,"P",101000,135],
+  ["Ship Engineers",35.4,3.3,44.9,"T",90000,8],
+  ["Boilermakers",28.0,3.3,28.1,"T",72000,11],
+  ["Subway and Streetcar Operators",33.1,3.3,36.0,"T",84000,10],
+  ["Wholesale and Manufacturing Sales Representatives",28.4,3.3,54.5,"O",73000,1400],
+  ["Real Estate Brokers",31.0,3.3,59.7,"O",79000,50],
+  ["Transportation, Storage, and Distribution Managers",38.5,3.3,54.5,"M",99000,165],
   ["Neurosurgeons",107.4,109.4,76.1,"H",790000,5],
   ["Law Firm Equity Partners",126.4,109.4,70.4,"S",1400000,25],
   ["Private Equity and Hedge Fund Partners",151.7,66.2,59.7,"B",3000000,8],
@@ -1464,7 +1494,7 @@ function render(){
     s.aimed + " built &middot; " + s.nurtured + " grown";
   el("dashTitle").textContent = "A life taking shape";
   el("principle").textContent =
-    "A career goal names one specific career out of ninety. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
+    "A career goal names one specific career out of a hundred and nine. Every stage spent correcting the aim is a stage not spent growing, and every stage spent growing is one you did not steer.";
   el("tip").textContent =
     "Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.";
 
