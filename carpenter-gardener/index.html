@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 55</span></div>
+    <span class="ver" role="note">build 56</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -543,7 +543,40 @@ const OCC = [
    Measured across the sweep, median-start doctorates only become visible
    around 1.4, and bachelor's costs 63% -> 82% to get there. */
 const ED_STEEPNESS = 1.4;
-OCC.forEach(o => { o[2] = +(o[2] * ED_STEEPNESS).toFixed(1); });
+/* Every occupation asks for one more credential than the table claims. The
+   figures were the formal minimum, and the formal minimum is not what gets
+   people hired: the jobs listed at "no credential" overwhelmingly go to
+   people with a diploma, the high-school ones to people with some college,
+   and so on up. Promoting the whole column by a rung is the correction.
+
+   Two exceptions. Doctorates stay put -- there is no rung above them. And
+   three jobs really are open to someone with no credential at all, so they
+   alone keep the floor.
+
+   Raising what every job asks for, while leaving what children attain
+   untouched, pushes outcomes DOWN the list: a child now qualifies for
+   fewer things, and the jobs they still qualify for are the ones at the
+   bottom. Measured over 8000 undirected lives from a median start, that is
+   what happens: trades, transport and protective work rise from 15% of
+   outcomes to 38% and management falls from 29% to 12%, both much closer to
+   their real share of American employment. The cost is that promoting 26
+   bachelor's jobs onto the new master's rung empties the middle of the axis,
+   and the few jobs left below the void become attractors: air traffic
+   control takes 19% of all lives where it took 2%. That wants more
+   occupations in the 46-123 band, not a smaller promotion. */
+const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
+  "Laborers and Freight, Stock, and Material Movers"];
+/* The master's rung also moves: it sat 43 units below a doctorate and now
+   sits half that gap higher, so the jobs promoted onto it are genuinely
+   harder to reach rather than just relabelled. */
+const MASTERS_RUNG = 66.2 + (109.4 - 66.2) / 2;
+const PROMOTE = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
+  32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG, 109.4: 109.4};
+OCC.forEach(o => {
+  const up = NO_CREDENTIAL.indexOf(o[0]) >= 0 ? 0 : PROMOTE[o[2]];
+  if(up === undefined) throw new Error("no promotion rung for education " + o[2] + " (" + o[0] + ")");
+  o[2] = +(up * ED_STEEPNESS).toFixed(1);
+});
 
 /* ============ the three axes ============
    Education and contact are percentiles and stop at 100. Salary is NOT a
@@ -913,7 +946,7 @@ const START_EQ = [
 
 /* the education ladder, minus "certificate", which is an off-ramp rather
    than a rung and would make the slider read oddly */
-const EDU_RUNGS = [0, 3.3, 15.6, 24.6, 32.9, 66.2, 109.4]
+const EDU_RUNGS = [0, 3.3, 15.6, 24.6, 32.9, MASTERS_RUNG, 109.4]
   .map(c => c * ED_STEEPNESS);
 
 /* Where the median parents sit, which matters more than it looks. An
@@ -1061,12 +1094,12 @@ const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6]
    nothing to a reader and a percentile would now be a lie */
 /* Education is no longer a percentile either. It is 46 units per HALVING of
    the share of adults who get that far, so each credential costs what the one
-   before it cost again -- which is why a doctorate now sits 43 units past a
+   before it cost again -- which is why a doctorate now sits 22 units past a
    master's where the occupation percentile put it 8. Shares are US Census CPS
    figures for adults 25 and over, approximate. A coordinate is meaningless to
    a reader, so always show the credential. */
 const ED_LEVELS = [[0,"no credential"],[3.3,"high school"],[15.6,"some college"],
-  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[66.2,"master's"],[109.4,"doctorate"]]
+  [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[MASTERS_RUNG,"master's"],[109.4,"doctorate"]]
   .map(L => [+(L[0] * ED_STEEPNESS).toFixed(1), L[1]]);
 function edLabel(c){
   let best = ED_LEVELS[0];
