@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 61</span></div>
+    <span class="ver" role="note">build 62</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -610,23 +610,56 @@ const ED_STEEPNESS = 1.4;
 const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
   "Laborers and Freight, Stock, and Material Movers",
   "Waiters and Waitresses", "Landscaping and Groundskeeping Workers"];
-/* Both rungs sit where the credential table puts them. They were briefly
-   pulled down to 85 and 104 to make doctorate-level careers come out at
-   the rate they should, which worked but bent the ladder to fix something
-   that was not the ladder's fault: the walk had no memory, so no child
-   ever built on what they had already grown. INCLINE does that job now and
-   these go back to being what they claim to be -- the master's rung half
-   way between the table's figure and a doctorate, the doctorate rung the
-   table's own. */
 const MASTERS_RUNG = 66.2 + (109.4 - 66.2) / 2;
-const DOCTORATE_RUNG = 109.4;
-const PROMOTE = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
-  32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG, 109.4: DOCTORATE_RUNG};
+/* The doctorate rung is 109.4 in the credential table and 118 here. Filling
+   the gap below it, which is what PROMOTE_FRACTION does, lets more lives
+   climb through to the top of the ladder, and 112 is what holds
+   doctorate-level careers at the rate they are supposed to come out at. */
+const DOCTORATE_RUNG = 112;
+const NEXT_RUNG = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
+  32.9: MASTERS_RUNG, 66.2: MASTERS_RUNG};
+
+/* An occupation does not sit ON a credential. Promoting every job a whole
+   rung put 26 bachelor's jobs onto the master's rung and left 77 units of
+   the education axis with nothing in it at all, and since every job snapped
+   to a rung nothing could ever be placed there. Lives landing in that gap
+   -- which is most of them, the median finished life sits at 64 -- got
+   dragged back down to the bachelor's rung, and whichever job there paid
+   best caught them. That is the whole air traffic control problem: at a
+   full promotion it took 21.6% of lives from doctorate-holding parents.
+
+   What a job really has is a MIX. Most holders have the credential the
+   table lists and a substantial minority have the next one up, so its
+   expected attainment sits between the two rungs, not on either. 0.6 of
+   the way up, which is the promotion read as "employers increasingly want
+   the next one" rather than "everyone needs it". Measured, gardened:
+
+     air traffic control, doctorate parents   21.6% -> 11.9%
+     air traffic control, bachelor's parents  11.6% ->  7.7%
+     air traffic control, default dials        4.3% ->  2.9%
+     distinct outcomes, default dials            94 ->    96
+     three commonest, default dials           28.7% -> 25.6%
+     three commonest, doctorate parents       45.5% -> 35.3%
+
+   The credential a job ASKS for is still the table's own figure, kept in
+   o[7] and reported from there. A job sitting at 82 on the axis is a
+   bachelor's job whose holders often went further, and calling it a
+   master's job because 82 is nearer that rung would be a lie. */
+const PROMOTE_FRACTION = 0.6;
 OCC.forEach(o => {
-  const up = NO_CREDENTIAL.indexOf(o[0]) >= 0 ? 0 : PROMOTE[o[2]];
-  if(up === undefined) throw new Error("no promotion rung for education " + o[2] + " (" + o[0] + ")");
-  o[2] = +(up * ED_STEEPNESS).toFixed(1);
+  const raw = o[2];
+  o[7] = raw;                                   // what the job formally asks for
+  if(NO_CREDENTIAL.indexOf(o[0]) >= 0){ o[2] = 0; return; }
+  if(raw === 109.4){ o[2] = +(DOCTORATE_RUNG * ED_STEEPNESS).toFixed(1); return; }
+  const next = NEXT_RUNG[raw];
+  if(next === undefined) throw new Error("no rung above education " + raw + " (" + o[0] + ")");
+  o[2] = +((raw + PROMOTE_FRACTION * (next - raw)) * ED_STEEPNESS).toFixed(1);
 });
+/* the credential a job asks for, by its own pre-promotion figure */
+const CRED_NAME = {0: "no credential", 3.3: "high school", 15.6: "some college",
+  17: "certificate", 24.6: "associate's", 32.9: "bachelor's", 66.2: "master's",
+  109.4: "doctorate"};
+const occCred = o => CRED_NAME[o[7]];
 
 /* ============ the three axes ============
    Education and contact are percentiles and stop at 100. Salary is NOT a
@@ -1264,11 +1297,10 @@ const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6]
 const ED_LEVELS = [[0,"no credential"],[3.3,"high school"],[15.6,"some college"],
   [17,"certificate"],[24.6,"associate's"],[32.9,"bachelor's"],[MASTERS_RUNG,"master's"],[DOCTORATE_RUNG,"doctorate"]]
   .map(L => [+(L[0] * ED_STEEPNESS).toFixed(1), L[1]]);
-function edLabel(c){
-  let best = ED_LEVELS[0];
-  for(const L of ED_LEVELS) if(Math.abs(L[0]-c) < Math.abs(best[0]-c)) best = L;
-  return best[1];
-}
+/* There is no nearest-rung label any more. It was only ever used on
+   occupations, which now sit BETWEEN rungs on purpose and report the
+   credential they ask for through occCred instead. A child's own position
+   is a different question and edReached answers it. */
 function edReached(c){            // the highest rung a position has actually cleared
   let best = ED_LEVELS[0];
   for(const L of ED_LEVELS) if(c >= L[0] - 0.01) best = L;
@@ -1521,7 +1553,7 @@ function occTable(s){
     const o = OCC[r.i], isT = r.i === s.target;
     return '<tr' + (isT ? ' aria-current="true"' : '') + '>' +
       '<th scope="row">' + esc(o[0]) + (isT ? ' (target)' : '') + '</th>' +
-      '<td>' + money(o[5]) + '</td><td>' + edLabel(o[2]) + '</td><td>' + o[3] + '</td>' +
+      '<td>' + money(o[5]) + '</td><td>' + occCred(o) + '</td><td>' + o[3] + '</td>' +
       '<td>' + r.d.toFixed(1) + '</td><td>' + esc(GROUPS[o[4]]) + '</td></tr>';
   }).join("");
   return '<div class="scroll"><table>' +
@@ -1674,7 +1706,7 @@ function render(){
     const t = TARGETS[s.target];
     const toTarget = Math.hypot(t[1]-s.pos[0], t[2]-s.pos[1], t[3]-s.pos[2]);
     el("nowBox").innerHTML = '<b>' + esc(o[0]) + '</b><small>' +
-      money(o[5]) + ' &middot; ' + edLabel(o[2]) + ' &middot; emotional labour ' + Math.round(o[3]) +
+      money(o[5]) + ' &middot; ' + occCred(o) + ' &middot; emotional labour ' + Math.round(o[3]) +
       '<br>' + n.dist.toFixed(1) + ' away' +
       /* with no address named there is nothing to be "off" by, so the second
          clause reports the fit that is actually being scored */
@@ -1754,10 +1786,10 @@ function render(){
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
           (s.over ? " disabled" : "") +
           ' aria-label="' + esc(o[0]) + ': ' + far +
-            ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', needs a ' + edLabel(o[2]) +
+            ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', needs a ' + occCred(o) +
             ', emotional labour ' + o[3] + '">' +
           '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
-            money(o[5]) + ' &middot; ' + edLabel(o[2]) + '</small></button>';
+            money(o[5]) + ' &middot; ' + occCred(o) + '</small></button>';
       }).join("");
     const t = TARGETS[s.target];
     /* the one-line summary carries the current target, so the list stays shut.
@@ -1917,7 +1949,7 @@ function finishRun(reason){
           cell in this grid describes the career, so reading "master's"
           next to Anesthesiologists looked like the result was wrong when
           it was two different quantities sitting side by side. */
-       ["Typical schooling", esc(edLabel(career[2]))]]
+       ["Typical schooling", esc(occCred(career))]]
     : [["Ended up at", esc(career[0])],
        ["Median pay", esc(money(career[5]))],
        ["Goal satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
