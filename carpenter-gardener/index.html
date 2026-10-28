@@ -171,6 +171,8 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .modal-card{max-width:600px;width:100%;background:var(--card);border-radius:24px;padding:28px;box-shadow:0 20px 70px rgba(0,0,0,.25)}
 .modal-card h2{font:700 30px/1.05 Georgia,serif;margin:6px 0 10px}
 .resultgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+/* an odd number of cells would leave the last one half-width beside a gap */
+.resultgrid .result:last-child:nth-child(odd){grid-column:1/-1}
 .result{background:#f1eee4;border-radius:15px;padding:12px}
 .result b{display:block;font-size:20px;color:var(--deep)}
 .result span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
@@ -203,7 +205,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 66</span></div>
+    <span class="ver" role="note">build 67</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1849,9 +1851,10 @@ function render(){
        inside the open list. A parent choosing between careers is choosing
        between educations, and the one line that stays on screen after the
        list shuts was the one place that did not say so. */
-    const goalCred = best ? "No specific career goal" : occCred(OCC[s.target]);
+    const goalCred = best ? "No specific career goal"
+      : esc(money(OCC[s.target][5])) + " &middot; " + esc(occCred(OCC[s.target]));
     el("targetSummary").innerHTML = '<span class="row"><span>' + esc(t[0]) +
-      '<em class="goalcred">' + esc(goalCred) + '</em></span><small>' +
+      '<em class="goalcred">' + goalCred + '</em></span><small>' +
       (s.over ? "run over" : s.segs.length ? "re-aim" : "change") + ' ▾</small></span>';
     if(best){
       /* No odds: the aspiration is not an address, so there is nothing to
@@ -2008,6 +2011,10 @@ function finishRun(reason){
        ["Typical schooling", esc(occCred(career))]]
     : [["Ended up at", esc(career[0])],
        ["Median pay", esc(money(career[5]))],
+       /* The career they actually reached asks for a schooling of its own,
+          and a run that missed its goal is exactly where that is worth
+          reading: the headline says which career, this says what it takes. */
+       ["Typical schooling", esc(occCred(career))],
        ["Goal satisfaction", faces(sat.value) + '<em class="outof">' + sat.value + ' / 100</em>'],
        ["Goal met", hitTarget ? "yes" : "no"],
        ["Built / grown", esc(s.aimed + " / " + s.nurtured)],
