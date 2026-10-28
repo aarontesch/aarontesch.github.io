@@ -71,6 +71,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .nowbox b{display:block;font-size:15px;font-weight:800;margin-bottom:2px}
 .nowbox small{display:block;color:var(--muted);font-size:12.5px;line-height:1.5;font-variant-numeric:tabular-nums}
 .nowbox .waiting{color:var(--muted);font-weight:600;font-size:14px}
+.picklist{margin:0;padding:0;list-style:none}
 .pickhint{margin:2px 4px 7px;font-size:11.5px;line-height:1.4;color:var(--muted)}
 .pick button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:7px 9px;border-radius:10px;font-size:13px}
 /* flex items will not shrink past their longest word unless told to, so a
@@ -115,7 +116,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .spacesvg .ghostline{fill:none;stroke:#b7a98a;stroke-width:1.5;stroke-dasharray:4 5;opacity:.75}
 .spacehint{position:absolute;right:11px;top:9px;font-size:11px;color:var(--muted);
   background:rgba(255,253,248,.82);border-radius:99px;padding:3px 10px;pointer-events:none}
-.viewbtns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.viewbtns{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px;padding:0;list-style:none}
 .viewbtn{border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--muted);background:var(--card)}
 .viewbtn:hover{border-color:var(--sage);color:var(--deep)}
 .viewbtn[aria-pressed="true"]{background:#e3eedd;color:var(--deep);border-color:var(--sage)}
@@ -159,10 +160,13 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
 .stat{border:1px solid var(--line);border-radius:15px;padding:13px;background:#fffefa}
 .stat .statlabel{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}
+.stat dd{margin:0}
 .stat strong{font-size:17px}
 
 .log{border-top:1px solid var(--line);padding-top:16px}
 .log p{margin:7px 0;color:#4f5e54;font-size:14px}
+.loglist{margin:0;padding:0;list-style:none}
+.loglist li{margin:7px 0;color:#4f5e54;font-size:14px}
 .tip{margin-top:18px;padding:13px 15px;border-left:4px solid var(--sun);background:#fff8e8;border-radius:0 12px 12px 0;color:#5e512d;font-size:13px}
 .tip.sage{border-color:var(--sage);background:#f0f7ed;color:#3f5545}
 .tip .tiphead{display:block;margin:0 0 3px;font:inherit;font-weight:800;letter-spacing:0;text-transform:none;color:inherit}
@@ -176,8 +180,11 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 /* an odd number of cells would leave the last one half-width beside a gap */
 .resultgrid .result:last-child:nth-child(odd){grid-column:1/-1}
 .result{background:#f1eee4;border-radius:15px;padding:12px}
-.result b{display:block;font-size:20px;color:var(--deep)}
-.result span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+/* the markup is term then definition; the column reverses so the value
+   still sits above the label it belongs to */
+.result{display:flex;flex-direction:column-reverse;align-items:flex-start}
+.result dd{display:block;margin:0;font-size:20px;font-weight:700;color:var(--deep)}
+.result dt{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
 /* one face per 10 of the 100 points available, the unearned ones left faint
    so the row reads as a scale rather than as a count floating on its own */
 .faces{display:block;font-size:14px;line-height:1.15;letter-spacing:.5px}
@@ -207,7 +214,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 68</span></div>
+    <span class="ver" role="note">build 69</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -306,7 +313,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       <h3 class="eyebrow" style="margin-bottom:9px">Parental career goal</h3>
       <details class="tgtpick" id="targetDetails">
         <summary id="targetSummary">Choose a target</summary>
-        <div class="pick" id="pick" role="group" aria-label="Choose the occupation to aim for"></div>
+        <div class="pick" id="pick"></div><!-- the <ul> inside carries the name -->
       </details>
     </div>
 
@@ -355,12 +362,13 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
         </button>
       </div>
     </div>
-    <div class="viewbtns">
-      <button class="viewbtn" data-view="iso">Reset view</button>
-      <button class="viewbtn" data-view="sal">Pay &times; Education</button>
-      <button class="viewbtn" data-view="con">Pay &times; Emotional labour</button>
-      <button class="viewbtn" data-view="spin" id="spinBtn" aria-pressed="false">Spin</button>
-    </div>
+    <!-- a set of view options, so a list -->
+    <ul class="viewbtns" aria-label="How to look at the space">
+      <li><button class="viewbtn" data-view="iso">Reset view</button></li>
+      <li><button class="viewbtn" data-view="sal">Pay &times; Education</button></li>
+      <li><button class="viewbtn" data-view="con">Pay &times; Emotional labour</button></li>
+      <li><button class="viewbtn" data-view="spin" id="spinBtn" aria-pressed="false">Spin</button></li>
+    </ul>
 
     <!-- The drawing is a data graphic: an occupation is placed by three
          percentiles. An svg with a label cannot convey that, so the same
@@ -375,14 +383,15 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <p class="outcome" id="outcome" role="status"></p>
 
     <div class="timeline" id="timeline"></div>
-    <div class="stats" id="stats"></div>
+    <!-- label and value pairs, so a description list -->
+    <dl class="stats" id="stats"></dl>
     <p id="progress" style="margin:0 0 4px;color:#4f5e54;font-size:14px"></p>
 
     <div class="log">
       <h3 class="eyebrow" id="principleLabel">Design principle</h3>
       <p id="principle"></p>
       <h3 class="eyebrow" style="margin-top:14px">Recent stages</h3>
-      <div id="log" aria-live="polite"></div>
+      <div id="log" aria-live="polite"></div><!-- holds an ordered list: the stages ran in order -->
     </div>
 
     <div class="tip sage"><h3 class="tiphead">How to play</h3>Name a career goal for your child, then work through five developmental stages. At each one you decide how to parent: carpentry, which points that stage of their development at the goal, or gardening, which supports whatever they are growing into. You only get five stages, and a stage can only be one or the other. Play again to see how a different mix of the two lands.</div>
@@ -405,7 +414,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <div class="eyebrow">Run complete</div>
     <h2 id="resultTitle">A life has taken shape.</h2>
     <p id="resultText"></p>
-    <div class="resultgrid" id="resultGrid"></div>
+    <dl class="resultgrid" id="resultGrid"></dl>
     <div class="modalbtns">
       <button class="primary" id="again">Play another run</button>
       <button class="secondary" id="closeModal">Look at the space</button>
@@ -1839,20 +1848,24 @@ function render(){
         'most schooling and most emotional labour at once. No single occupation sits there, ' +
         'so this goal cannot be missed.">' +
       '<span>' + esc(BEST[0]) + '</span><small>No specific career goal &middot; cannot be missed</small></button>';
-    el("pick").innerHTML = bestBtn +
-      '<p class="pickhint">Then the real occupations, least likely at the top. The figure is ' +
-      'how often that occupation comes out when the run is played as well as it can be, ' +
-      'measured from the model itself.</p>' +
+    /* One list, the aspiration pinned at the top of it. The hint moves above
+       the list because a <ul> may only hold <li>, and a reader meeting the
+       options needs it first anyway. */
+    el("pick").innerHTML =
+      '<p class="pickhint">Their best first, then the real occupations, least likely at the ' +
+      'top. The figure is how often that occupation comes out when the run is played as ' +
+      'well as it can be, measured from the model itself.</p>' +
+      '<ul class="picklist" aria-label="Choose the occupation to aim for"><li>' + bestBtn + '</li>' +
       PICK_ORDER.map(i => {
         const o = OCC[i], far = Math.round(reachOf(o)), od = DIFFICULTY[i].pct;
-        return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
+        return '<li><button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
           (s.over ? " disabled" : "") +
           ' aria-label="' + esc(o[0]) + ': ' + far +
             ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', typically ' + occCred(o) +
             ', emotional labour ' + o[3] + '">' +
           '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
-            money(o[5]) + ' &middot; ' + occCred(o) + '</small></button>';
-      }).join("");
+            money(o[5]) + ' &middot; ' + occCred(o) + '</small></button></li>';
+      }).join("") + '</ul>';
     const t = TARGETS[s.target];
     /* the one-line summary carries the current target, so the list stays shut.
        the flex lives on an inner span: styling <summary> itself has a history
@@ -1934,7 +1947,8 @@ function render(){
       : ["Cost of pushing", s.aimed && sat.cost ? "−" + sat.cost + " points" : "none"]
   ];
   el("stats").innerHTML = stats.map(x =>
-    '<div class="stat"><span class="statlabel">' + x[0] + '</span><strong>' + esc(x[1]) + '</strong></div>').join("");
+    '<div class="stat"><dt class="statlabel">' + x[0] + '</dt><dd><strong>' + esc(x[1]) +
+    '</strong></dd></div>').join("");
 
   el("progress").textContent = s.segs.length === 0
     ? "Nothing has grown yet. Left entirely alone, five stages run straight to the middle of the space."
@@ -1944,7 +1958,9 @@ function render(){
       : "Nearest occupation is " + OCC[w.i][0] + ", " + w.dist.toFixed(1) + " away; the goal " +
         TARGETS[s.target][0] + " is " + Math.hypot(TARGETS[s.target][1]-s.pos[0], TARGETS[s.target][2]-s.pos[1], TARGETS[s.target][3]-s.pos[2]).toFixed(1) + " away.";
 
-  el("log").innerHTML = s.log.slice(-4).map(x => '<p>↳ ' + esc(x) + '</p>').join("");
+  /* the stages happened in order, so an ordered list */
+  el("log").innerHTML = '<ol class="loglist">' +
+    s.log.slice(-4).map(x => '<li>↳ ' + esc(x) + '</li>').join("") + '</ol>';
   el("space").outerHTML = spaceSvg(s);
   bindSpace();
   fitControls();
@@ -2029,7 +2045,9 @@ function finishRun(reason){
        ["Goal met", hitTarget ? "yes" : "no"],
        ["Built / grown", esc(s.aimed + " / " + s.nurtured)],
        ["Cost of pushing", esc(s.aimed && sat.cost ? "−" + sat.cost + " points" : "none")]]
-  ).map(x => '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
+  /* term then definition in the markup; the cell reverses them visually so
+     the value still reads above its label */
+  ).map(x => '<div class="result"><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>').join("");
 
   render();
   openResult();
