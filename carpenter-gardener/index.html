@@ -196,7 +196,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 51</span></div>
+    <span class="ver" role="note">build 52</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -661,14 +661,31 @@ const EMP_PULL = 1.5;
 const empBonus = i => EMP_PULL * Math.log2(OCC[i][6] / EMP_MED);
 const distTo = (p, i) => Math.sqrt(
   (p[0]-OCC[i][1])**2 + (p[1]-OCC[i][2])**2 + (p[2]-OCC[i][3])**2);
+/* You cannot hold a job you never got the credential for, and until now the
+   match ignored that completely. It is a distance in three dimensions, so a
+   child could be handed a doctorate-level career on the strength of their
+   pay and emotional range while their schooling sat nowhere near it.
+   Measured, that was most of the problem: children of PhD parents reached
+   doctorate-level SCHOOLING 0.1% of the time but were landing in doctorate
+   CAREERS 8.8% of the time, and 45% of all lives finished in a job they
+   were underqualified for, by an average of 19 rungs.
+
+   Falling short of a credential now costs distance -- a quarter of a unit
+   per unit of shortfall. Soft rather than absolute, because the education
+   coordinate is expected attainment rather than a certificate: being a
+   little under should make a job unlikely, not impossible. At 0.25 the
+   doctorate rate from PhD parents lands on 5%, which is about what it
+   should be. */
+const CRED_GATE = 0.25;
+const credCost = (p, i) => CRED_GATE * Math.max(0, OCC[i][2] - p[1]);
 function nearestOcc(p, prefer){
   let best = Infinity, bi = 0;
   for(let i = 0; i < OCC.length; i++){
-    const score = distTo(p, i) - empBonus(i);
+    const score = distTo(p, i) - empBonus(i) + credCost(p, i);
     if(score < best){ best = score; bi = i; }
   }
   if(prefer !== undefined && prefer !== bi){
-    if(distTo(p, prefer) - empBonus(prefer) <= best + 1e-9) bi = prefer;
+    if(distTo(p, prefer) - empBonus(prefer) + credCost(p, prefer) <= best + 1e-9) bi = prefer;
   }
   /* the distance reported is the real one, not the score: satisfaction and
      the readouts measure how near that life actually is, not how it won */
