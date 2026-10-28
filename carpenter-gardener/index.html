@@ -72,6 +72,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .nowbox .waiting{color:var(--muted);font-weight:600;font-size:14px}
 .pickhint{margin:2px 4px 7px;font-size:11.5px;line-height:1.4;color:var(--muted)}
 .pick button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:7px 9px;border-radius:10px;font-size:13px}
+/* flex items will not shrink past their longest word unless told to, so a
+   long schooling label pushed the whole panel wider than a phone screen */
+.pick button > *{min-width:0}
+.pick button small{text-align:right}
 .pick button:hover:not([disabled]){background:#f0f6ed}
 .pick button[aria-pressed="true"]{background:#e3eedd;font-weight:750}
 .startpick{margin-bottom:15px}
@@ -82,7 +86,9 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .startbody input[type=range][disabled]{opacity:.5;cursor:not-allowed}
 .sout{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
 .sout b{color:var(--deep);font-weight:750}
-.pick small{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* no nowrap here: the schooling label names two credentials now, and held
+   on one line it pushed the picker wider than a phone screen */
+.pick small{color:var(--muted);font-variant-numeric:tabular-nums}
 /* the aspiration is pinned above the ranked list, so it is ruled off from it */
 .pick button.aspire{border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;
   margin-bottom:5px;padding-bottom:9px}
@@ -196,7 +202,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 63</span></div>
+    <span class="ver" role="note">build 64</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -660,7 +666,27 @@ OCC.forEach(o => {
 const CRED_NAME = {0: "no credential", 3.3: "high school", 15.6: "some college",
   17: "certificate", 24.6: "associate's", 32.9: "bachelor's", 66.2: "master's",
   109.4: "doctorate"};
-const occCred = o => CRED_NAME[o[7]];
+/* What the people doing a job typically have, which is not the least you
+   can be hired with. The table figure is the entry-level minimum, and
+   reporting it alone made every career read as easier to reach than it is
+   -- a bachelor's job whose holders have mostly gone further was being
+   announced as a bachelor's job. It is also the whole reason an occupation
+   sits BETWEEN two rungs rather than on one, so the label says both: the
+   floor, and the rung a large share of holders have actually reached.
+
+   The five that genuinely ask for nothing say so, and a doctorate has no
+   rung above it to name. */
+CRED_NAME[MASTERS_RUNG] = "master's";       // the promotion targets are rungs too
+CRED_NAME[DOCTORATE_RUNG] = "doctorate";
+const occCred = o => {
+  const raw = o[7];
+  if(NO_CREDENTIAL.indexOf(o[0]) >= 0) return CRED_NAME[0];
+  const lo = CRED_NAME[raw], next = NEXT_RUNG[raw];
+  const hi = next === undefined ? lo : CRED_NAME[next];
+  /* a master's job is promoted to the master's rung, which is a harder
+     master's and not a different credential, so it names itself once */
+  return hi === lo ? lo : lo + ", often " + hi;
+};
 
 /* ============ the three axes ============
    Education and contact are percentiles and stop at 100. Salary is NOT a
@@ -1798,7 +1824,7 @@ function render(){
         return '<button data-pick="' + i + '" aria-pressed="' + (i === s.target ? "true" : "false") + '"' +
           (s.over ? " disabled" : "") +
           ' aria-label="' + esc(o[0]) + ': ' + far +
-            ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', needs a ' + occCred(o) +
+            ' units out, reached in ' + (od ? 'about ' + od + ' percent' : 'under one percent') + ' of runs. Median pay ' + money(o[5]) + ', typically ' + occCred(o) +
             ', emotional labour ' + o[3] + '">' +
           '<span>' + esc(o[0]) + '</span><small>' + (od ? od + '%' : '&lt;1%') + ' &middot; ' +
             money(o[5]) + ' &middot; ' + occCred(o) + '</small></button>';
