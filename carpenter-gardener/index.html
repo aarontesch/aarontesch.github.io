@@ -17,7 +17,7 @@ body{margin:0;color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-syst
   background:radial-gradient(circle at 10% 0%,#e6f0e2,transparent 35%),var(--paper)}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 /* the focus ring must clear 3:1 as a non-text indicator; --sun alone was 1.99:1 */
-button:focus-visible,summary:focus-visible,svg:focus-visible{outline:3px solid var(--deep);outline-offset:3px;
+button:focus-visible,summary:focus-visible,svg:focus-visible,select:focus-visible{outline:3px solid var(--deep);outline-offset:3px;
   box-shadow:0 0 0 6px rgba(228,173,75,.45)}
 .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
   clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
@@ -83,8 +83,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .startpick .startbody{border:1px solid var(--line);border-top:0;border-radius:0 0 15px 15px;
   padding:11px 13px 13px;background:var(--card)}
 .slab{display:block;font-size:12px;font-weight:750;color:var(--deep);margin:9px 0 2px}
-.startbody input[type=range]{width:100%;accent-color:var(--deep);margin:0}
-.startbody input[type=range][disabled]{opacity:.5;cursor:not-allowed}
+.sselect{width:100%;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:10px;padding:7px 9px;margin:0}
+.sselect:hover:not([disabled]){border-color:var(--sage)}
+.sselect[disabled]{opacity:.55;cursor:not-allowed}
 .sout{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
 .sout b{color:var(--deep);font-weight:750}
 /* no nowrap here: the schooling label names two credentials now, and held
@@ -205,7 +207,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">&#10022;</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 67</span></div>
+    <span class="ver" role="note">build 68</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -277,19 +279,23 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
           reached is partly handed on, and the three ladders hand it on at
           different rates.</p>
 
+        <!-- These three were range sliders. A slider is operable from the
+             keyboard, but it is not one of the controls an accessibility
+             review will accept without argument, and every stop on all
+             three is a named discrete choice rather than a point on a
+             continuum -- which is a select. The options are filled from
+             START_EDU, START_PAY and START_EQ at boot so the labels have
+             one source. -->
         <label class="slab" for="sEdu">Parents&rsquo; education</label>
-        <input type="range" id="sEdu" min="0" max="6" step="1" value="2"
-               aria-describedby="sEduOut">
+        <select id="sEdu" class="sselect" aria-describedby="sEduOut"></select>
         <div class="sout" id="sEduOut"></div>
 
         <label class="slab" for="sPay">Parents&rsquo; income</label>
-        <input type="range" id="sPay" min="0" max="6" step="1" value="2"
-               aria-describedby="sPayOut">
+        <select id="sPay" class="sselect" aria-describedby="sPayOut"></select>
         <div class="sout" id="sPayOut"></div>
 
         <label class="slab" for="sEq">Early emotional environment</label>
-        <input type="range" id="sEq" min="0" max="5" step="1" value="3"
-               aria-describedby="sEqOut">
+        <select id="sEq" class="sselect" aria-describedby="sEqOut"></select>
         <div class="sout" id="sEqOut"></div>
       </div>
     </details>
@@ -390,8 +396,12 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 </div>
 </main>
 
+<!-- A dialog, said so. It used to be a bare div: a keyboard user finishing a
+     run got no focus move, no name announced, and a Tab that walked the page
+     behind the overlay. -->
 <div class="modal" id="modal">
-  <div class="modal-card">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle"
+       aria-describedby="resultText" tabindex="-1" id="modalCard">
     <div class="eyebrow">Run complete</div>
     <h2 id="resultTitle">A life has taken shape.</h2>
     <p id="resultText"></p>
@@ -2022,8 +2032,33 @@ function finishRun(reason){
   ).map(x => '<div class="result"><b>' + x[1] + '</b><span>' + x[0] + '</span></div>').join("");
 
   render();
-  el("modal").classList.add("show");
+  openResult();
 }
+
+/* ============ the result dialog, from the keyboard ============
+   Opening it moves focus into the card, Escape closes it, and Tab cycles
+   between its two buttons instead of walking the page behind the overlay.
+   Closing hands focus to whatever the reader wants next: a stage button if
+   there is a run to play, otherwise Reset. */
+function openResult(){
+  el("modal").classList.add("show");
+  el("modalCard").focus();
+}
+function closeResult(){
+  el("modal").classList.remove("show");
+  const act = document.querySelector("[data-act]:not([disabled])");
+  (act || el("reset")).focus();
+}
+document.addEventListener("keydown", e => {
+  if(!el("modal").classList.contains("show")) return;
+  if(e.key === "Escape"){ e.preventDefault(); return closeResult(); }
+  if(e.key !== "Tab") return;
+  const f = [].slice.call(el("modalCard").querySelectorAll("button:not([disabled])"));
+  if(!f.length) return;
+  const first = f[0], last = f[f.length - 1], cur = document.activeElement;
+  if(e.shiftKey && (cur === first || cur === el("modalCard"))){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && cur === last){ e.preventDefault(); first.focus(); }
+});
 
 /* ============ orbit ============ */
 let drag = null, spinTimer = null;
@@ -2062,7 +2097,13 @@ document.addEventListener("click", e => {
       state.target = next;
     }
     el("targetDetails").open = false;   // collapse back to the one-line summary
-    return render();
+    render();
+    /* That render rebuilds the whole list, destroying the button that was
+       just activated -- which drops a keyboard user back to the top of the
+       document with no idea where they are. Hand focus to the control that
+       opened the list, the way a closing dialog hands it back. */
+    el("targetSummary").focus();
+    return;
   }
 
   const act = e.target.closest("[data-act]");
@@ -2084,22 +2125,38 @@ document.addEventListener("click", e => {
   }
 
   if(e.target.closest("#reset")){ state = fresh(state.target); return render(); }
-  if(e.target.closest("#again")){ el("modal").classList.remove("show"); state = fresh(state.target); return render(); }
-  if(e.target.closest("#closeModal")){ el("modal").classList.remove("show"); return; }
+  if(e.target.closest("#again")){ state = fresh(state.target); render(); return closeResult(); }
+  if(e.target.closest("#closeModal")){ return closeResult(); }
 });
 
-/* Moving a slider re-plants the childhood, so the run restarts from the new
-   point. Nothing is lost: the sliders lock as soon as a stage has grown, so
-   this can only fire before anything has happened. */
-document.addEventListener("input", e => {
+/* The three start controls carry their own labels, so fill them from the
+   data rather than writing the options out twice. */
+function fillStarts(){
+  const opts = list => list.map((v, i) =>
+    '<option value="' + i + '">' + esc(v) + '</option>').join("");
+  el("sEdu").innerHTML = opts(START_EDU.map(x => x[0]));
+  el("sPay").innerHTML = opts(START_PAY.map(money));
+  el("sEq").innerHTML  = opts(START_EQ.map(x => x[0]));
+}
+
+/* Changing a start re-plants the childhood, so the run restarts from the new
+   point. Nothing is lost: the controls lock as soon as a stage has grown, so
+   this can only fire before anything has happened.
+
+   Both events, because a select fires change on every browser and input only
+   on most, while the old range inputs fired input continuously. */
+function startChanged(e){
   const id = e.target.id;
   if(id !== "sEdu" && id !== "sPay" && id !== "sEq") return;
-  if(id === "sEdu") startEd = +e.target.value;
-  if(id === "sPay") startPay = +e.target.value;
-  if(id === "sEq") startEq = +e.target.value;
+  const v = +e.target.value;
+  if(id === "sEdu"){ if(v === startEd) return; startEd = v; }
+  if(id === "sPay"){ if(v === startPay) return; startPay = v; }
+  if(id === "sEq"){ if(v === startEq) return; startEq = v; }
   state = fresh(state.target);
   render();
-});
+}
+document.addEventListener("input", startChanged);
+document.addEventListener("change", startChanged);
 
 /* the buttons rewrap as the window changes, so the strip is re-measured */
 let fitTimer = null;
@@ -2109,6 +2166,7 @@ window.addEventListener("resize", function(){
 });
 
 try{
+  fillStarts();
   state = fresh();
   render();
 }catch(err){
