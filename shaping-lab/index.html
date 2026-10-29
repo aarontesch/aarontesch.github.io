@@ -25,7 +25,7 @@
   h1,h2,h3{font-family:Palatino,"Iowan Old Style",Georgia,serif;font-weight:600;margin:0}
   header{padding:20px 22px 12px;border-bottom:1px solid var(--steel-lite)}
   h1{font-size:26px;letter-spacing:.2px}
-  header p{margin:4px 0 0;max-width:62ch;color:#a9b3af;font-size:14px}
+  header p{margin:4px 0 0;max-width:62ch;color:#b3bdb9;font-size:14px}
   .wrap{display:grid;grid-template-columns:minmax(320px,1fr) minmax(300px,380px);
     gap:18px;padding:18px 22px 40px;align-items:start}
   @media(max-width:860px){.wrap{grid-template-columns:1fr}}
@@ -47,25 +47,25 @@
   button[disabled]{opacity:.4;cursor:not-allowed}
   select,input[type=number]{font:inherit;background:var(--steel);color:var(--paper);
     border:1px solid #5c6d69;border-radius:4px;padding:6px 8px}
-  label{font-size:13px;color:#a9b3af}
+  label{font-size:13px;color:#b3bdb9}
   .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
   .stat{background:var(--steel);border-radius:4px;padding:8px 10px}
   .stat b{display:block;font-size:20px;font-family:Palatino,Georgia,serif}
-  .stat span{font-size:12px;color:#a9b3af}
+  .stat span{font-size:12px;color:#b3bdb9}
   .steps{margin:8px 0 0;padding:0;list-style:none;font-size:13px}
   .steps li{padding:3px 0;color:#8e9a96;display:flex;gap:8px;align-items:baseline}
   .steps li.on{color:var(--paper)}
   .steps li.on::before{content:"◆";color:var(--brass)}
   .steps li::before{content:"◇";font-size:11px}
   .log{height:110px;overflow-y:auto;background:#20292700;border-top:1px solid #5c6d69;
-    margin-top:10px;padding-top:8px;font-size:13px;color:#a9b3af}
+    margin-top:10px;padding-top:8px;font-size:13px;color:#b3bdb9}
   .log div{padding:1px 0}
   h3{font-size:15px;margin-bottom:2px}
   .note{font-size:12.5px;color:#8e9a96;margin-top:8px}
   .tabs{display:flex;gap:6px;margin-bottom:10px}
   .tabs button{flex:1}
   .tabs button.sel{background:var(--paper);color:var(--ink);border-color:var(--paper);font-weight:600}
-  details{margin-top:12px;font-size:13px;color:#a9b3af}
+  details{margin-top:12px;font-size:13px;color:#b3bdb9}
   summary{cursor:pointer;color:var(--paper)}
 </style>
 </head>
@@ -456,7 +456,7 @@ function drawChamber(){
   cx.restore();
 
   // caption
-  cx.fillStyle = '#a9b3af'; cx.font = '20px Helvetica, Arial';
+  cx.fillStyle = '#b3bdb9'; cx.font = '20px Helvetica, Arial';
   cx.fillText(S.eating>0 ? 'Eating at the magazine' : LEVELS[S.level], 34, H-34);
 }
 
