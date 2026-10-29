@@ -60,6 +60,7 @@
   .log{height:110px;overflow-y:auto;background:#20292700;border-top:1px solid #5c6d69;
     margin-top:10px;padding-top:8px;font-size:24px;color:#b3bdb9}
   .log div{padding:1px 0}
+  .log:focus-visible { outline: 2px solid #c1cbc7; outline-offset: 2px; }
   h3{font-size:20px;margin-bottom:2px}
   .note{font-size:18px;color:#8e9a96;margin-top:8px}
   .tabs{display:flex;gap:6px;margin-bottom:10px}
@@ -69,7 +70,17 @@
   summary{cursor:pointer;color:var(--paper)}
 </style>
 </head>
+  <script>
 <body>
+  <header>
+    <h1>Shaping Lab</h1>
+    <p>Train a rat to press a lever…</p>
+  </header>
+  <main>
+    <!-- all existing content: canvases, controls, both panels, logs -->
+  </main>
+  <!-- scripts can stay here -->
+</script>
 <header>
   <h1>Shaping Lab</h1>
   <p>Train a rat to press a lever by reinforcing successive approximations, then put the
@@ -79,10 +90,10 @@
 <div class="wrap">
   <div class="panel">
     <div class="chamber-wrap">
-      <canvas id="chamber" width="800" height="500"></canvas>
+      <canvas id="chamber" width="800" height="500" role="img" aria-label="Operant chamber showing the rat and lever"></canvas>
       <button id="reinforce" class="primary">Deliver pellet (spacebar)</button>
     </div>
-    <canvas id="recorder" width="800" height="350"></canvas>
+    <canvas id="recorder" width="800" height="350" role="img" aria-label="Cumulative record of lever presses"></canvas>
     <div class="row">
       <button id="run">Pause</button>
       <button id="reset">New rat</button>
@@ -120,7 +131,7 @@
     </div>
 
     <div id="schedPane" style="display:none">
-      <h3>Automatic reinforcement</h3>
+      <h2>Automatic reinforcement</h2>
       <p class="note" style="margin-top:2px">The chamber now delivers pellets on its own,
          according to the contingency below.</p>
       <div class="row">
@@ -146,7 +157,7 @@
         <div class="stat"><b id="sPresses2">0</b><span>Presses</span></div>
       </div>
       <button id="clearRec" style="margin-top:10px">Clear the record</button>
-      <div class="log" id="log2"></div>
+      <div class="log" id="log2" tabindex="0" role="log" aria-label="Schedule event log"></div>
     </div>
 
     <details>
