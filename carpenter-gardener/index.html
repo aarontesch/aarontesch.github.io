@@ -192,7 +192,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 76</span></div>
+    <span class="ver" role="note">build 77</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1913,9 +1913,7 @@ function render(){
   /* the stages happened in order, so an ordered list */
   el("log").innerHTML = '<ol class="loglist">' +
     s.log.slice(-4).map(x => '<li>↳ ' + esc(x) + '</li>').join("") + '</ol>';
-  el("space").outerHTML = spaceSvg(s);
-  bindSpace();
-  fitControls();
+  redrawSpace();
   el("tableWrap").innerHTML = occTable(s);
   el("tableSummary").textContent = "Show these figures as a table";
 }
@@ -2010,12 +2008,36 @@ function finishRun(reason){
    between its two buttons instead of walking the page behind the overlay.
    Closing hands focus to whatever the reader wants next: a stage button if
    there is a run to play, otherwise Reset. */
+/* aria-modal alone asks assistive tech to ignore everything outside the
+   dialog; `inert` makes it so. Inert content is not exposed to a screen
+   reader and is not in the tab order, so "can read outside the dialog" and
+   "can tab out of the dialog" stop being promises the script has to keep
+   and become facts about the document. The Tab cycle below stays as the
+   fallback for anything that does not support inert.
+
+   Only the nodes this turned inert are turned back, so an element that was
+   already inert for its own reasons keeps its state. #modal is a child of
+   body, so it is never inerted by this. */
+let inertedByModal = [];
+function setBackgroundInert(on){
+  if(on){
+    inertedByModal = [].slice.call(document.body.children)
+      .filter(n => n.id !== "modal" && !n.hasAttribute("inert"));
+    inertedByModal.forEach(n => n.setAttribute("inert", ""));
+  } else {
+    inertedByModal.forEach(n => n.removeAttribute("inert"));
+    inertedByModal = [];
+  }
+}
 function openResult(){
   el("modal").classList.add("show");
+  setBackgroundInert(true);
   el("modalCard").focus();
 }
 function closeResult(){
   el("modal").classList.remove("show");
+  /* lift inertness BEFORE moving focus: you cannot focus into inert content */
+  setBackgroundInert(false);
 
   const nextAction = document.querySelector(
     "[data-act]:not([aria-disabled='true'])"
@@ -2058,7 +2080,19 @@ function bindSpace(){
     redrawSpace();
   });
 }
-function redrawSpace(){ el("space").outerHTML = spaceSvg(state); bindSpace(); fitControls(); }
+/* Replacing outerHTML destroys the node, and with it the focus it was
+   holding. The space is tabbable and the arrow keys orbit it, so a reader
+   steering the graphic from the keyboard lost their place on the FIRST
+   keypress and landed on <body> -- they could not press a second arrow
+   without tabbing all the way back in. Hand the focus to the node that
+   replaces it. Every redraw goes through here, including render's. */
+function redrawSpace(){
+  const hadFocus = document.activeElement === el("space");
+  el("space").outerHTML = spaceSvg(state);
+  bindSpace();
+  fitControls();
+  if(hadFocus) el("space").focus();
+}
 
 /* ============ events ============ */
 document.addEventListener("click", e => {
