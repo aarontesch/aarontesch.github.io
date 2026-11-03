@@ -19,7 +19,7 @@
   --bg:#080c1a; --neuron:#00e5ff; --synapse:#7b2fff;
   --encode:#00ffb3; --consolidate:#ff6b35; --retrieve:#ffd700; --forget:#ff4488;
   --vision:#00e5ff; --audio:#c84bff;
-  --text:#ffffff; --dim:#a0b0cc;
+  --text:#ffffff; --dim:#a0b0cc; --synapse-text:#b39aff;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{height:100%;height:-webkit-fill-available;}
@@ -45,7 +45,13 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 /* TITLE */
 #screen-title{text-align:center;gap:22px;}
 .title-main{font-family:'Syne',sans-serif;font-size:clamp(2rem,7vw,4rem);font-weight:800;letter-spacing:-0.02em;color:var(--neuron);text-shadow:0 0 20px rgba(200,30,40,0.5);line-height:1;}
-.title-sub{font-size:0.68rem;letter-spacing:0.3em;color:var(--synapse);text-transform:uppercase;}
+.title-sub{font-size:0.68rem;letter-spacing:0.3em;color:var(--synapse-text);text-transform:uppercase;}
+/* the screen titles became real headings; h2 brings margins a div did not */
+.screen-title,.results-title{margin:0;}
+/* build badge, same idea as the other activities: say which version is live */
+.ver{display:inline-block;margin-top:10px;padding:2px 9px;border:1px solid rgba(0,229,255,0.35);
+  border-radius:99px;font-size:0.56rem;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--neuron);background:rgba(0,229,255,0.06);}
 .title-desc{max-width:420px;font-size:0.76rem;line-height:1.8;color:var(--dim);font-style:italic;}
 .stage-strip{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
 .stage-badge{padding:4px 12px;border-radius:20px;font-size:0.64rem;letter-spacing:0.1em;text-transform:uppercase;border:1px solid;}
@@ -264,10 +270,10 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
   <div class="hud-lives" id="hud-lives"></div>
 </div>
 
-<div id="app">
+<div id="app" role="main">
 
 <!-- ══════ TITLE ══════ -->
-<div id="screen-title" class="screen active" role="main">
+<div id="screen-title" class="screen active" role="region" aria-labelledby="title-main">
   <svg width="96" height="96" viewBox="0 0 120 120" fill="none" aria-hidden="true">
     <defs><radialGradient id="bg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5ff" stop-opacity="0.22"/><stop offset="100%" stop-color="#7b2fff" stop-opacity="0"/></radialGradient></defs>
     <ellipse cx="60" cy="60" rx="50" ry="45" fill="url(#bg2)" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="4 3"/>
@@ -277,7 +283,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
     <line x1="55" y1="60" x2="70" y2="52" stroke="#00e5ff" stroke-width="0.8" opacity="0.4"/>
     <line x1="55" y1="60" x2="48" y2="68" stroke="#7b2fff" stroke-width="0.8" opacity="0.4"/>
   </svg>
-  <div><p class="title-sub">A Neuroscience Experience</p><h1 class="title-main">HIPPOCAMPUS</h1></div>
+  <div><p class="title-sub">A Neuroscience Experience</p><h1 class="title-main" id="title-main">HIPPOCAMPUS</h1><p class="ver" role="note">Build 1</p></div>
   <p class="title-desc">Visual and auditory neurons encode associations through a live 10×10 synaptic matrix — with axon columns, dendritic soma bodies, and receptor-level synapse illustrations at every intersection.</p>
   <div class="stage-strip">
     <span class="stage-badge encode">① Bimodal Encoding</span>
@@ -305,10 +311,10 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 <!-- ══════ ENCODE ══════ -->
-<div id="screen-encode" class="screen" role="main" aria-label="Stage 1: Bimodal Encoding">
-  <div class="screen-title" style="color:var(--encode);">
+<div id="screen-encode" class="screen" role="region" aria-label="Stage 1: Bimodal Encoding">
+  <h2 class="screen-title" style="color:var(--encode);">
     Stage 1: <span style="opacity:0.5" id="enc-phase-sub">Observe — Patterns Forming</span>
-  </div>
+  </h2>
   <p class="screen-instruction" id="enc-instruction">Two perceptual streams co-activate simultaneously. Watch receptor clusters appear at each axon intersection.</p>
 
   <div style="font-size:0.52rem;letter-spacing:0.18em;color:var(--audio);text-transform:uppercase;opacity:0.75;align-self:center;">🎵 Auditory Cortex — 10 axon columns</div>
@@ -326,7 +332,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-right">
         <div class="matrix-col-labels" id="enc-col-labels"></div>
         <div class="syn-grid" id="enc-grid" role="grid" aria-label="Synaptic weight matrix"></div>
-        <svg class="arch-overlay" id="enc-arch"></svg>
+        <svg class="arch-overlay" aria-hidden="true" focusable="false" id="enc-arch"></svg>
       </div>
     </div>
     <div class="weight-legend" id="enc-legend"></div>
@@ -360,8 +366,8 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 <!-- ══════ CONSOLIDATION ══════ -->
-<div id="screen-consolidate" class="screen" role="main" aria-label="Stage 2: Sleep Replay">
-  <div class="screen-title" style="color:var(--consolidate);">Stage 2: <span style="opacity:0.5">Sleep Replay</span></div>
+<div id="screen-consolidate" class="screen" role="region" aria-label="Stage 2: Sleep Replay">
+  <h2 class="screen-title" style="color:var(--consolidate);">Stage 2: <span style="opacity:0.5">Sleep Replay</span></h2>
   <p class="screen-instruction">Your hippocampus is offline. Watch it replay each memory pattern — re-firing the original neurons and re-activating their receptor clusters.</p>
 
   <svg id="con-eeg" viewBox="0 0 480 56" preserveAspectRatio="none" aria-hidden="true">
@@ -398,7 +404,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-right">
         <div class="matrix-col-labels" id="con-col-labels"></div>
         <div class="syn-grid" id="con-grid" role="grid" aria-label="Consolidation matrix"></div>
-        <svg class="arch-overlay" id="con-arch"></svg>
+        <svg class="arch-overlay" aria-hidden="true" focusable="false" id="con-arch"></svg>
       </div>
     </div>
     <div class="weight-legend" id="con-legend"></div>
@@ -411,8 +417,8 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 <!-- ══════ RETRIEVAL ══════ -->
-<div id="screen-retrieve" class="screen" role="main" aria-label="Stage 3: Matrix Retrieval">
-  <div class="screen-title" style="color:var(--retrieve);">Stage 3: <span style="opacity:0.5">Matrix Retrieval</span></div>
+<div id="screen-retrieve" class="screen" role="region" aria-label="Stage 3: Matrix Retrieval">
+  <h2 class="screen-title" style="color:var(--retrieve);">Stage 3: <span style="opacity:0.5">Matrix Retrieval</span></h2>
   <p class="screen-instruction">A single perceptual cue arrives. Read the synaptic receptor patterns in the matrix to find what it was associated with. No time limit — but points decay.</p>
 
   <div id="score-meter">
@@ -442,7 +448,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-right">
         <div class="matrix-col-labels" id="ret-col-labels"></div>
         <div class="syn-grid" id="ret-grid" role="grid" aria-label="Retrieval weight matrix"></div>
-        <svg class="arch-overlay" id="ret-arch"></svg>
+        <svg class="arch-overlay" aria-hidden="true" focusable="false" id="ret-arch"></svg>
       </div>
     </div>
     <div class="weight-legend" id="ret-legend"></div>
@@ -457,8 +463,8 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 <!-- ══════ FORGETTING ══════ -->
-<div id="screen-forget" class="screen" role="main" aria-label="Stage 4: Forgetting">
-  <div class="screen-title" style="color:var(--forget);">Stage 4: Forgetting</div>
+<div id="screen-forget" class="screen" role="region" aria-label="Stage 4: Forgetting">
+  <h2 class="screen-title" style="color:var(--forget);">Stage 4: Forgetting</h2>
   <p class="screen-instruction">Neurons fire without dopamine or paired co-activation. Unpaired AMPA connections depress and are removed — LTD in action.</p>
 
   <div id="forget-counter" style="font-size:0.56rem;letter-spacing:0.16em;color:var(--forget);text-transform:uppercase;">Pattern 1 / —</div>
@@ -475,7 +481,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-right">
         <div class="matrix-col-labels" id="forget-col-labels"></div>
         <div class="syn-grid" id="forget-grid" role="grid" aria-label="Forgetting matrix"></div>
-        <svg class="arch-overlay" id="forget-arch"></svg>
+        <svg class="arch-overlay" aria-hidden="true" focusable="false" id="forget-arch"></svg>
       </div>
     </div>
     <div class="weight-legend" id="forget-legend"></div>
@@ -494,8 +500,8 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 <!-- ══════ RESULTS ══════ -->
-<div id="screen-results" class="screen" role="main">
-  <div class="results-title" id="res-title">MEMORY FORMED</div>
+<div id="screen-results" class="screen" role="region" aria-labelledby="res-title">
+  <h2 class="results-title" id="res-title">MEMORY FORMED</h2>
   <p class="screen-instruction" id="res-sub"></p>
   <div class="res-grid">
     <div class="res-card enc"><div class="res-num" id="r-enc">—</div><div class="res-lbl">Encoding</div></div>
@@ -594,7 +600,7 @@ function somaSVG(type, state, icon){
 
   // Small dot to indicate state, plus the icon
   const fontSize=Math.max(8, Math.round(CELL*0.38));
-  return `<svg class="star-svg" viewBox="0 0 ${S} ${S}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  return `<svg aria-hidden="true" focusable="false" class="star-svg" viewBox="0 0 ${S} ${S}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
     ${filtDef}
     <text x="${S/2}" y="${S/2+1}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" fill="${stroke}" ${filterAttr} style="user-select:none">${icon}</text>
   </svg>`;
@@ -667,7 +673,7 @@ function synapseSVG(w, topInset=0, botWiden=2, mgOut=false){
 
   if(w===0){
     // w=0: NMDA only (red channel + Mg²⁺)
-    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    return `<svg aria-hidden="true" focusable="false" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       ${caps(outline0,'1.0',fill0)}
       <line x1="${px.toFixed(1)}" y1="${cleftY.toFixed(1)}" x2="${(px+pw).toFixed(1)}" y2="${cleftY.toFixed(1)}"
         stroke="${outline0}" stroke-width="0.5"/>
@@ -677,7 +683,7 @@ function synapseSVG(w, topInset=0, botWiden=2, mgOut=false){
 
   if(w===1){
     const nmdaX=cx-aSpacing*0.55, ampaX=cx+aSpacing*0.55;
-    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    return `<svg aria-hidden="true" focusable="false" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       ${caps(outline0,'1.0',fill0)}
       <line x1="${px.toFixed(1)}" y1="${cleftY.toFixed(1)}" x2="${(px+pw).toFixed(1)}" y2="${cleftY.toFixed(1)}"
         stroke="${outline0}" stroke-width="0.65"/>
@@ -687,7 +693,7 @@ function synapseSVG(w, topInset=0, botWiden=2, mgOut=false){
   }
 
   const nmdaX=cx-aSpacing*1.0, ampaX1=cx, ampaX2=cx+aSpacing*1.0;
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  return `<svg aria-hidden="true" focusable="false" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
     ${caps(outline0,'1.0',fill0)}
     <line x1="${px.toFixed(1)}" y1="${cleftY.toFixed(1)}" x2="${(px+pw).toFixed(1)}" y2="${cleftY.toFixed(1)}"
       stroke="${outline0}" stroke-width="0.75"/>

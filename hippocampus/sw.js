@@ -3,12 +3,16 @@
  * Must stay next to index.html: registered as './sw.js', so its scope is the
  * /hippocampus/ folder and it never touches the other activities on this site.
  *
- * Bump CACHE_VERSION whenever index.html changes. Nothing breaks if you forget
+ * Keep CACHE_VERSION in step with the Build badge on the title screen: they
+ * name the same thing. Bump both whenever index.html changes -- a returning
+ * visitor is served the cached copy until this string changes, and so is any
+ * scanner pointed at the live URL.
+ * Nothing breaks if you forget
  * (HTML is fetched network-first), but a stale font or icon can linger until
  * the version changes and the old cache is dropped.
  */
 
-const CACHE_VERSION = 'hippocampus-v1';
+const CACHE_VERSION = 'hippocampus-build-1';
 
 const CORE = [
   './',
