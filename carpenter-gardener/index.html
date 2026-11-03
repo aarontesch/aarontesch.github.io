@@ -55,32 +55,15 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .action{display:flex;justify-content:space-between;gap:12px;align-items:center;width:100%;
   border:1px solid var(--line);background:var(--card);border-radius:15px;padding:11px 13px;text-align:left;
   transition:background-color .2s,border-color .2s}
-.action:hover:not([disabled]){border-color:var(--sage);background:#f6fbf3}
+.action:hover:not([aria-disabled="true"]){border-color:var(--sage);background:#f6fbf3}
 .action[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
 .action b{display:block}
 .action small{color:var(--muted);font-size:12.5px;line-height:1.3}
-.tgtpick summary{cursor:pointer;list-style:none;border:1px solid var(--line);background:var(--card);
-  border-radius:15px;padding:12px 14px;font-size:14px;font-weight:750}
-.tgtpick summary::-webkit-details-marker{display:none}
-.tgtpick summary .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.tgtpick summary:hover{border-color:var(--sage);background:#f6fbf3}
-.tgtpick summary small{color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
-.goalcred{display:block;font-style:normal;font-weight:600;font-size:12px;color:var(--muted);margin-top:2px}
-.tgtpick[open] summary{border-radius:15px 15px 0 0;border-bottom-color:transparent}
-.pick{max-height:214px;overflow:auto;border:1px solid var(--line);border-top:0;border-radius:0 0 15px 15px;padding:7px;background:var(--card)}
 .nowbox{border:1px solid var(--line);background:var(--card);border-radius:15px;padding:12px 14px}
 .nowbox b{display:block;font-size:15px;font-weight:800;margin-bottom:2px}
 .nowbox small{display:block;color:var(--muted);font-size:12.5px;line-height:1.5;font-variant-numeric:tabular-nums}
 .nowbox .waiting{color:var(--muted);font-weight:600;font-size:14px}
-.picklist{margin:0;padding:0;list-style:none}
 .pickhint{margin:2px 4px 7px;font-size:11.5px;line-height:1.4;color:var(--muted)}
-.pick button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:7px 9px;border-radius:10px;font-size:13px}
-/* flex items will not shrink past their longest word unless told to, so a
-   long schooling label pushed the whole panel wider than a phone screen */
-.pick button > *{min-width:0}
-.pick button small{text-align:right}
-.pick button:hover:not([disabled]){background:#f0f6ed}
-.pick button[aria-pressed="true"]{background:#e3eedd;font-weight:750}
 .startpick{margin:0 0 15px;border:1px solid var(--line);border-radius:15px;
   padding:8px 13px 13px;background:var(--card);min-width:0}
 .startpick legend{padding:0 6px}
@@ -88,17 +71,9 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .slab{display:block;font-size:12px;font-weight:750;color:var(--deep);margin:9px 0 2px}
 .sselect{width:100%;font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);
   border:1px solid var(--line);border-radius:10px;padding:7px 9px;margin:0}
-.sselect:hover:not([disabled]){border-color:var(--sage)}
-.sselect[disabled]{opacity:.55;cursor:not-allowed}
+.sselect:hover:not([aria-disabled="true"]){border-color:var(--sage)}
 .sout{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
 .sout b{color:var(--deep);font-weight:750}
-/* no nowrap here: the schooling label names two credentials now, and held
-   on one line it pushed the picker wider than a phone screen */
-.pick small{color:var(--muted);font-variant-numeric:tabular-nums}
-/* the aspiration is pinned above the ranked list, so it is ruled off from it */
-.pick button.aspire{border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;
-  margin-bottom:5px;padding-bottom:9px}
-.pick button.aspire span{font-weight:750}
 
 /* ---- the three-dimensional space ---- */
 .space{position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;
@@ -132,8 +107,8 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
    reserves underneath stays the right size */
 .spaceactions .action b{font-size:13px;line-height:1.22}
 .spaceactions .action small{font-size:11.5px;line-height:1.3}
-.spaceactions .action:hover:not([disabled]){background:#f3f9ef;border-color:var(--sage)}
-.spaceactions .action[disabled]{opacity:.5}
+.spaceactions .action:hover:not([aria-disabled="true"]){background:#f3f9ef;border-color:var(--sage)}
+.spaceactions .action[aria-disabled="true"]{opacity:.5}
 .spaceactions.single{grid-template-columns:1fr}
 @media(max-width:620px){.spaceactions{grid-template-columns:1fr;gap:6px}
   .spaceactions .action small{display:none}
@@ -217,7 +192,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 75</span></div>
+    <span class="ver" role="note">build 76</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -265,11 +240,15 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
   </div>
 <section class="layout">
 
-  <div class="panel">
+  <!-- A named region, not a dialog. A review read this card as a modal
+       because it is a raised panel holding a heading and form controls, but
+       it is static, unlayered and has no backdrop. Claiming role="dialog"
+       would tell a screen reader the rest of the page is inert. -->
+  <div class="panel" role="region" aria-labelledby="approachTitle">
     <div class="panel-head">
       <div>
         <div class="eyebrow">Stage <span id="stageNo">1</span> · <span id="stageName">Infancy</span></div>
-        <h2>Choose your approach</h2>
+        <h2 id="approachTitle">Choose your approach</h2>
       </div>
       <div class="badge" id="stageBadge" role="status">Stage 1 / 5</div>
     </div>
@@ -331,7 +310,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <div class="tip" id="tip">Carpentry Parenting points the child's developmental progress towards a specific career goal. Parental Gardening encourages children to grow to their potential but the direction of growth isn't controlled. You have five developmental stages to help shape your child into the person they will become and choose at each stage how you will approach their development.</div>
   </div>
 
-  <div class="panel">
+  <div class="panel" role="region" aria-labelledby="dashTitle">
     <div class="panel-head">
       <div>
         <div class="eyebrow">What happened</div>
@@ -2048,7 +2027,7 @@ document.addEventListener("keydown", e => {
   if(!el("modal").classList.contains("show")) return;
   if(e.key === "Escape"){ e.preventDefault(); return closeResult(); }
   if(e.key !== "Tab") return;
-  const f = [].slice.call(el("modalCard").querySelectorAll("button:not([disabled])"));
+  const f = [].slice.call(el("modalCard").querySelectorAll("button:not([disabled]):not([aria-disabled='true'])"));
   if(!f.length) return;
   const first = f[0], last = f[f.length - 1], cur = document.activeElement;
   if(e.shiftKey && (cur === first || cur === el("modalCard"))){ e.preventDefault(); last.focus(); }
@@ -2083,28 +2062,14 @@ function redrawSpace(){ el("space").outerHTML = spaceSvg(state); bindSpace(); fi
 
 /* ============ events ============ */
 document.addEventListener("click", e => {
-  const pick = e.target.closest("[data-pick]");
-  if(pick && !pick.disabled){
-    const next = +pick.dataset.pick;
-    if(next !== state.target){
-      // before anything grows this is still choosing; after, it is a revision
-      if(state.segs.length) state.reaims++; else state.firstTarget = next;
-      state.target = next;
-    }
-    el("targetDetails").open = false;   // collapse back to the one-line summary
-    render();
-    /* That render rebuilds the whole list, destroying the button that was
-       just activated -- which drops a keyboard user back to the top of the
-       document with no idea where they are. Hand focus to the control that
-       opened the list, the way a closing dialog hands it back. */
-    el("targetSummary").focus();
-    return;
-  }
-
+  /* The goal used to be a list of 116 buttons in a disclosure; it is a
+     <select> now, handled by targetChanged. The branch that served those
+     buttons has gone with them -- it reached for #targetDetails and
+     #targetSummary, neither of which exists any more. */
   const actionButton = e.target.closest("[data-act]");
-if(actionButton && !actionButton.matches('[aria-disabled="true"]')) {
-  return growStage(actionButton.dataset.act);
-}
+  if(actionButton && !actionButton.matches('[aria-disabled="true"]')){
+    return growStage(actionButton.dataset.act);
+  }
 
   const view = e.target.closest("[data-view]");
   if(view){
