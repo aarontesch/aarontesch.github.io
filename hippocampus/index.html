@@ -283,7 +283,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
     <line x1="55" y1="60" x2="70" y2="52" stroke="#00e5ff" stroke-width="0.8" opacity="0.4"/>
     <line x1="55" y1="60" x2="48" y2="68" stroke="#7b2fff" stroke-width="0.8" opacity="0.4"/>
   </svg>
-  <div><p class="title-sub">A Neuroscience Experience</p><h1 class="title-main" id="title-main">HIPPOCAMPUS</h1><p class="ver" role="note">Build 1</p></div>
+  <div><p class="title-sub">A Neuroscience Experience</p><h1 class="title-main" id="title-main">HIPPOCAMPUS</h1><p class="ver" role="note">Build 2</p></div>
   <p class="title-desc">Visual and auditory neurons encode associations through a live 10×10 synaptic matrix — with axon columns, dendritic soma bodies, and receptor-level synapse illustrations at every intersection.</p>
   <div class="stage-strip">
     <span class="stage-badge encode">① Bimodal Encoding</span>
@@ -1430,6 +1430,34 @@ function runNextTest(){
   buildEncodeSelectors();
 }
 
+/* ── the soma stars, for the keyboard ──────────────────────────────────
+   Tapping these stars IS the game: it is how a pattern is encoded, recalled
+   and pruned. They were plain divs carrying an onclick -- no tab stop, no
+   role, no name -- so every stage that asks the player to choose neurons
+   could only be played with a pointer. Arming one makes it a real toggle
+   button; standing it down strips that off again, so a star that does
+   nothing is never offered to the keyboard. */
+function armSoma(el, name){
+  if(!el) return;
+  el.setAttribute('role','button');
+  el.setAttribute('tabindex','0');
+  el.setAttribute('aria-label', name);
+  el.setAttribute('aria-pressed','false');
+  el.onkeydown = function(e){
+    if(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar'){ e.preventDefault(); el.click(); }
+  };
+}
+function disarmSoma(el){
+  if(!el) return;
+  el.removeAttribute('role'); el.removeAttribute('tabindex');
+  el.removeAttribute('aria-pressed'); el.onkeydown = null;
+}
+/* the chosen state lives in a class, so read it back off that */
+function syncSoma(el){
+  if(el && el.hasAttribute('aria-pressed'))
+    el.setAttribute('aria-pressed', /chosen-|soma-pulse/.test(el.className + '') ? 'true' : 'false');
+}
+
 function buildEncodeSelectors(){
   for(let i=0;i<10;i++){
     const aEl=document.getElementById('enc-grid-audio-'+i);
@@ -1437,12 +1465,14 @@ function buildEncodeSelectors(){
       aEl.innerHTML=somaSVG('an','idle',AI[i]);
       aEl.style.cursor='pointer';
       aEl.onclick=()=>toggleSel(i,'a',aEl);
+      armSoma(aEl, 'Audio neuron ' + (i+1) + ' of 10');
     }
     const vEl=document.getElementById('enc-grid-vision-'+i);
     if(vEl){
       vEl.innerHTML=somaSVG('vn','idle',VI[i]);
       vEl.style.cursor='pointer';
       vEl.onclick=()=>toggleSel(i,'v',vEl);
+      armSoma(vEl, 'Visual neuron ' + (i+1) + ' of 10');
     }
   }
 }
@@ -1462,6 +1492,7 @@ function toggleSel(idx, type, el){
     el.innerHTML=somaSVG(nodeType,'idle',icons[idx]);
     el.classList.remove('chosen-v','chosen-a');
   }
+  syncSoma(el);
   G.activeV=[...G.playerV]; G.activeA=[...G.playerA];
   renderMatrixWeights('enc-grid');
   if(p===-1) fireAxon('enc-grid',[idx],type==='v'?'v':'a','active');
@@ -1551,8 +1582,8 @@ function submitEncodeAnswer(){
     for(let i=0;i<10;i++){
       const vEl=document.getElementById('enc-grid-vision-'+i);
       const aEl=document.getElementById('enc-grid-audio-'+i);
-      if(vEl){vEl.className='mlabel-r mio-cell';vEl.innerHTML=somaSVG('vn','idle',VI[i]);vEl.style.cursor='';vEl.onclick=null;}
-      if(aEl){aEl.className='mlabel-c mio-cell';aEl.innerHTML=somaSVG('an','idle',AI[i]);aEl.style.cursor='';aEl.onclick=null;}
+      if(vEl){vEl.className='mlabel-r mio-cell';vEl.innerHTML=somaSVG('vn','idle',VI[i]);vEl.style.cursor='';vEl.onclick=null;disarmSoma(vEl);}
+      if(aEl){aEl.className='mlabel-c mio-cell';aEl.innerHTML=somaSVG('an','idle',AI[i]);aEl.style.cursor='';aEl.onclick=null;disarmSoma(aEl);}
     }
     G.testIdx++;G.playerV=[];G.playerA=[];G.activeV=[];G.activeA=[];
     const btn=document.getElementById('enc-submit-btn');
@@ -1883,6 +1914,7 @@ function buildRetSelectors(ansType){
     el.innerHTML=somaSVG(ansType,'idle',icons[i]);
     el.style.cursor='pointer';
     el.onclick=()=>toggleRetSel(i,ansType,el,icons[i]);
+    armSoma(el, (isAudio ? 'Audio' : 'Visual') + ' neuron ' + (i+1) + ' of 10');
   }
 }
 
@@ -1900,6 +1932,7 @@ function toggleRetSel(idx, ansType, el, icon){
     el.innerHTML=somaSVG(ansType,'idle',icon);
     el.classList.remove('soma-pulse');
   }
+  syncSoma(el);
   if(!G.retSubmitting && G.retAnswer.length>0 && G.retPlayerSel.length===G.retAnswer.length){
     G.retSubmitting=true;
     submitRetAnswer();
@@ -1935,7 +1968,7 @@ function submitRetAnswer(){
     const id=isAudio?`ret-grid-audio-${i}`:`ret-grid-vision-${i}`;
     const el=document.getElementById(id);
     if(!el) continue;
-    el.style.cursor='';el.onclick=null;
+    el.style.cursor='';el.onclick=null;disarmSoma(el);
     if(correct.includes(i)&&player.includes(i)) el.innerHTML=somaSVG(ansType,'correct',icons[i]);
     else if(player.includes(i)&&!correct.includes(i)) el.innerHTML=somaSVG(ansType,'wrong',icons[i]);
     else if(correct.includes(i)&&!player.includes(i)) el.innerHTML=somaSVG(ansType,'correct',icons[i]);
@@ -2077,11 +2110,13 @@ function buildForgetSelectors(distractorV, distractorA, pat){
       vEl.innerHTML=somaSVG('vn','idle',VI[i]);
       vEl.style.cursor='pointer';
       vEl.onclick=()=>toggleForgetSel(i,'v',vEl);
+      armSoma(vEl, 'Visual neuron ' + (i+1) + ' of 10');
     }
     if(aEl){
       aEl.innerHTML=somaSVG('an','idle',AI[i]);
       aEl.style.cursor='pointer';
       aEl.onclick=()=>toggleForgetSel(i,'a',aEl);
+      armSoma(aEl, 'Audio neuron ' + (i+1) + ' of 10');
     }
   }
 
@@ -2110,6 +2145,7 @@ function toggleForgetSel(idx, type, el){
     el.innerHTML=somaSVG(nodeType,'idle',icons[idx]);
     el.classList.remove('soma-pulse');
   }
+  syncSoma(el);
   document.getElementById('forget-submit-btn').style.display='inline-flex';
   // Auto-submit when player has selected all correct neurons
   // (correct = distractor neurons NOT in encoded pattern that have Mg2+ out)
