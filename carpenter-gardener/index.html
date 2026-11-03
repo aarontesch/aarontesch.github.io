@@ -192,7 +192,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 78</span></div>
+    <span class="ver" role="note">build 79</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -392,7 +392,19 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <div class="eyebrow">Run complete</div>
     <h2 id="resultTitle">A life has taken shape.</h2>
     <p id="resultText"></p>
-    <dl class="resultgrid" id="resultGrid"></dl>
+    <!-- Seeded with the cells a finished run fills in. Left empty this was an
+         empty <dl>: a list with no items, and the served HTML is what a
+         scanner that does not run JavaScript reads. #stats is seeded the
+         same way for the same reason. -->
+    <dl class="resultgrid" id="resultGrid">
+      <div class="result" role="presentation"><dt>Ended up at</dt><dd>&mdash;</dd></div>
+      <div class="result" role="presentation"><dt>Median pay</dt><dd>&mdash;</dd></div>
+      <div class="result" role="presentation"><dt>Typical schooling</dt><dd>&mdash;</dd></div>
+      <div class="result" role="presentation"><dt>Goal satisfaction</dt><dd>&mdash;</dd></div>
+      <div class="result" role="presentation"><dt>Goal met</dt><dd>&mdash;</dd></div>
+      <div class="result" role="presentation"><dt>Built / grown</dt><dd>&mdash;</dd></div>
+      <div class="result" role="presentation"><dt>Cost of pushing</dt><dd>&mdash;</dd></div>
+    </dl>
     <div class="modalbtns">
       <button class="primary" id="again">Play another run</button>
       <button class="secondary" id="closeModal">Look at the space</button>
