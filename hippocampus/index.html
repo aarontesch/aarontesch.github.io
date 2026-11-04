@@ -53,7 +53,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
   border-radius:99px;font-size:0.56rem;letter-spacing:0.18em;text-transform:uppercase;
   color:var(--neuron);background:rgba(0,229,255,0.06);}
 .title-desc{max-width:420px;font-size:0.76rem;line-height:1.8;color:var(--dim);font-style:italic;}
-.stage-strip{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+.stage-strip{display:flex;list-style:none;gap:7px;flex-wrap:wrap;justify-content:center;}
 .stage-badge{padding:4px 12px;border-radius:20px;font-size:0.64rem;letter-spacing:0.1em;text-transform:uppercase;border:1px solid;}
 .stage-badge.encode{border-color:var(--encode);color:var(--encode);}
 .stage-badge.consolidate{border-color:var(--consolidate);color:var(--consolidate);}
@@ -288,14 +288,14 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
     <line x1="55" y1="60" x2="70" y2="52" stroke="#00e5ff" stroke-width="0.8" opacity="0.4"/>
     <line x1="55" y1="60" x2="48" y2="68" stroke="#7b2fff" stroke-width="0.8" opacity="0.4"/>
   </svg>
-  <div><p class="title-sub">A Neuroscience Experience</p><p class="title-main" id="title-main">HIPPOCAMPUS</p><p class="ver" role="note">Build 3</p></div>
+  <div><p class="title-sub">A Neuroscience Experience</p><p class="title-main" id="title-main">HIPPOCAMPUS</p><p class="ver" role="note">Build 4</p></div>
   <p class="title-desc">Visual and auditory neurons encode associations through a live 10×10 synaptic matrix — with axon columns, dendritic soma bodies, and receptor-level synapse illustrations at every intersection.</p>
-  <div class="stage-strip">
-    <span class="stage-badge encode">① Bimodal Encoding</span>
-    <span class="stage-badge consolidate">② Sleep Replay</span>
-    <span class="stage-badge retrieve">③ Matrix Retrieval</span>
-    <span class="stage-badge forget">④ Forgetting</span>
-  </div>
+  <ul class="stage-strip" role="list" aria-label="The four stages of this activity">
+    <li class="stage-badge encode">① Bimodal Encoding</li>
+    <li class="stage-badge consolidate">② Sleep Replay</li>
+    <li class="stage-badge retrieve">③ Matrix Retrieval</li>
+    <li class="stage-badge forget">④ Forgetting</li>
+  </ul>
   <button class="btn btn-primary" onclick="startGame()" ontouchstart="event.preventDefault();startGame()">BEGIN JOURNEY</button>
   <div class="science-panel">
     <div class="science-label">Hebbian Plasticity + Synaptic Ultrastructure + Receptor Ultrastructure</div>
@@ -304,16 +304,6 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
   </div>
 </div>
 
-<!-- ══════ INSTRUCTION MODAL ══════ -->
-<div id="instruction-modal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(4,6,15,0.92);backdrop-filter:blur(8px);flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:16px;">
-  <div style="max-width:420px;width:100%;max-height:80vh;overflow-y:auto;background:rgba(10,14,35,0.98);border-radius:10px;border:1px solid rgba(123,47,255,0.35);padding:24px 20px;display:flex;flex-direction:column;gap:14px;">
-    <div id="instr-stage" style="font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.6;"></div>
-    <div id="instr-title" style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;line-height:1.1;"></div>
-    <div id="instr-body" style="font-size:0.88rem;line-height:1.7;color:#ffffff;"></div>
-    <div id="instr-steps" style="display:flex;flex-direction:column;gap:8px;"></div>
-    <button id="instr-btn" class="btn btn-primary" style="margin-top:4px;align-self:stretch;font-size:1rem;padding:14px;line-height:1;display:flex;align-items:center;justify-content:center;">I'M READY →</button>
-  </div>
-</div>
 
 <!-- ══════ ENCODE ══════ -->
 <div id="screen-encode" class="screen" role="region" aria-label="Stage 1: Bimodal Encoding">
@@ -382,14 +372,16 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
   </svg>
 
   <div class="replay-counter" id="con-counter">Waiting for slow-wave peaks…</div>
-  <div class="replay-desc" id="con-desc">Tap the EEG when the oscillation hits its peak to trigger memory replay. Sharp-wave ripples fire memories during NREM sleep.</div>
+  <div class="replay-desc" id="con-desc">Trigger memory replay when the oscillation hits its peak — tap the EEG, or use the dopamine button. Sharp-wave ripples fire memories during NREM sleep.</div>
 
   <!-- EEG Display -->
   <div style="position:relative;width:100%;max-width:500px;touch-action:none;min-height:110px;" id="eeg-wrap">
     <canvas id="eeg-canvas" style="width:100%;border-radius:6px;background:rgba(4,6,15,0.85);border:1px solid rgba(0,229,255,0.25);display:block;cursor:pointer;"></canvas>
-    <div id="eeg-tap-hint" style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:0.55rem;color:rgba(0,229,255,0.7);letter-spacing:0.12em;text-transform:uppercase;pointer-events:none;">TAP TO TRIGGER REPLAY — PEAK = BONUS PTS</div>
+    <div id="eeg-tap-hint" style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:0.55rem;color:rgba(0,229,255,0.7);letter-spacing:0.12em;text-transform:uppercase;pointer-events:none;">TAP, OR USE THE BUTTON BELOW — PEAK = BONUS PTS</div>
     <div id="eeg-peak-flash" style="position:absolute;inset:0;border-radius:6px;pointer-events:none;opacity:0;transition:opacity 0.15s;"></div>
   </div>
+
+  <button id="eeg-trigger" class="btn btn-sm" style="border-color:var(--consolidate);color:var(--consolidate);align-self:center;" disabled>⚡ Release dopamine burst</button>
 
   <!-- Replay score bar -->
   <div style="width:100%;max-width:500px;">
@@ -417,7 +409,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 
   <div class="science-panel" style="max-width:500px;">
     <div class="science-label">🔬 Sharp-Wave Ripple Replay</div>
-    <p class="science-text">During NREM sleep, slow cortical oscillations (0.5–1 Hz) gate hippocampal sharp-wave ripples. Each peak of the slow wave opens a window for CA3 replay — timing your tap to the peak triggers the strongest consolidation.</p>
+    <p class="science-text">During NREM sleep, slow cortical oscillations (0.5–1 Hz) gate hippocampal sharp-wave ripples. Each peak of the slow wave opens a window for CA3 replay — timing your burst to the peak triggers the strongest consolidation.</p>
   </div>
 </div>
 
@@ -459,7 +451,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
     <div class="weight-legend" id="ret-legend"></div>
   </div>
 
-  <div style="font-size:0.6rem;color:var(--retrieve);letter-spacing:0.08em;text-align:center;text-transform:uppercase;" id="ret-choose-label">Tap the neurons in the matrix that completed the pattern:</div>
+  <div style="font-size:0.6rem;color:var(--retrieve);letter-spacing:0.08em;text-align:center;text-transform:uppercase;" id="ret-choose-label">Select the neurons in the matrix that completed the pattern:</div>
 
   <div class="science-panel" style="max-width:500px;">
     <div class="science-label">🔬 CA3 Pattern Completion</div>
@@ -492,7 +484,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
     <div class="weight-legend" id="forget-legend"></div>
   </div>
 
-  <div style="font-size:0.6rem;color:var(--forget);letter-spacing:0.08em;text-align:center;text-transform:uppercase;">Tap neurons that are NOT paired with the distractor — their AMPA will be removed</div>
+  <div style="font-size:0.6rem;color:var(--forget);letter-spacing:0.08em;text-align:center;text-transform:uppercase;">Select neurons that are NOT paired with the distractor — their AMPA will be removed</div>
 
   <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px;">
     <button class="btn btn-primary btn-sm" onclick="forceSubmitForget()" id="forget-submit-btn" style="display:none;">Remove AMPA ✓</button>
@@ -524,6 +516,17 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 </div><!-- /app -->
+
+<!-- ══════ INSTRUCTION MODAL ══════ -->
+<div id="instruction-modal" role="dialog" aria-modal="true" aria-labelledby="instr-stage instr-title" aria-describedby="instr-body" style="display:none;position:fixed;inset:0;z-index:1100;background:rgba(4,6,15,0.92);backdrop-filter:blur(8px);flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:16px;">
+  <div id="instr-panel" tabindex="-1" style="max-width:420px;width:100%;max-height:80vh;overflow-y:auto;background:rgba(10,14,35,0.98);border-radius:10px;border:1px solid rgba(123,47,255,0.35);padding:24px 20px;display:flex;flex-direction:column;gap:14px;">
+    <div id="instr-stage" style="font-size:0.5rem;letter-spacing:0.2em;text-transform:uppercase;opacity:0.6;"></div>
+    <div id="instr-title" style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;line-height:1.1;"></div>
+    <div id="instr-body" style="font-size:0.88rem;line-height:1.7;color:#ffffff;"></div>
+    <div id="instr-steps" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <button id="instr-btn" class="btn btn-primary" style="margin-top:4px;align-self:stretch;font-size:1rem;padding:14px;line-height:1;display:flex;align-items:center;justify-content:center;">I'M READY →</button>
+  </div>
+</div>
 <div id="install-banner" role="complementary">
   <div class="ib-icon">🧠</div>
   <div class="ib-text"><strong>Add to Home Screen</strong>Tap Share → "Add to Home Screen" to install — plays offline.</div>
@@ -1165,6 +1168,58 @@ let instrCallback=null;
   }
 })();
 
+// The instruction panel is a real modal dialog: it covers the stage, and the
+// stage behind it must not be reachable by Tab, readable by a screen reader,
+// or the only way out. Escape dismisses it exactly as the button does.
+let instrReturn=null;
+
+function modalIsOpen(){
+  const m=document.getElementById('instruction-modal');
+  return !!m && m.style.display==='flex';
+}
+
+function setBackgroundInert(on){
+  const modal=document.getElementById('instruction-modal');
+  Array.prototype.forEach.call(document.body.children, el=>{
+    if(el===modal) return;
+    const t=el.tagName;
+    if(t==='SCRIPT'||t==='STYLE'||t==='LINK'||t==='TEMPLATE') return;
+    if(on){
+      if(el.dataset.modalInert) return;
+      // Remember whether aria-hidden was already there, so lifting the modal
+      // does not un-hide something that was always meant to be hidden.
+      el.dataset.modalInert = el.hasAttribute('aria-hidden') ? 'keep' : 'add';
+      el.setAttribute('inert','');
+      el.setAttribute('aria-hidden','true');
+    } else {
+      if(!el.dataset.modalInert) return;
+      el.removeAttribute('inert');
+      if(el.dataset.modalInert==='add') el.removeAttribute('aria-hidden');
+      delete el.dataset.modalInert;
+    }
+  });
+}
+
+function modalFocusables(){
+  const modal=document.getElementById('instruction-modal');
+  if(!modal) return [];
+  return Array.prototype.filter.call(
+    modal.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'),
+    el => !el.disabled && el.offsetParent !== null);
+}
+
+document.addEventListener('keydown', e=>{
+  if(!modalIsOpen()) return;
+  if(e.key==='Escape'||e.key==='Esc'){ e.preventDefault(); dismissInstruction(); return; }
+  if(e.key!=='Tab') return;
+  const f=modalFocusables();
+  if(!f.length){ e.preventDefault(); return; }
+  e.preventDefault();
+  const i=f.indexOf(document.activeElement);
+  if(i===-1){ (e.shiftKey ? f[f.length-1] : f[0]).focus(); return; }
+  f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+}, true);
+
 function showInstruction(stage, title, body, steps, callback){
   if(instrCallback) return; // already showing an instruction
   instrCallback=callback;
@@ -1179,15 +1234,27 @@ function showInstruction(stage, title, body, steps, callback){
     d.innerHTML=`<span style="flex-shrink:0;font-size:1rem;">${s.icon}</span><span style="color:#ffffff;font-size:0.85rem;">${s.text}</span>`;
     stepsEl.appendChild(d);
   });
-  document.getElementById('instruction-modal').style.display='flex';
+  const modal=document.getElementById('instruction-modal');
+  instrReturn=(document.activeElement && document.activeElement!==document.body)
+    ? document.activeElement : null;
+  modal.style.display='flex';
+  setBackgroundInert(true);
+  requestAnimationFrame(()=>{const p=document.getElementById('instr-panel'); if(p) p.focus();});
 }
 
 function dismissInstruction(){
   if(!instrCallback) return; // guard double-fire
   document.getElementById('instruction-modal').style.display='none';
+  setBackgroundInert(false);            // lift inertness before focus moves
   const cb=instrCallback;
   instrCallback=null;
+  const back=instrReturn;
+  instrReturn=null;
   cb();
+  // Land the keyboard in the stage that just started, not back on <body>.
+  if(back && document.body.contains(back) && back.offsetParent!==null){ back.focus(); return; }
+  const scr=document.querySelector('.screen.active');
+  if(scr){ scr.setAttribute('tabindex','-1'); scr.focus(); }
 }
 
 // ═══════════════════════════════════════════
@@ -1344,7 +1411,9 @@ function startGame(){
   _gameStarting=true;
   setTimeout(()=>_gameStarting=false, 1000);
   instrCallback=null;
+  instrReturn=null;
   document.getElementById('instruction-modal').style.display='none';
+  setBackgroundInert(false);
   Object.assign(G,{score:0,lives:3,round:0,encScore:0,conScore:0,retScore:0,patterns:[],encodedPatterns:[],playerV:[],playerA:[],testIdx:0,retRound:0,instrSeen:new Set()});
   resetWeights();
   startEncode();
@@ -1411,8 +1480,8 @@ async function runObservePhase(){
 function startEncodeTestPhase(){
   showInstruction('Stage 1 · Test Phase','⭐ Encode the Pattern',
     'Gold cells will highlight the active synapses. Select the neurons that will fire to encode this pattern.',
-    [{icon:'👁',text:'Tap the visual soma stars (left) that you see light up.'},
-     {icon:'🎵',text:'Tap the audio soma stars (top) that fire at the same time.'},
+    [{icon:'👁',text:'Select the visual soma stars (left) that you see light up.'},
+     {icon:'🎵',text:'Select the audio soma stars (top) that fire at the same time.'},
      {icon:'⚡',text:'Select the exact right number in each modality — submits automatically.'}],
     _startEncodeTestPhase);
 }
@@ -1619,7 +1688,7 @@ function startConsolidate(){
   showInstruction('Stage 2 · Sleep Replay','💤 Sleep Consolidation',
     'During slow-wave sleep your hippocampus replays memories to cement them into place. You only replay memories that had an associated Domaine burst when you experienced them during the day. This process is enhanced by the timing of attentional Dopamine bursts during periods of high activation called hippocampal ripples. You will now control dopamine release during one of these ripples. Hippocampal neurons are phase locked so the Dopamine needs to be perfectly timed to enhance the formation of these memories.',
     [{icon:'🌊',text:'Watch the EEG wave scroll — gold markers appear at random points. It\'s been found that memory patterns activate at specific points in the slow wave cycle and it\'s your job to place the Domaine burst at the correct time of the cycle to help form the memory.'},
-     {icon:'👆',text:'Tap anywhere on screen when a marker reaches the cursor line to produce the Dopamine burst and cement the memory in place.'},
+     {icon:'👆',text:'Press the dopamine button below the EEG — or tap anywhere on screen — when a marker reaches the cursor line, to produce the Dopamine burst and cement the memory in place.'},
      {icon:'🎯',text:'The closer your burst is to the marker, the more points you score and the stronger the memory will be.'}],
     _startConsolidate);
 }
@@ -1645,7 +1714,7 @@ function startEEG(){
   eegHits=0; eegTotal=0;
   document.getElementById('con-hits').textContent='0 / 0';
   document.getElementById('con-acc-fill').style.width='0%';
-  document.getElementById('con-counter').textContent='Tap the EEG peak to replay each memory!';
+  document.getElementById('con-counter').textContent='Release dopamine at each EEG peak to replay the memory!';
 
   const canvas=document.getElementById('eeg-canvas');
   const wrap=document.getElementById('eeg-wrap');
@@ -1733,7 +1802,7 @@ function startEEG(){
 
     // Phase indicator
     if(eegHits<nPat){
-      document.getElementById('con-counter').textContent=`Ripple active — tap the markers to release Dopamine!`;
+      document.getElementById('con-counter').textContent=`Ripple active — release Dopamine as each marker crosses the line!`;
     }
 
     if(elapsed>totalTime){finishConsolidate();return;}
@@ -1791,6 +1860,15 @@ function startEEG(){
   eegTapFn=onTap;
   screenEl.addEventListener('click',onTap);
   screenEl.addEventListener('touchstart',onTap,{passive:false});
+
+  // The screen-wide tap is a pointer gesture, so the same handler also hangs
+  // off a real button, which Enter and Space can reach.
+  const trig=document.getElementById('eeg-trigger');
+  if(trig){
+    trig.disabled=false;
+    trig.onclick=(ev)=>{ev.stopPropagation();onTap(ev);};
+    trig.focus();
+  }
   }); // end requestAnimationFrame
 }
 
@@ -1817,6 +1895,8 @@ function finishConsolidate(){
     screenEl.removeEventListener('touchstart',eegTapFn);
     eegTapFn=null;
   }
+  const trig=document.getElementById('eeg-trigger');
+  if(trig){trig.onclick=null;trig.disabled=true;}
   document.getElementById('con-counter').textContent='Replay complete — memory consolidated.';
   document.getElementById('con-desc').textContent='Patterns replayed during slow-wave sleep. Synaptic weights stabilised.';
   showFact();
