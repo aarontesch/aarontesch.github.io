@@ -12,7 +12,7 @@
  * the version changes and the old cache is dropped.
  */
 
-const CACHE_VERSION = 'hippocampus-build-2';
+const CACHE_VERSION = 'hippocampus-build-3';
 
 const CORE = [
   './',

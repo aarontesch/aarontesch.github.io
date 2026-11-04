@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>HIPPOCAMPUS</title>
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -122,6 +122,9 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 .axon-canvas{position:absolute;top:0;left:0;pointer-events:none;z-index:0;}
 
 .matrix-row-labels{display:flex;flex-direction:column;gap:2px;margin-right:2px;position:relative;z-index:2;}
+.syn-row{display:contents}
+/* the one real h1: present on every screen, shown to screen readers only */
+.vh-h1{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
 .mlabel-r{font-size:0.48rem;display:flex;align-items:center;justify-content:center;color:#00e5ff;opacity:0.5;}
 .matrix-right{display:flex;flex-direction:column;position:relative;z-index:2;overflow:visible;}
 .matrix-col-labels{display:flex;gap:2px;margin-bottom:2px;overflow:visible;}
@@ -244,8 +247,8 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 .ft-lbl{font-size:0.5rem;letter-spacing:0.2em;color:var(--neuron);text-transform:uppercase;margin-bottom:2px;}
 
 /* Install banner */
-#install-banner{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:rgba(7,11,26,0.97);border-top:1px solid rgba(200,30,40,0.18);padding:11px 16px calc(11px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:9px;backdrop-filter:blur(12px);transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.34,1.3,0.64,1);}
-#install-banner.visible{transform:translateY(0);}
+#install-banner{visibility:hidden;position:fixed;bottom:0;left:0;right:0;z-index:1000;background:rgba(7,11,26,0.97);border-top:1px solid rgba(200,30,40,0.18);padding:11px 16px calc(11px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:9px;backdrop-filter:blur(12px);transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.34,1.3,0.64,1);}
+#install-banner.visible{transform:translateY(0);visibility:visible;}
 #install-banner .ib-icon{font-size:1.6rem;flex-shrink:0;}
 #install-banner .ib-text{flex:1;font-size:0.65rem;line-height:1.4;color:var(--text);}
 #install-banner .ib-text strong{color:var(--neuron);display:block;margin-bottom:1px;font-family:'Syne',sans-serif;}
@@ -255,14 +258,15 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}}
-.btn:focus-visible,.nsel-btn:focus-visible,.answer-choice:focus-visible{outline:2px solid var(--neuron);outline-offset:2px;}
+.btn:focus-visible,.nsel-btn:focus-visible,.answer-choice:focus-visible,
+.ib-close:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--neuron);outline-offset:2px;}
 </style>
 </head>
 <body>
 <canvas id="neural-bg" aria-hidden="true"></canvas>
 <div id="flash" aria-hidden="true"></div>
 <div id="fact-toast" role="status" aria-live="polite"><div class="ft-lbl">🧠 Neuroscience Fact</div><div id="fact-text"></div></div>
-<div id="dopamine-toast">⚡ Dopamine burst! AMPA receptors inserting into the synapse…</div>
+<div id="dopamine-toast" role="status">⚡ Dopamine burst! AMPA receptors inserting into the synapse…</div>
 <div id="hud" role="banner">
   <div class="hud-stage" id="hud-label">—</div>
   <div class="hud-progress"><div class="hud-progress-fill" id="hud-fill" style="width:0%"></div></div>
@@ -271,6 +275,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
 </div>
 
 <div id="app" role="main">
+<h1 class="vh-h1">Hippocampus — a neuroscience experience</h1>
 
 <!-- ══════ TITLE ══════ -->
 <div id="screen-title" class="screen active" role="region" aria-labelledby="title-main">
@@ -283,7 +288,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
     <line x1="55" y1="60" x2="70" y2="52" stroke="#00e5ff" stroke-width="0.8" opacity="0.4"/>
     <line x1="55" y1="60" x2="48" y2="68" stroke="#7b2fff" stroke-width="0.8" opacity="0.4"/>
   </svg>
-  <div><p class="title-sub">A Neuroscience Experience</p><h1 class="title-main" id="title-main">HIPPOCAMPUS</h1><p class="ver" role="note">Build 2</p></div>
+  <div><p class="title-sub">A Neuroscience Experience</p><p class="title-main" id="title-main">HIPPOCAMPUS</p><p class="ver" role="note">Build 3</p></div>
   <p class="title-desc">Visual and auditory neurons encode associations through a live 10×10 synaptic matrix — with axon columns, dendritic soma bodies, and receptor-level synapse illustrations at every intersection.</p>
   <div class="stage-strip">
     <span class="stage-badge encode">① Bimodal Encoding</span>
@@ -331,7 +336,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-row-labels" id="enc-row-labels"></div>
       <div class="matrix-right">
         <div class="matrix-col-labels" id="enc-col-labels"></div>
-        <div class="syn-grid" id="enc-grid" role="grid" aria-label="Synaptic weight matrix"></div>
+        <div class="syn-grid" id="enc-grid" data-gridlabel="Synaptic weight matrix"></div>
         <svg class="arch-overlay" aria-hidden="true" focusable="false" id="enc-arch"></svg>
       </div>
     </div>
@@ -403,7 +408,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-row-labels" id="con-row-labels"></div>
       <div class="matrix-right">
         <div class="matrix-col-labels" id="con-col-labels"></div>
-        <div class="syn-grid" id="con-grid" role="grid" aria-label="Consolidation matrix"></div>
+        <div class="syn-grid" id="con-grid" data-gridlabel="Consolidation matrix"></div>
         <svg class="arch-overlay" aria-hidden="true" focusable="false" id="con-arch"></svg>
       </div>
     </div>
@@ -447,7 +452,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-row-labels" id="ret-row-labels"></div>
       <div class="matrix-right">
         <div class="matrix-col-labels" id="ret-col-labels"></div>
-        <div class="syn-grid" id="ret-grid" role="grid" aria-label="Retrieval weight matrix"></div>
+        <div class="syn-grid" id="ret-grid" data-gridlabel="Retrieval weight matrix"></div>
         <svg class="arch-overlay" aria-hidden="true" focusable="false" id="ret-arch"></svg>
       </div>
     </div>
@@ -480,7 +485,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
       <div class="matrix-row-labels" id="forget-row-labels"></div>
       <div class="matrix-right">
         <div class="matrix-col-labels" id="forget-col-labels"></div>
-        <div class="syn-grid" id="forget-grid" role="grid" aria-label="Forgetting matrix"></div>
+        <div class="syn-grid" id="forget-grid" data-gridlabel="Forgetting matrix"></div>
         <svg class="arch-overlay" aria-hidden="true" focusable="false" id="forget-arch"></svg>
       </div>
     </div>
@@ -524,7 +529,7 @@ body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-ser
   <div class="ib-text"><strong>Add to Home Screen</strong>Tap Share → "Add to Home Screen" to install — plays offline.</div>
   <button class="ib-close" onclick="dismissBanner()" aria-label="Dismiss">✕</button>
 </div>
-<div id="offline-badge">● Offline</div>
+<div id="offline-badge" role="status">● Offline</div>
 
 <script>
 
@@ -1089,12 +1094,24 @@ function buildMatrixDOM(gridId, rowLblId, colLblId){
     d.innerHTML=somaSVG('vn','idle',VI[v]);
     rowL.appendChild(d);
   }
-  for(let v=0;v<10;v++) for(let a=0;a<10;a++){
-    const c=document.createElement('div');c.className='syn w0';c.id=`${gridId}-${v}-${a}`;
-    c.setAttribute('role','gridcell');c.setAttribute('aria-label',`V${v+1}×A${a+1}: baseline`);
-    c.title=`V${v+1}×A${a+1}`;
-    c.innerHTML=synapseSVG(0, v===0?1:0);
-    grid.appendChild(c);
+  /* role="grid" requires rows, and role="gridcell" requires a row parent:
+     100 flat cells under the grid failed both. The rows carry display:contents
+     so the CSS grid still lays the cells out itself and nothing moves. */
+  for(let v=0;v<10;v++){
+    const row=document.createElement('div');
+    row.className='syn-row'; row.setAttribute('role','row');
+    row.setAttribute('aria-rowindex', String(v+1));
+    for(let a=0;a<10;a++){
+      const c=document.createElement('div');c.className='syn w0';c.id=`${gridId}-${v}-${a}`;
+      c.setAttribute('role','gridcell');c.setAttribute('aria-colindex', String(a+1));
+      c.setAttribute('aria-label',`V${v+1}×A${a+1}: baseline`);
+      c.title=`V${v+1}×A${a+1}`;
+      c.innerHTML=synapseSVG(0, v===0?1:0);
+      row.appendChild(c);
+    }
+    grid.appendChild(row);
+    if(v === 9){ grid.setAttribute("role","grid");
+      grid.setAttribute("aria-label", grid.dataset.gridlabel || "Synaptic weight matrix"); }
   }
 
   // Size them immediately
