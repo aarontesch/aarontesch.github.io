@@ -121,7 +121,9 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 
 /* ---- accessible table equivalents of the drawing ---- */
 .vizdata{margin:-2px 0 16px}
-.vizdata summary{cursor:pointer;font-weight:800;font-size:12px;color:var(--deep);padding:5px 0}
+.vizdata summary{cursor:pointer;font-weight:700;font-size:12px;color:var(--deep);padding:5px 0;
+  text-decoration:underline;text-underline-offset:3px}
+.vizdata summary:hover{color:#20412e}
 .vizmore{margin:5px 0 2px}
 .vizdata table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 4px}
 .vizdata caption{caption-side:top;text-align:left;color:var(--muted);font-size:12px;line-height:1.45;padding:0 0 9px}
@@ -202,7 +204,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 80</span></div>
+    <span class="ver" role="note">build 81</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -285,7 +287,12 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
          a laptop screen. It locks with the first stage, like the goal -- you
          cannot re-pick a childhood halfway through one. -->
     <fieldset class="startpick" id="startSet">
-  <legend class="eyebrow">Where the child starts</legend>
+  <!-- The legend names the group. The heading inside it is there because this
+       text is set in exactly the same type as the h3.eyebrow headings further
+       down the panel, so it reads as a section heading and had better be one.
+       <legend> takes heading content by spec, and the fieldset still draws its
+       name from the legend's text either way. -->
+  <legend><h3 class="eyebrow">Where the child starts</h3></legend>
   <p class="pickhint">A child does not begin at zero. What the parents
     reached is partly handed on, and the three ladders hand it on at
     different rates.</p>
@@ -312,7 +319,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
          carried no visible label. The legend is that label; the select is
          named by it rather than repeating the words in a <label>. -->
     <fieldset id="targetWrap" class="startpick">
-      <legend class="eyebrow" id="goalLegend">Parental career goal</legend>
+      <legend><h3 class="eyebrow" id="goalLegend">Parental career goal</h3></legend>
       <select id="targetSel" class="sselect" aria-required="true" aria-labelledby="goalLegend"
               aria-describedby="targetCred odds"></select>
       <div class="sout" id="targetCred"></div>
