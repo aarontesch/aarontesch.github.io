@@ -21,7 +21,8 @@ body{margin:0;color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-syst
   background:radial-gradient(circle at 10% 0%,#e6f0e2,transparent 35%),var(--paper)}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 /* the focus ring must clear 3:1 as a non-text indicator; --sun alone was 1.99:1 */
-button:focus-visible,summary:focus-visible,svg:focus-visible,select:focus-visible{outline:3px solid var(--deep);outline-offset:3px;
+button:focus-visible,summary:focus-visible,svg:focus-visible,select:focus-visible,
+.vizdata .scroll:focus-visible{outline:3px solid var(--deep);outline-offset:3px;
   box-shadow:0 0 0 6px rgba(228,173,75,.45)}
 .vh{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
   clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
@@ -204,7 +205,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 81</span></div>
+    <span class="ver" role="note">build 83</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -387,7 +388,14 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
     <details class="vizdata">
       <summary id="tableSummary">Show these figures as a table</summary>
       <p class="vizmore"><button type="button" class="viewbtn" id="rowsBtn" aria-pressed="false" aria-controls="tableWrap">Show all 115 occupations</button></p>
-      <div id="tableWrap"><div class="scroll"><table><caption>The child is at pay $31k, schooling to high school, emotional labour 23 after 0 of 5 stages. These are the occupations nearest that point; whichever is closest at the end is the career.</caption><thead><tr><th scope="col">Occupation</th><th scope="col">Median pay</th><th scope="col">Education</th><th scope="col">Emotional labour</th><th scope="col">Distance now</th><th scope="col">Field</th></tr></thead><tbody><tr><th scope="row">Cashiers</th><td>$31k</td><td>no credential, often high school</td><td>24.6</td><td>7.7</td><td>Sales &amp; office</td></tr><tr><th scope="row">Waiters and Waitresses</th><td>$34k</td><td>no credential</td><td>31.9</td><td>16.3</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Bartenders</th><td>$34k</td><td>no credential, often high school</td><td>36</td><td>17.4</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Retail Salespersons</th><td>$35k</td><td>no credential</td><td>31.9</td><td>18.0</td><td>Sales &amp; office</td></tr><tr><th scope="row">Cooks, Restaurant</th><td>$37k</td><td>no credential, often high school</td><td>16.4</td><td>20.5</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Security Guards</th><td>$38k</td><td>high school, often some college</td><td>40.3</td><td>26.9</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Farmworkers and Laborers, Crop</th><td>$35k</td><td>no credential, often high school</td><td>0</td><td>27.3</td><td>Trades &amp; transport</td></tr><tr><th scope="row">Office Clerks, General</th><td>$41k</td><td>high school, often some college</td><td>21.4</td><td>28.4</td><td>Sales &amp; office</td></tr><tr><th scope="row">Bakers</th><td>$36k</td><td>no credential, often high school</td><td>0</td><td>28.8</td><td>Trades &amp; transport</td></tr><tr><th scope="row">Janitors and Cleaners</th><td>$36k</td><td>no credential</td><td>0</td><td>29.6</td><td>Protective, food &amp; personal service</td></tr><tr aria-current="true"><th scope="row">Family Medicine Physicians (target)</th><td>$325k</td><td>doctorate</td><td>100</td><td>287.9</td><td>Healthcare</td></tr></tbody></table></div></div>
+      <!-- aria-controls above names the table, but NVDA dropped support for it
+           and VoiceOver never had it, so pressing the button used to rewrite the
+           table in silence: you heard "pressed" and nothing about what changed.
+           This says what the table now holds. It is deliberately not on #tableWrap
+           itself -- that is rewritten on every stage, and a live region there would
+           read a hundred and fifteen rows aloud each time. -->
+      <p class="vh" id="rowsStatus" role="status"></p>
+      <div id="tableWrap"><div class="scroll" tabindex="0" role="region" aria-labelledby="occCaption"><table><caption id="occCaption">The child is at pay $31k, schooling to high school, emotional labour 23 after 0 of 5 stages. These are the occupations nearest that point; whichever is closest at the end is the career.</caption><thead><tr><th scope="col">Occupation</th><th scope="col">Median pay</th><th scope="col">Education</th><th scope="col">Emotional labour</th><th scope="col">Distance now</th><th scope="col">Field</th></tr></thead><tbody><tr><th scope="row">Cashiers</th><td>$31k</td><td>no credential, often high school</td><td>24.6</td><td>7.7</td><td>Sales &amp; office</td></tr><tr><th scope="row">Waiters and Waitresses</th><td>$34k</td><td>no credential</td><td>31.9</td><td>16.3</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Bartenders</th><td>$34k</td><td>no credential, often high school</td><td>36</td><td>17.4</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Retail Salespersons</th><td>$35k</td><td>no credential</td><td>31.9</td><td>18.0</td><td>Sales &amp; office</td></tr><tr><th scope="row">Cooks, Restaurant</th><td>$37k</td><td>no credential, often high school</td><td>16.4</td><td>20.5</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Security Guards</th><td>$38k</td><td>high school, often some college</td><td>40.3</td><td>26.9</td><td>Protective, food &amp; personal service</td></tr><tr><th scope="row">Farmworkers and Laborers, Crop</th><td>$35k</td><td>no credential, often high school</td><td>0</td><td>27.3</td><td>Trades &amp; transport</td></tr><tr><th scope="row">Office Clerks, General</th><td>$41k</td><td>high school, often some college</td><td>21.4</td><td>28.4</td><td>Sales &amp; office</td></tr><tr><th scope="row">Bakers</th><td>$36k</td><td>no credential, often high school</td><td>0</td><td>28.8</td><td>Trades &amp; transport</td></tr><tr><th scope="row">Janitors and Cleaners</th><td>$36k</td><td>no credential</td><td>0</td><td>29.6</td><td>Protective, food &amp; personal service</td></tr><tr aria-current="true"><th scope="row">Family Medicine Physicians (target)</th><td>$325k</td><td>doctorate</td><td>100</td><td>287.9</td><td>Healthcare</td></tr></tbody></table></div></div>
     </details>
 
     <!-- the whole scoreboard: what you pointed at, and where they arrived -->
@@ -1652,8 +1660,8 @@ function occTable(s){
       '<td>' + money(o[5]) + '</td><td>' + occCred(o) + '</td><td>' + o[3] + '</td>' +
       '<td>' + r.d.toFixed(1) + '</td><td>' + esc(GROUPS[o[4]]) + '</td></tr>';
   }).join("");
-  return '<div class="scroll"><table>' +
-    '<caption>The child is at pay ' + money(payAt(pos[0])) + ', schooling to ' + edReached(pos[1]) +
+  return '<div class="scroll" tabindex="0" role="region" aria-labelledby="occCaption"><table>' +
+    '<caption id="occCaption">The child is at pay ' + money(payAt(pos[0])) + ', schooling to ' + edReached(pos[1]) +
       ', emotional labour ' + Math.round(pos[2]) + ' after ' + s.segs.length + ' of ' + TOTAL_STAGES +
       ' stages. ' + (showAllRows ? 'All ' + OCC.length + ' occupations, nearest that point first'
                                  : 'These are the occupations nearest that point') +
@@ -1968,7 +1976,12 @@ function render(){
   el("log").innerHTML = '<ol class="loglist">' +
     s.log.slice(-4).map(x => '<li>↳ ' + esc(x) + '</li>').join("") + '</ol>';
   redrawSpace();
+  const tableHadFocus = el("tableWrap").contains(document.activeElement);
   el("tableWrap").innerHTML = occTable(s);
+  if(tableHadFocus){
+    const box = el("tableWrap").querySelector(".scroll");
+    if(box) box.focus();
+  }
   el("tableSummary").textContent = "Show these figures as a table";
 }
 
@@ -2180,6 +2193,9 @@ document.addEventListener("click", e => {
     showAllRows = !showAllRows;
     el("rowsBtn").setAttribute("aria-pressed", showAllRows ? "true" : "false");
     el("tableWrap").innerHTML = occTable(state);
+    el("rowsStatus").textContent = showAllRows
+      ? "Table now lists all " + OCC.length + " occupations, nearest the child first."
+      : "Table now lists the ten occupations nearest the child.";
     return;
   }
 
