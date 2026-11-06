@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Carpenter or Gardener</title>
+<style>
+:root{color-scheme:light;--text:#15263b;--blue:#143f77;--line:#506781;--pale:#eaf1f8;--cream:#fff9e9;--white:#fff}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--white);color:var(--text);font:1rem/1.6 system-ui,Segoe UI,Arial,sans-serif}header,main,footer{max-width:75rem;margin:auto;padding:1rem 1.5rem}header{background:var(--pale);border-bottom:4px solid var(--blue)}h1{font-size:clamp(1.7rem,4vw,2.35rem);line-height:1.2}h2{font-size:1.55rem;margin:1.6rem 0 .6rem}h3{font-size:1.2rem;margin:1rem 0 .4rem}a{color:#064692;text-decoration:underline;text-underline-offset:.1em}a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible,.tablewrap:focus-visible{outline:4px solid #b14c00;outline-offset:3px}button,select,input{font:inherit;color:inherit;padding:.55rem .7rem;min-height:44px;max-width:100%;border:2px solid var(--line);border-radius:.3rem;background:#fff}button{cursor:pointer}button.primary{color:#fff;background:var(--blue);border-color:var(--blue)}button:disabled{opacity:.55;cursor:not-allowed}label{font-weight:650;display:block;margin-top:.8rem}fieldset{border:2px solid var(--line);padding:1rem;margin:1rem 0;min-width:0}legend{font-size:1.1rem;font-weight:750;padding:0 .3rem}.hint{font-size:.94rem}.panel{border-left:5px solid var(--blue);padding:.85rem 1.1rem;background:var(--pale);margin:1rem 0}.notice{border-left-color:#936700;background:var(--cream)}.actions{display:flex;flex-wrap:wrap;gap:.7rem;margin:.8rem 0}.actions button{flex:1 1 15rem}.layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:1rem}.metric{padding:1rem;border:2px solid #aec0d0;border-radius:.3rem}.metric strong{display:block;font-size:1.25rem}.skip{position:absolute;left:-9999px;top:0;background:#fff;padding:.5rem}.skip:focus{left:1rem;z-index:999}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{padding:.5rem .65rem;border:1px solid #718399;text-align:left;vertical-align:top}thead th{background:#dce8f4}tbody tr:nth-child(even){background:#f2f6fb}caption{text-align:left;font-weight:750;padding:.35rem 0}table th[scope=row]{font-weight:700}.tablewrap{overflow-x:auto;max-width:100%;border:1px solid #a8b4c0}details{border:1px solid #b1becb;padding:.8rem;margin:1rem 0}summary{cursor:pointer;font-weight:700}#plot{max-width:100%;height:auto;border:1px solid #8190a0;background:#fff}#chartDesc{font-size:.95rem}ol li{margin:.4rem 0}.toolbar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:end}.toolbar>div{flex:1 1 13rem}.toolbar input,.toolbar select{width:100%}.buttons{display:flex;flex-wrap:wrap;gap:.7rem}.buttons button{flex:0 1 auto}#live{min-height:1px}footer{border-top:2px solid var(--line)}@media(max-width:650px){header,main,footer{padding:.8rem}th,td{padding:.3rem;font-size:.92rem}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}@media print{button,#plot,.toolbar{display:none!important}body{font-size:11pt}}
+
+.instruction-emphasis{font-size:1.3rem;font-weight:750;line-height:1.45;padding:.85rem 1rem;background:#eaf1f8;border-left:5px solid #143f77;margin:.8rem 0}
+.current-stage{font-size:1.18rem;font-weight:750;margin:1.1rem 0 .5rem}
+#game fieldset{margin-top:.6rem}
+
+
+/* Learner-focused presentation: clear reading order, responsive layouts and contrast. */
+:root{--blue:#173f78;--ink:#152b45;--accent:#925300;--panel:#f3f7fc;--border:#a9bfd5;--soft:#e9f2ff}
+body{background:#f7f9fc;color:var(--ink);font-size:1.0625rem;line-height:1.65}
+header{max-width:none;background:linear-gradient(120deg,#153b6d,#205b91);color:#fff;border:0;padding:2.25rem max(1rem,calc((100vw - 72rem)/2));}
+header h1{color:#fff;margin:.35rem 0 .8rem;max-width:18ch;font-size:clamp(2rem,4.6vw,3.4rem);letter-spacing:-.025em}
+header p{max-width:60rem;font-size:1.12rem;margin:.4rem 0}
+header .eyebrow{font-size:.83rem;font-weight:800;letter-spacing:.085em;text-transform:uppercase;color:#d9eafb}
+main{max-width:76rem;padding:1.5rem 1rem 3rem}
+main>section{background:#fff;border:1px solid #c8d6e4;border-radius:14px;box-shadow:0 3px 13px rgba(14,38,64,.055);padding:clamp(1rem,2.8vw,2rem);margin:0 0 1.4rem}
+main>section h2{margin:0 0 1rem;font-size:clamp(1.45rem,2.3vw,1.85rem);line-height:1.3;color:#123962}
+main>section h2::after{content:'';display:block;width:3.5rem;height:4px;background:#d28a27;margin:.6rem 0 0;border-radius:4px}
+#instructionsHeading::after{background:#70b5df}
+.instructions-lead{font-size:1.12rem;font-weight:650;max-width:72ch}
+#instructionsHeading + .instructions-lead{margin-top:.2rem}
+.quick-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:.7rem;list-style:none;counter-reset:quick;padding:0;margin:1.2rem 0}
+.quick-steps li{counter-increment:quick;border:1px solid #bfd0e2;border-radius:10px;padding:1rem;background:#f5f9fd;line-height:1.5}
+.quick-steps li::before{content:counter(quick);display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:#173f78;color:#fff;font-weight:750;margin-bottom:.55rem}
+.instructions-note{color:#29435f;background:#eef5fb;padding:.8rem 1rem;border-left:4px solid #387bb0;border-radius:4px}
+fieldset{border:2px solid #9eb5cb;border-radius:10px}
+select,input{background:white;border-color:#617b95;border-radius:7px}
+select{width:100%}
+#goal{width:min(100%,48rem)}
+.hint{color:#354b64}
+.instruction-emphasis{font-size:clamp(1.15rem,2.2vw,1.45rem);background:#e8f2fe;color:#153b68;border-radius:9px;border-left:6px solid #235d9a;padding:1rem 1.15rem}
+.current-stage{font-size:clamp(1.2rem,2vw,1.5rem);padding:.9rem 1rem;border:2px solid #173f78;border-radius:10px;margin:1rem 0;background:#fff}
+.stage-track{margin:.65rem 0 1.1rem}
+.stage-track-label{display:block;font-weight:700;margin-bottom:.35rem}
+.stage-track progress{display:block;width:100%;height:1.2rem;accent-color:#1a6c9f}
+.stage-list{display:flex;flex-wrap:wrap;gap:.35rem;list-style:none;padding:0;margin:.8rem 0}
+.stage-list li{border:1px solid #9badc1;border-radius:999px;background:#fff;padding:.25rem .65rem;font-size:.88rem}
+.stage-list li[aria-current=step]{background:#153f77;color:#fff;border-color:#153f77;font-weight:750}
+.stage-list li.complete{background:#e0f4ed;border-color:#28765d;color:#164e3c}
+#game fieldset{background:#f7faff;border-color:#9db8d5}
+#game legend{font-size:1.24rem;color:#113a68}
+.actions button{font-size:1.12rem;min-height:3.8rem;font-weight:750;border-radius:9px;transition:background-color .14s ease,box-shadow .14s ease}
+.actions button:hover:not(:disabled){box-shadow:0 0 0 3px #b2cee9}
+#gardener{background:#e8f4ef;border-color:#26684b;color:#164b38}
+#gardener:hover:not(:disabled){background:#d0ebdf}
+.metric{border-radius:10px;background:#f7f9fd;border-color:#b7c9de}
+.metric strong{line-height:1.25;margin-top:.3rem;overflow-wrap:anywhere}
+#positionText,#stageFeedback{max-width:75ch}
+.panel{border-radius:6px;background:#f1f6fc}
+#results #outcomeText{font-size:1.13rem;line-height:1.6}
+#resultHistory:empty::after{content:'Your five choices will appear here after the activity.';color:#38556f}
+.tablewrap{border-radius:6px}
+#explorer .toolbar{background:#f4f8fd;padding:1rem;border:1px solid #c3d5e5;border-radius:9px}
+#explorer th{background:#dceaf8;color:#142e4a}
+footer{display:none}
+@media(max-width:650px){main{padding:.8rem}main>section{padding:1rem}.actions button{flex-basis:100%}.stage-list li{font-size:.8rem}}
+@media(prefers-reduced-motion:reduce){.actions button{transition:none}}
+@media print{header{background:white!important;color:black!important}header h1,header .eyebrow{color:black!important}main>section{box-shadow:none;break-inside:avoid}}
+
+/* Decisions and their visible consequences are intentionally adjacent. */
+.decision-growth{display:grid;grid-template-columns:minmax(17rem,0.85fr) minmax(0,1.15fr);gap:1rem;align-items:start}
+.decision-growth fieldset{margin:0;height:100%}
+.growth-panel{border:2px solid #9db8d5;border-radius:10px;background:#f8fbff;padding:1rem;min-width:0}
+.growth-panel h3{margin:0 0 .35rem}
+.growth-panel svg{display:block;width:100%;height:auto;background:#fff;border:1px solid #9badc1;border-radius:7px}
+.growth-panel .key{margin:.5rem 0;font-size:.93rem}
+.growth-panel .key span{font-weight:750}
+.growth-summary{padding:.7rem;background:#e8f2fe;border-left:4px solid #173f78;margin:.7rem 0}
+#growthDetails table{font-size:.93rem}
+#growthDetails td,#growthDetails th{padding:.3rem .45rem}
+@media(max-width:850px){.decision-growth{grid-template-columns:minmax(0,1fr)}}
+@media print{.growth-panel svg{display:none}}
+</style></head><body>
+<a class="skip" href="#main">Skip to main content</a>
+<header><p class="eyebrow">Five stages. Two approaches. Your decisions.</p><h1>Parenting like a Carpenter or a Gardener</h1><p>Explore how different parenting approaches shape an illustrative career pathway. Make choices across five stages, see how the results change, and explore 115 occupations.</p></header>
+<main id="main">
+<section aria-labelledby="instructionsHeading"><h2 id="instructionsHeading">How to play</h2><p class="instructions-lead">Your mission: choose a family starting point, guide a child through five stages, and compare the outcome with a career goal.</p><ol class="quick-steps"><li>Set the starting conditions and select a career goal.</li><li>At each developmental stage, select Carpenter or Gardener.</li><li>See how each choice changes the illustrative outcome.</li><li>Review your results, then explore or compare careers in the occupation table.</li></ol><p class="instructions-note">There is no single correct sequence. Watch the pathway grow beside the decision buttons, then use its stage-by-stage table to compare the same information. Chance plays a part: each stage is a little different every time, and a new run draws a new child from the same family. The page shows the likelihood of reaching the goal before you start and after every stage. Try several rounds with different decisions and compare the results.</p><p class="hint">Keyboard access: Tab to move between controls, arrow keys to change menu choices, and Enter or Space to select a button.</p></section>
+<section aria-labelledby="setupH" id="setupSection"><h2 id="setupH">1. Set up the family and goal</h2><form id="setupForm"><fieldset><legend>Where the child starts</legend><div class="layout"><div><label for="education">Parents’ education</label><select id="education"></select></div><div><label for="income">Parents’ yearly income</label><select id="income"></select></div><div><label for="environment">Early emotional environment</label><select id="environment"></select></div></div></fieldset><label for="goal">Parental career goal (115 occupations)</label><select id="goal"></select><p class="hint" id="goalInfo"></p><p class="hint" id="setupNote">Your selections apply immediately. Changing any setup choice restarts the five stages. You can try a new scenario at any time.</p></form></section>
+<section aria-labelledby="stageH" id="game"><h2 id="stageH" tabindex="-1">2. Choose an approach</h2><p class="instruction-emphasis" id="stageIntro">For each of the five developmental stages, select one approach: Carpenter, guide toward the career goal, or Gardener, support exploration.</p><div class="stage-track" id="stageTrack"><label class="stage-track-label" for="journeyProgress">Your five-stage journey</label><progress aria-describedby="progressHint" id="journeyProgress" max="5" value="0"></progress><p class="hint" id="progressHint">0 of 5 developmental stages completed.</p><ol aria-label="Developmental stages" class="stage-list" id="stageNavigator"><li aria-current="step">Infancy</li><li>Early childhood</li><li>Middle childhood</li><li>Adolescence</li><li>Transition to adulthood</li></ol></div><p class="current-stage" id="currentStage" tabindex="-1">Current developmental stage: 1 of 5, Infancy.</p><div class="decision-growth"><fieldset><legend>Choose your parenting approach for this stage</legend><div class="actions"><button class="primary" id="carpenter" type="button">Carpenter: Guide toward career goal</button><button id="gardener" type="button">Gardener: Support exploration</button></div><p class="hint">Select one button to complete the current stage. The next stage appears automatically.</p></fieldset>
+<div class="growth-panel" aria-labelledby="growthHeading">
+<h3 id="growthHeading">Watch the pathway develop</h3>
+<p class="hint">The three axes represent normalized pay, education, and emotional labor. The pathway shows each stage and the selected career goal. It is an illustrative model, not a prediction.</p>
+<svg id="growthPlot" role="img" aria-labelledby="growthPlotTitle growthPlotDesc" viewBox="0 0 680 355" xmlns="http://www.w3.org/2000/svg"><title id="growthPlotTitle">Three-dimensional career pathway</title><desc id="growthPlotDesc">The trajectory is also described in the text and stage-by-stage table immediately below.</desc></svg>
+<p class="key">Visual key: <span>numbered circles</span> are completed stages, <span>G</span> identifies the parental goal, and <span>S</span> is the starting point. Connecting lines show the pathway.</p>
+<p id="growthSummary" class="growth-summary"></p>
+<details id="growthDetails" open><summary>Explore the same growth information as a table</summary>
+<div class="tablewrap" tabindex="0" role="region" aria-labelledby="growthCaption"><table><caption id="growthCaption">Career pathway by developmental stage</caption><thead><tr><th scope="col">Stage and choice</th><th scope="col">Pay dimension (0 to 100)</th><th scope="col">Education dimension (0 to 100)</th><th scope="col">Emotional labor dimension (0 to 100)</th><th scope="col">Distance to goal</th><th scope="col">Likelihood of reaching goal, best remaining plan</th></tr></thead><tbody id="growthRows"></tbody></table></div>
+</details>
+</div></div><div class="layout"><div class="metric"><span>Stages completed</span><strong id="stageCount">0 of 5</strong></div><div class="metric"><span>Carpenter / Gardener</span><strong id="counts">0 / 0</strong></div><div class="metric"><span>Nearest occupation now</span><strong id="nearest">Not determined</strong></div><div class="metric"><span>Likelihood this child reaches the goal</span><strong id="likelihood">Not yet calculated</strong></div></div><div class="panel"><h3>Where they are now</h3><p id="positionText"></p><p id="stageFeedback"></p></div><h3>Reflect on the decisions</h3><p>Did your choices bring the pathway closer to the parental career goal or move it toward other possibilities? What might it mean to support exploration even when the outcome differs from the original goal?</p><h3>Recent stages</h3><ol id="stageHistory"><li>No stages completed.</li></ol><div class="buttons"><button id="reset" type="button">Restart the five stages</button></div></section>
+<section aria-labelledby="resultsH" id="results"><h2 id="resultsH" tabindex="-1">3. A life taking shape: final results</h2><p id="outcomeText">Complete all five developmental stages in Section 2 to view your final results here.</p><div class="layout" id="finalMetrics"></div><h3>Choices across five stages</h3><ol id="resultHistory"></ol><div class="buttons"><button class="primary" disabled="" id="again" type="button">Play another run, same setup</button><button disabled="" id="change" type="button">Change family and career goal</button><button disabled="" id="export" type="button">Download this run as text</button></div></section>
+<section aria-labelledby="explorerH" id="explorer"><h2 id="explorerH">4. Explore all 115 occupations</h2><p>All occupations are available in the table regardless of whether you can see or use the chart. The table identifies career pay, typical education, emotional labor score, employment estimate, and comparison distance from the current simulated position. The nearest matches appear first by default. The pathway visualization and equivalent growth table are next to the parenting choices in Section 2.</p><div class="toolbar"><div><label for="search">Search occupation name</label><input id="search" placeholder="Example: teacher" type="search"/></div><div><label for="groupFilter">Career field</label><select id="groupFilter"><option value="">All career fields</option></select></div><div><label for="viewFilter">Which occupations?</label><select id="viewFilter"><option value="nearest">10 closest, plus selected goal</option><option value="all">All 115 occupations</option></select></div><div><label for="sort">Sort rows by</label><select id="sort"><option value="distance">Closest to current position</option><option value="name">Occupation A to Z</option><option value="pay">Pay, highest first</option><option value="eq">Emotional labor, highest first</option></select></div></div><p aria-live="polite" id="tableStatus" role="status"></p><div class="tablewrap" tabindex="0" role="region" aria-labelledby="tableCaption"><table><caption id="tableCaption">Occupations and simulation comparisons</caption><thead><tr><th scope="col">Occupation</th><th scope="col">Median pay (USD)</th><th scope="col">Typical education</th><th scope="col">Emotional labor (data score)</th><th scope="col">Comparison distance</th><th scope="col">Career field</th><th scope="col">Employment (thousands)</th></tr></thead><tbody id="occupationRows"></tbody></table></div><p class="hint">The supplied file contains illustrative high-income occupations alongside conventional job categories. Employment values and median pay are reproduced from that file, without external validation. Emotional labor scores reflect the supplied EQ_coordinate field. Some occupations have only a total score, with individual dimensions not scored.</p>
+<details><summary>Optional visual comparison of occupation pay and emotional labor</summary><p id="chartDesc">A two-dimensional plot depicts all 115 occupations by pay and emotional labor. It is supplemental only. All values are in the table above. The chart uses a logarithmic pay axis.</p><svg aria-labelledby="plotTitle plotDescription" id="plot" role="img" viewbox="0 0 720 370" xmlns="http://www.w3.org/2000/svg"><title id="plotTitle">Occupation pay compared with emotional labor</title><desc id="plotDescription">Scatterplot of all 115 occupations. Equivalent numerical details are provided in the adjacent table.</desc></svg></details>
+<details><summary>How this adapted calculation works</summary><p>This page uses the same model as the published Garden or Blueprint activity. Each occupation sits in a three-dimensional space whose axes are difficulty ladders: pay rises a fixed distance for every doubling of income, education a fixed distance for every halving of the share of adults who reach a credential, and emotional labor is scored on a five-dimension rubric. The child starts near the middle of the population, nudged by the family settings and by a random draw, because parents load the dice rather than decide the throw.</p><p>Each Carpenter stage steps toward the chosen occupation, with a little random error in direction and length, and never past it. Each Gardener stage travels further but in a direction the child chooses, which tends to follow what they were already growing into. After five stages the child lands on the best-matched occupation: the nearest one, with larger occupations pulling a little harder and a missing credential counting against a job.</p><p>The likelihood of reaching the goal is measured, not assumed. The page replays the rest of the childhood hundreds of times under every mix of Carpenter and Gardener stages and reports how often the child lands on the goal. The figures use a fixed random seed so the same position always shows the same likelihood.</p><p>These are educational approximations. A match does not establish actual career fit, causal parenting effects, or real-world probabilities of an outcome.</p></details></section>
+</main><div aria-atomic="true" aria-live="polite" class="sr-only" id="live" role="status"></div>
+<script>
+'use strict';
+const occupations=[{"name":"Chief Executives","pay":239200,"edu":"bachelor","eq":70.4,"group":"Management","employment":211.0,"total":15,"scored":true},{"name":"Fortune 500 CEO (illustrative)","pay":17000000,"edu":"master","eq":70.4,"group":"Management","employment":0.5,"total":15,"scored":true},{"name":"General and Operations Managers","pay":103000,"edu":"bachelor","eq":70.4,"group":"Management","employment":3500.0,"total":15,"scored":true},{"name":"Marketing Managers","pay":161000,"edu":"bachelor","eq":44.9,"group":"Management","employment":320.0,"total":10,"scored":true},{"name":"Financial Managers","pay":161000,"edu":"bachelor","eq":44.9,"group":"Management","employment":770.0,"total":10,"scored":true},{"name":"Construction Managers","pay":106000,"edu":"bachelor","eq":44.9,"group":"Management","employment":300.0,"total":10,"scored":true},{"name":"Medical and Health Services Managers","pay":117000,"edu":"bachelor","eq":70.4,"group":"Management","employment":500.0,"total":15,"scored":true},{"name":"Human Resources Specialists","pay":72000,"edu":"bachelor","eq":70.4,"group":"Business & finance","employment":800.0,"total":15,"scored":true},{"name":"Market Research Analysts","pay":76000,"edu":"bachelor","eq":18.6,"group":"Business & finance","employment":800.0,"total":3,"scored":true},{"name":"Accountants and Auditors","pay":81000,"edu":"bachelor","eq":44.9,"group":"Business & finance","employment":1400.0,"total":10,"scored":true},{"name":"Information Security Analysts","pay":124000,"edu":"bachelor","eq":31.9,"group":"Computing & math","employment":175.0,"total":7,"scored":true},{"name":"Computer User Support Specialists","pay":60000,"edu":"some college","eq":36.0,"group":"Computing & math","employment":700.0,"total":8,"scored":true},{"name":"Software Developers","pay":133080,"edu":"bachelor","eq":36.0,"group":"Computing & math","employment":1650.0,"total":8,"scored":true},{"name":"Mathematicians","pay":120000,"edu":"master","eq":16.4,"group":"Computing & math","employment":2.3,"total":2,"scored":true},{"name":"Statisticians","pay":104000,"edu":"master","eq":18.6,"group":"Computing & math","employment":33.0,"total":3,"scored":true},{"name":"Data Scientists","pay":120230,"edu":"bachelor","eq":18.6,"group":"Computing & math","employment":200.0,"total":3,"scored":true},{"name":"Architects","pay":96000,"edu":"bachelor","eq":49.6,"group":"Engineering & science","employment":110.0,"total":11,"scored":true},{"name":"Civil Engineers","pay":99000,"edu":"bachelor","eq":36.0,"group":"Engineering & science","employment":330.0,"total":8,"scored":true},{"name":"Electrical Engineers","pay":111000,"edu":"bachelor","eq":31.9,"group":"Engineering & science","employment":190.0,"total":7,"scored":true},{"name":"Mechanical Engineers","pay":102320,"edu":"bachelor","eq":31.9,"group":"Engineering & science","employment":280.0,"total":7,"scored":true},{"name":"Medical Scientists","pay":100000,"edu":"doctorate","eq":24.6,"group":"Engineering & science","employment":115.0,"total":5,"scored":true},{"name":"Physicists","pay":156000,"edu":"doctorate","eq":16.4,"group":"Engineering & science","employment":20.0,"total":2,"scored":true},{"name":"Economists","pay":116000,"edu":"master","eq":24.6,"group":"Engineering & science","employment":16.0,"total":5,"scored":true},{"name":"Clinical and Counseling Psychologists","pay":96000,"edu":"doctorate","eq":100.0,"group":"Engineering & science","employment":71.0,"total":20,"scored":true},{"name":"Educational, Guidance, and Career Counselors","pay":64000,"edu":"master","eq":81.8,"group":"Social service & legal","employment":300.0,"total":17,"scored":true},{"name":"Child, Family, and School Social Workers","pay":55000,"edu":"bachelor","eq":100.0,"group":"Social service & legal","employment":340.0,"total":20,"scored":true},{"name":"Clergy","pay":58000,"edu":"bachelor","eq":87.7,"group":"Social service & legal","employment":55.0,"total":18,"scored":true},{"name":"Lawyers","pay":151160,"edu":"doctorate","eq":70.4,"group":"Social service & legal","employment":735.0,"total":15,"scored":true},{"name":"Judges and Magistrates","pay":151000,"edu":"doctorate","eq":76.1,"group":"Social service & legal","employment":30.0,"total":16,"scored":true},{"name":"Paralegals and Legal Assistants","pay":61000,"edu":"associate","eq":40.3,"group":"Social service & legal","employment":350.0,"total":9,"scored":true},{"name":"Mathematical Science Teachers, Postsecondary","pay":80000,"edu":"doctorate","eq":54.5,"group":"Education & arts","employment":50.0,"total":12,"scored":true},{"name":"English Language and Literature Teachers, Postsecondary","pay":80470,"edu":"doctorate","eq":59.7,"group":"Education & arts","employment":60.0,"total":13,"scored":true},{"name":"Elementary School Teachers","pay":64000,"edu":"bachelor","eq":70.4,"group":"Education & arts","employment":1400.0,"total":15,"scored":true},{"name":"Secondary School Teachers","pay":66000,"edu":"bachelor","eq":70.4,"group":"Education & arts","employment":1000.0,"total":15,"scored":true},{"name":"Librarians","pay":65000,"edu":"master","eq":36.0,"group":"Education & arts","employment":130.0,"total":8,"scored":true},{"name":"Fine Artists","pay":66000,"edu":"bachelor","eq":15.0,"group":"Education & arts","employment":12.0,"total":1,"scored":true},{"name":"Graphic Designers","pay":61000,"edu":"bachelor","eq":31.9,"group":"Education & arts","employment":215.0,"total":7,"scored":true},{"name":"News Analysts, Reporters, and Journalists","pay":58000,"edu":"bachelor","eq":44.9,"group":"Education & arts","employment":45.0,"total":10,"scored":true},{"name":"Writers and Authors","pay":72000,"edu":"bachelor","eq":16.4,"group":"Education & arts","employment":50.0,"total":2,"scored":true},{"name":"Dentists, General","pay":172000,"edu":"doctorate","eq":65.0,"group":"Healthcare","employment":120.0,"total":14,"scored":true},{"name":"Pharmacists","pay":137000,"edu":"doctorate","eq":54.5,"group":"Healthcare","employment":330.0,"total":12,"scored":true},{"name":"Physician Assistants","pay":133000,"edu":"master","eq":81.8,"group":"Healthcare","employment":145.0,"total":17,"scored":true},{"name":"Physical Therapists","pay":101000,"edu":"doctorate","eq":76.1,"group":"Healthcare","employment":240.0,"total":16,"scored":true},{"name":"Veterinarians","pay":125000,"edu":"doctorate","eq":76.1,"group":"Healthcare","employment":80.0,"total":16,"scored":true},{"name":"Registered Nurses","pay":93600,"edu":"bachelor","eq":76.1,"group":"Healthcare","employment":3200.0,"total":16,"scored":true},{"name":"Nurse Practitioners","pay":129000,"edu":"master","eq":93.8,"group":"Healthcare","employment":280.0,"total":19,"scored":true},{"name":"Anesthesiologists","pay":557131,"edu":"doctorate","eq":65.0,"group":"Healthcare","employment":32.0,"total":14,"scored":true},{"name":"Family Medicine Physicians","pay":325040,"edu":"doctorate","eq":100.0,"group":"Healthcare","employment":110.0,"total":20,"scored":true},{"name":"Psychiatrists","pay":350786,"edu":"doctorate","eq":100.0,"group":"Healthcare","employment":25.0,"total":20,"scored":true},{"name":"Radiologists","pay":609684,"edu":"doctorate","eq":28.1,"group":"Healthcare","employment":30.0,"total":6,"scored":true},{"name":"Paramedics","pay":54000,"edu":"certificate","eq":76.1,"group":"Healthcare","employment":95.0,"total":16,"scored":true},{"name":"Licensed Practical Nurses","pay":62000,"edu":"certificate","eq":70.4,"group":"Healthcare","employment":630.0,"total":15,"scored":true},{"name":"Nursing Assistants","pay":40000,"edu":"certificate","eq":70.4,"group":"Healthcare","employment":1350.0,"total":15,"scored":true},{"name":"Dental Assistants","pay":48000,"edu":"certificate","eq":44.9,"group":"Healthcare","employment":370.0,"total":10,"scored":true},{"name":"Firefighters","pay":59000,"edu":"certificate","eq":70.4,"group":"Protective, food & personal service","employment":320.0,"total":15,"scored":true},{"name":"Police and Sheriff's Patrol Officers","pay":77000,"edu":"high school","eq":81.8,"group":"Protective, food & personal service","employment":665.0,"total":17,"scored":true},{"name":"Security Guards","pay":38000,"edu":"high school","eq":40.3,"group":"Protective, food & personal service","employment":1100.0,"total":9,"scored":true},{"name":"Chefs and Head Cooks","pay":60000,"edu":"high school","eq":31.9,"group":"Protective, food & personal service","employment":160.0,"total":7,"scored":true},{"name":"Cooks, Restaurant","pay":37000,"edu":"no credential","eq":16.4,"group":"Protective, food & personal service","employment":1400.0,"total":2,"scored":true},{"name":"Bartenders","pay":34000,"edu":"no credential","eq":36.0,"group":"Protective, food & personal service","employment":670.0,"total":8,"scored":true},{"name":"Waiters and Waitresses","pay":34000,"edu":"no credential","eq":31.9,"group":"Protective, food & personal service","employment":2200.0,"total":7,"scored":true},{"name":"Janitors and Cleaners","pay":36000,"edu":"no credential","eq":0.0,"group":"Protective, food & personal service","employment":2200.0,"total":0,"scored":true},{"name":"Landscaping and Groundskeeping Workers","pay":38000,"edu":"no credential","eq":0.0,"group":"Protective, food & personal service","employment":950.0,"total":0,"scored":true},{"name":"Hairdressers and Cosmetologists","pay":36000,"edu":"certificate","eq":54.5,"group":"Protective, food & personal service","employment":400.0,"total":12,"scored":true},{"name":"Childcare Workers","pay":32000,"edu":"high school","eq":76.1,"group":"Protective, food & personal service","employment":500.0,"total":16,"scored":true},{"name":"Cashiers","pay":31000,"edu":"no credential","eq":24.6,"group":"Sales & office","employment":3300.0,"total":5,"scored":true},{"name":"Retail Salespersons","pay":35000,"edu":"no credential","eq":31.9,"group":"Sales & office","employment":3700.0,"total":7,"scored":true},{"name":"Real Estate Sales Agents","pay":56000,"edu":"high school","eq":59.7,"group":"Sales & office","employment":160.0,"total":13,"scored":true},{"name":"Customer Service Representatives","pay":42000,"edu":"high school","eq":44.9,"group":"Sales & office","employment":2800.0,"total":10,"scored":true},{"name":"Secretaries and Administrative Assistants","pay":46000,"edu":"high school","eq":36.0,"group":"Sales & office","employment":2900.0,"total":8,"scored":true},{"name":"Office Clerks, General","pay":41000,"edu":"high school","eq":21.4,"group":"Sales & office","employment":2600.0,"total":4,"scored":true},{"name":"Farmworkers and Laborers, Crop","pay":35000,"edu":"no credential","eq":0.0,"group":"Trades & transport","employment":280.0,"total":0,"scored":true},{"name":"Carpenters","pay":59000,"edu":"high school","eq":28.1,"group":"Trades & transport","employment":700.0,"total":6,"scored":true},{"name":"Construction Laborers","pay":46000,"edu":"no credential","eq":16.4,"group":"Trades & transport","employment":1000.0,"total":2,"scored":true},{"name":"Electricians","pay":62350,"edu":"high school","eq":31.9,"group":"Trades & transport","employment":700.0,"total":7,"scored":true},{"name":"Plumbers, Pipefitters, and Steamfitters","pay":62000,"edu":"high school","eq":31.9,"group":"Trades & transport","employment":470.0,"total":7,"scored":true},{"name":"Automotive Service Technicians","pay":50000,"edu":"certificate","eq":31.9,"group":"Trades & transport","employment":660.0,"total":7,"scored":true},{"name":"HVAC Mechanics and Installers","pay":59000,"edu":"certificate","eq":31.9,"group":"Trades & transport","employment":400.0,"total":7,"scored":true},{"name":"Bakers","pay":36000,"edu":"no credential","eq":0.0,"group":"Trades & transport","employment":210.0,"total":0,"scored":true},{"name":"Machinists","pay":53000,"edu":"high school","eq":15.0,"group":"Trades & transport","employment":300.0,"total":1,"scored":true},{"name":"Welders, Cutters, Solderers, and Brazers","pay":51000,"edu":"high school","eq":15.0,"group":"Trades & transport","employment":430.0,"total":1,"scored":true},{"name":"Airline Pilots, Copilots, and Flight Engineers","pay":239200,"edu":"bachelor","eq":65.0,"group":"Trades & transport","employment":90.0,"total":14,"scored":true},{"name":"Air Traffic Controllers","pay":145000,"edu":"associate","eq":65.0,"group":"Trades & transport","employment":22.0,"total":14,"scored":true},{"name":"Heavy and Tractor-Trailer Truck Drivers","pay":58000,"edu":"certificate","eq":16.4,"group":"Trades & transport","employment":2100.0,"total":2,"scored":true},{"name":"Laborers and Freight, Stock, and Material Movers","pay":38000,"edu":"no credential","eq":0.0,"group":"Trades & transport","employment":2900.0,"total":0,"scored":true},{"name":"Dental Hygienists","pay":87000,"edu":"associate","eq":44.9,"group":"Healthcare","employment":215.0,"total":10,"scored":false},{"name":"Radiation Therapists","pay":98000,"edu":"associate","eq":81.8,"group":"Healthcare","employment":17.0,"total":17,"scored":false},{"name":"Diagnostic Medical Sonographers","pay":84000,"edu":"associate","eq":49.6,"group":"Healthcare","employment":84.0,"total":11,"scored":false},{"name":"Nuclear Medicine Technologists","pay":92000,"edu":"associate","eq":49.6,"group":"Healthcare","employment":18.0,"total":11,"scored":false},{"name":"MRI Technologists","pay":83000,"edu":"associate","eq":40.3,"group":"Healthcare","employment":40.0,"total":9,"scored":false},{"name":"Respiratory Therapists","pay":77000,"edu":"associate","eq":70.4,"group":"Healthcare","employment":135.0,"total":15,"scored":false},{"name":"Web Developers","pay":86000,"edu":"associate","eq":36.0,"group":"Computing & math","employment":90.0,"total":8,"scored":false},{"name":"Nuclear Technicians","pay":101000,"edu":"associate","eq":40.3,"group":"Engineering & science","employment":6.0,"total":9,"scored":false},{"name":"Electrical Power-Line Installers","pay":85000,"edu":"high school","eq":36.0,"group":"Trades & transport","employment":125.0,"total":8,"scored":false},{"name":"Elevator and Escalator Installers","pay":102000,"edu":"high school","eq":31.9,"group":"Trades & transport","employment":25.0,"total":7,"scored":false},{"name":"Power Plant Operators","pay":100000,"edu":"high school","eq":40.3,"group":"Trades & transport","employment":32.0,"total":9,"scored":false},{"name":"Detectives and Criminal Investigators","pay":91000,"edu":"high school","eq":81.8,"group":"Protective, food & personal service","employment":108.0,"total":17,"scored":false},{"name":"First-Line Supervisors of Police","pay":101000,"edu":"high school","eq":87.7,"group":"Protective, food & personal service","employment":135.0,"total":18,"scored":false},{"name":"Ship Engineers","pay":90000,"edu":"high school","eq":44.9,"group":"Trades & transport","employment":8.0,"total":10,"scored":false},{"name":"Boilermakers","pay":72000,"edu":"high school","eq":28.1,"group":"Trades & transport","employment":11.0,"total":6,"scored":false},{"name":"Subway and Streetcar Operators","pay":84000,"edu":"high school","eq":36.0,"group":"Trades & transport","employment":10.0,"total":8,"scored":false},{"name":"Wholesale and Manufacturing Sales Representatives","pay":73000,"edu":"high school","eq":54.5,"group":"Sales & office","employment":1400.0,"total":12,"scored":false},{"name":"Real Estate Brokers","pay":79000,"edu":"high school","eq":59.7,"group":"Sales & office","employment":50.0,"total":13,"scored":false},{"name":"Transportation, Storage, and Distribution Managers","pay":99000,"edu":"high school","eq":54.5,"group":"Management","employment":165.0,"total":12,"scored":false},{"name":"Radiologic Technologists and Technicians","pay":73410,"edu":"associate","eq":49.6,"group":"Healthcare","employment":220.0,"total":11,"scored":false},{"name":"Aircraft Mechanics and Service Technicians","pay":75400,"edu":"associate","eq":31.9,"group":"Trades & transport","employment":150.0,"total":7,"scored":false},{"name":"Computer Network Support Specialists","pay":71530,"edu":"associate","eq":36.0,"group":"Computing & math","employment":170.0,"total":8,"scored":false},{"name":"Physical Therapist Assistants","pay":64080,"edu":"associate","eq":76.1,"group":"Healthcare","employment":100.0,"total":16,"scored":false},{"name":"Commercial Pilots","pay":113080,"edu":"certificate","eq":54.5,"group":"Trades & transport","employment":50.0,"total":12,"scored":false},{"name":"Psychology Teachers, Postsecondary","pay":82000,"edu":"master","eq":59.7,"group":"Education & arts","employment":37.0,"total":13,"scored":false},{"name":"Neurosurgeons","pay":790000,"edu":"doctorate","eq":76.1,"group":"Healthcare","employment":5.0,"total":16,"scored":false},{"name":"Law Firm Equity Partners","pay":1400000,"edu":"doctorate","eq":70.4,"group":"Social service & legal","employment":25.0,"total":15,"scored":false},{"name":"Private Equity and Hedge Fund Partners","pay":3000000,"edu":"master","eq":59.7,"group":"Business & finance","employment":8.0,"total":13,"scored":false},{"name":"Major League Athletes","pay":4500000,"edu":"high school","eq":70.4,"group":"Education & arts","employment":3.5,"total":15,"scored":false},{"name":"Lead Film and Television Actors","pay":8000000,"edu":"no credential","eq":49.6,"group":"Education & arts","employment":1.0,"total":11,"scored":false}];
+/* ============ the occupation cloud ============
+   name, pay coordinate (log-dollars), education coordinate (attainment
+   rarity), human-contact percentile, group code, median pay in dollars.
+   All three are difficulty ladders now. Emotional labour comes from the
+   rubric in EMOTIONAL-LABOUR-RUBRIC.md, scored per occupation in
+   emotional-labour-scores.csv. See the axis notes below. */
+const GROUPS = {M:"Management",B:"Business & finance",C:"Computing & math",E:"Engineering & science",
+  S:"Social service & legal",A:"Education & arts",H:"Healthcare",P:"Protective, food & personal service",
+  O:"Sales & office",T:"Trades & transport"};
+const GCOL = {M:"#6f559b",B:"#44719f",C:"#28806f",E:"#3a7247",S:"#9c6d1f",A:"#ad5f43",
+  H:"#a33f52",P:"#5e7280",O:"#7c7140",T:"#6d5a49"};
+const OCC = [
+  ["Chief Executives",67.8,32.9,70.4,"M",239200,211],["Fortune 500 CEO (illustrative)",209.3,66.2,70.4,"M",17000000,0.5],
+  ["General and Operations Managers",39.8,32.9,70.4,"M",103000,3500],["Marketing Managers",54.7,32.9,44.9,"M",161000,320],
+  ["Financial Managers",54.7,32.9,44.9,"M",161000,770],["Construction Managers",40.8,32.9,44.9,"M",106000,300],
+  ["Medical and Health Services Managers",44.1,32.9,70.4,"M",117000,500],["Human Resources Specialists",28.0,32.9,70.4,"B",72000,800],
+  ["Market Research Analysts",29.8,32.9,18.6,"B",76000,800],["Accountants and Auditors",31.9,32.9,44.9,"B",81000,1400],
+  ["Information Security Analysts",46.0,32.9,31.9,"C",124000,175],["Computer User Support Specialists",21.9,15.6,36.0,"C",60000,700],
+  ["Software Developers",48.3,32.9,36.0,"C",133080,1650],["Mathematicians",44.9,66.2,16.4,"C",120000,2.3],
+  ["Statisticians",40.2,66.2,18.6,"C",104000,33],["Data Scientists",45.0,32.9,18.6,"C",120230,200],
+  ["Architects",37.5,32.9,49.6,"E",96000,110],["Civil Engineers",38.5,32.9,36.0,"E",99000,330],
+  ["Electrical Engineers",42.3,32.9,31.9,"E",111000,190],["Mechanical Engineers",39.6,32.9,31.9,"E",102320,280],
+  ["Medical Scientists",38.9,109.4,24.6,"E",100000,115],["Physicists",53.6,109.4,16.4,"E",156000,20],
+  ["Economists",43.8,66.2,24.6,"E",116000,16],["Clinical and Counseling Psychologists",37.5,109.4,100.0,"E",96000,71],
+  ["Educational, Guidance, and Career Counselors",24.1,66.2,81.8,"S",64000,300],["Child, Family, and School Social Workers",19.0,32.9,100.0,"S",55000,340],
+  ["Clergy",20.8,32.9,87.7,"S",58000,55],["Lawyers",52.6,109.4,70.4,"S",151160,735],
+  ["Judges and Magistrates",52.5,109.4,76.1,"S",151000,30],["Paralegals and Legal Assistants",22.5,24.6,40.3,"S",61000,350],
+  ["Mathematical Science Teachers, Postsecondary",31.5,109.4,54.5,"A",80000,50],["English Language and Literature Teachers, Postsecondary",31.7,109.4,59.7,"A",80470,60],
+  ["Elementary School Teachers",24.1,32.9,70.4,"A",64000,1400],["Secondary School Teachers",25.1,32.9,70.4,"A",66000,1000],
+  ["Librarians",24.6,66.2,36.0,"A",65000,130],["Fine Artists",25.1,32.9,15.0,"A",66000,12],
+  ["Graphic Designers",22.5,32.9,31.9,"A",61000,215],["News Analysts, Reporters, and Journalists",20.8,32.9,44.9,"A",58000,45],
+  ["Writers and Authors",28.0,32.9,16.4,"A",72000,50],["Dentists, General",56.9,109.4,65.0,"H",172000,120],
+  ["Pharmacists",49.3,109.4,54.5,"H",137000,330],["Physician Assistants",48.3,66.2,81.8,"H",133000,145],
+  ["Physical Therapists",39.2,109.4,76.1,"H",101000,240],["Veterinarians",46.3,109.4,76.1,"H",125000,80],
+  /* Back at a bachelor's, which is what the BLS handbook says. It was moved
+     down to an associate's on the argument that the ADN is still a common
+     way in -- true, but the listed figure is the typical entry-level
+     credential and that is a bachelor's, and the move was doing a job the
+     model should not have been asking it to do: it halved the air traffic
+     control pole, which was really a gap in the education axis and is
+     fixed properly by PROMOTE_FRACTION. With the gap filled, putting
+     nursing back costs almost nothing. */
+  ["Registered Nurses",36.7,32.9,76.1,"H",93600,3200],["Nurse Practitioners",47.3,66.2,93.8,"H",129000,280],
+  ["Anesthesiologists",95.9,109.4,65.0,"H",557131,32],["Family Medicine Physicians",78.0,109.4,100.0,"H",325040,110],
+  ["Psychiatrists",80.5,109.4,100.0,"H",350786,25],["Radiologists",98.8,109.4,28.1,"H",609684,30],
+  ["Paramedics",18.4,17,76.1,"H",54000,95],["Licensed Practical Nurses",23.0,17,70.4,"H",62000,630],
+  ["Nursing Assistants",8.5,17,70.4,"H",40000,1350],["Dental Assistants",14.5,17,44.9,"H",48000,370],
+  ["Firefighters",21.4,17,70.4,"P",59000,320],["Police and Sheriff's Patrol Officers",30.2,3.3,81.8,"P",77000,665],
+  ["Security Guards",6.8,3.3,40.3,"P",38000,1100],["Chefs and Head Cooks",21.9,3.3,31.9,"P",60000,160],
+  ["Cooks, Restaurant",5.9,0,16.4,"P",37000,1400],["Bartenders",3.1,0,36.0,"P",34000,670],
+  ["Waiters and Waitresses",3.1,0,31.9,"P",34000,2200],["Janitors and Cleaners",5.0,0,0.0,"P",36000,2200],
+  ["Landscaping and Groundskeeping Workers",6.8,0,0.0,"P",38000,950],["Hairdressers and Cosmetologists",5.0,17,54.5,"P",36000,400],
+  ["Childcare Workers",1.1,3.3,76.1,"P",32000,500],["Cashiers",0.0,0,24.6,"O",31000,3300],
+  ["Retail Salespersons",4.0,0,31.9,"O",35000,3700],["Real Estate Sales Agents",19.6,3.3,59.7,"O",56000,160],
+  ["Customer Service Representatives",10.1,3.3,44.9,"O",42000,2800],["Secretaries and Administrative Assistants",13.1,3.3,36.0,"O",46000,2900],
+  ["Office Clerks, General",9.3,3.3,21.4,"O",41000,2600],["Farmworkers and Laborers, Crop",4.0,0,0.0,"T",35000,280],
+  ["Carpenters",21.4,3.3,28.1,"T",59000,700],["Construction Laborers",13.1,0,16.4,"T",46000,1000],
+  ["Electricians",23.2,3.3,31.9,"T",62350,700],["Plumbers, Pipefitters, and Steamfitters",23.0,3.3,31.9,"T",62000,470],
+  ["Automotive Service Technicians",15.9,17,31.9,"T",50000,660],["HVAC Mechanics and Installers",21.4,17,31.9,"T",59000,400],
+  ["Bakers",5.0,0,0.0,"T",36000,210],["Machinists",17.8,3.3,15.0,"T",53000,300],
+  ["Welders, Cutters, Solderers, and Brazers",16.5,3.3,15.0,"T",51000,430],["Airline Pilots, Copilots, and Flight Engineers",67.8,32.9,65.0,"T",239200,90],
+  ["Air Traffic Controllers",51.2,24.6,65.0,"T",145000,22],["Heavy and Tractor-Trailer Truck Drivers",20.8,17,16.4,"T",58000,2100],
+  ["Laborers and Freight, Stock, and Material Movers",6.8,0,0.0,"T",38000,2900],
+  /* Five careers that bridge the top of the pay axis. Without them there was
+     a 111-unit hole between Radiologists at $610k and the illustrative CEO
+     at $17m, where every other neighbouring pair sits within 15 units -- so
+     any life that drifted past the doctors had nothing nearer than a Fortune
+     500 CEO and was handed one. These turn that single jump into five steps
+     at 107, 126, 152, 165 and 184.
+
+     Only the neurosurgeon is a clean BLS occupation. The others are real
+     careers without tidy federal categories, so their pay and headcount are
+     my estimates rather than a sourced table -- the same caveat as the
+     employment column, and they are here to be corrected. */
+  /* The missing middle. Two of ninety occupations sat at associate's level
+     against 11% of adults, and fourteen at high school against 28%, leaving
+     the busiest part of the space -- decent pay without a degree -- almost
+     empty: 57% of landings were more than 25 units from any job at all, and
+     the worst-served region centred on good money with modest schooling.
+     Lives drifting through there had nowhere to land but a degree career
+     above it, which is a large part of why bachelor's outcomes ran high.
+
+     Pay is the BLS median, education the credential the work actually asks
+     for, emotional labour scored on the same five-dimension rubric as the
+     rest. Headcounts are rounded recollections, like the column they join. */
+  ["Dental Hygienists",34.2,24.6,44.9,"H",87000,215],
+  ["Radiation Therapists",38.2,24.6,81.8,"H",98000,17],
+  ["Diagnostic Medical Sonographers",33.1,24.6,49.6,"H",84000,84],
+  ["Nuclear Medicine Technologists",36.1,24.6,49.6,"H",92000,18],
+  ["MRI Technologists",32.7,24.6,40.3,"H",83000,40],
+  ["Respiratory Therapists",30.2,24.6,70.4,"H",77000,135],
+  ["Web Developers",33.9,24.6,36.0,"C",86000,90],
+  ["Nuclear Technicians",39.2,24.6,40.3,"E",101000,6],
+  ["Electrical Power-Line Installers",33.5,3.3,36.0,"T",85000,125],
+  ["Elevator and Escalator Installers",39.5,3.3,31.9,"T",102000,25],
+  ["Power Plant Operators",38.9,3.3,40.3,"T",100000,32],
+  ["Detectives and Criminal Investigators",35.7,3.3,81.8,"P",91000,108],
+  ["First-Line Supervisors of Police",39.2,3.3,87.7,"P",101000,135],
+  ["Ship Engineers",35.4,3.3,44.9,"T",90000,8],
+  ["Boilermakers",28.0,3.3,28.1,"T",72000,11],
+  ["Subway and Streetcar Operators",33.1,3.3,36.0,"T",84000,10],
+  ["Wholesale and Manufacturing Sales Representatives",28.4,3.3,54.5,"O",73000,1400],
+  ["Real Estate Brokers",31.0,3.3,59.7,"O",79000,50],
+  ["Transportation, Storage, and Distribution Managers",38.5,3.3,54.5,"M",99000,165],
+
+  /* Company on the associate's rung, which after the promotion is where a
+     great many lives come to rest and which held only ten jobs. All five are
+     large, ordinary occupations that pay well without a degree, and the four
+     technologist entries carry the headcount that the imaging and support
+     trades really have. */
+  ["Radiologic Technologists and Technicians",28.6,24.6,49.6,"H",73410,220],
+  ["Aircraft Mechanics and Service Technicians",29.5,24.6,31.9,"T",75400,150],
+  ["Computer Network Support Specialists",27.7,24.6,36.0,"C",71530,170],
+  ["Physical Therapist Assistants",24.1,24.6,76.1,"H",64080,100],
+  ["Commercial Pilots",42.9,17,54.5,"T",113080,50],
+  /* A professor of the subject this activity is for. Entered at a master's
+     rather than at the doctorate the two postsecondary rows above carry,
+     because community college and lecturer posts are a real and common way
+     into the work and the doctorate rung is where careers go to be
+     unreachable. Scored at 59.7 rather than the 70.4 the rubric first gave
+     it, because at 70.4 it sat on top of the careers counsellors, who are
+     eight times as numerous and win every tie: the slot has to be its own
+     to be reachable at all. Aimed at, it comes out 1.6% of the time. */
+  ["Psychology Teachers, Postsecondary",32.3,66.2,59.7,"A",82000,37],
+
+  ["Neurosurgeons",107.4,109.4,76.1,"H",790000,5],
+  ["Law Firm Equity Partners",126.4,109.4,70.4,"S",1400000,25],
+  ["Private Equity and Hedge Fund Partners",151.7,66.2,59.7,"B",3000000,8],
+  /* Scored up from 44.9. The rubric had been read as though the job were
+     the game: it is also the press conference after a loss, the locker room,
+     the agent, the crowd and the knowledge that a bad season ends the
+     career.
+
+     It was meant to make the job rarer and it does not. Measured: at 44.9 it
+     takes 10.1% of lives and at 70.4 it takes 10.7%, because the cloud of
+     finished lives has a median emotional labour of 73 and moving the job up
+     moved it TOWARDS them. Emotional labour is not what decides this one.
+     Lives that land here do so at a mean of $1.64m a year, and in that part
+     of the space there is nothing else to land on at all -- 28% of children
+     finish a life earning over $500,000, which is the number that would
+     actually move it. The score stays at 70.4 because it is the right score,
+     not because it fixed anything. */
+  ["Major League Athletes",165.2,3.3,70.4,"A",4500000,3.5],
+  ["Lead Film and Television Actors",184.3,0,49.6,"A",8000000,1],
+];
+
+/* ============ how steep the education ladder is ============
+   The education coordinates above were written at 23 units per halving of
+   the adults who reach a credential, the same rate as pay. That was too
+   gentle: 93% of lives were finishing in a career that needs a bachelor's,
+   and 36% in one that needs a master's, against the 14% of American adults
+   who hold one and the ~4% of jobs that ask for one.
+
+   Raising the rate puts a degree further out of reach. It is a
+   pure rescale, because a coordinate is just the rate times log2(1/share),
+   so the whole column and the axis scale together and every credential
+   keeps its meaning. Measured at 2x: master's-level outcomes fall from 36%
+   to 4%, bachelor's from 93% to 68%, and lives finishing below an
+   associate's rise from 7% to 25%.
+
+   1.4 rather than the 2.0 it was first set to. At 2.0 a doctorate sat at
+   219 while a gardened life travels about 141 in total, so it was not rare
+   from a median start -- it was unreachable, 0% even when every stage was
+   aimed at one. The two cannot both be satisfied: the ladder is one
+   geometric scale, so loosening the top to let a doctorate be reached
+   loosens the bottom as well and bachelor's-level outcomes climb with it.
+   Measured across the sweep, median-start doctorates only become visible
+   around 1.4, and bachelor's costs 63% -> 82% to get there. */
+const ED_STEEPNESS = 1.4;
+/* Every occupation asks for one more credential than the table claims. The
+   figures were the formal minimum, and the formal minimum is not what gets
+   people hired: the jobs listed at "no credential" overwhelmingly go to
+   people with a diploma, the high-school ones to people with some college,
+   and so on up. Promoting the whole column by a rung is the correction.
+
+   Two exceptions. Doctorate jobs are set by the rates they should produce
+   rather than promoted, since there is no rung above them. And
+   five jobs really are open to someone with no credential at all, so they
+   alone keep the floor.
+
+   Raising what every job asks for, while leaving what children attain
+   untouched, pushes outcomes DOWN the list: a child now qualifies for
+   fewer things, and the jobs they still qualify for are the ones at the
+   bottom. Measured over 8000 undirected lives from a median start, that is
+   what happens: trades, transport and protective work rise from 15% of
+   outcomes to 38% and management falls from 29% to 12%, both much closer to
+   their real share of American employment. The cost is that promoting 26
+   bachelor's jobs onto the new master's rung empties the middle of the axis,
+   and the few jobs left below the void become attractors: air traffic
+   control takes 19% of all lives where it took 2%. That wants more
+   occupations in the 46-123 band, not a smaller promotion. */
+const NO_CREDENTIAL = ["Janitors and Cleaners", "Retail Salespersons",
+  "Laborers and Freight, Stock, and Material Movers",
+  "Waiters and Waitresses", "Landscaping and Groundskeeping Workers"];
+const MASTERS_RUNG = 66.2 + (109.4 - 66.2) / 2;
+/* The doctorate rung is 109.4 in the credential table and 118 here. Filling
+   the gap below it, which is what PROMOTE_FRACTION does, lets more lives
+   climb through to the top of the ladder, and 114 is what holds
+   doctorate-level careers at the rate they are supposed to come out at. */
+const DOCTORATE_RUNG = 114;
+/* The rung each credential is promoted TOWARD. A master's job used to be
+   promoted toward the master's rung, which is where it already was -- a
+   leftover from when the promotion moved everything exactly one rung and
+   bachelor's and master's jobs both landed on the same one. It left ten
+   jobs reading "master's" while sitting BELOW the master's rung, the only
+   place where a label and a position disagreed. They point at the
+   doctorate now, like every other credential points at the one above it. */
+const NEXT_RUNG = {0: 3.3, 3.3: 15.6, 15.6: 24.6, 17: 24.6, 24.6: 32.9,
+  32.9: MASTERS_RUNG, 66.2: DOCTORATE_RUNG};
+
+/* An occupation does not sit ON a credential. Promoting every job a whole
+   rung put 26 bachelor's jobs onto the master's rung and left 77 units of
+   the education axis with nothing in it at all, and since every job snapped
+   to a rung nothing could ever be placed there. Lives landing in that gap
+   -- which is most of them, the median finished life sits at 64 -- got
+   dragged back down to the bachelor's rung, and whichever job there paid
+   best caught them. That is the whole air traffic control problem: at a
+   full promotion it took 21.6% of lives from doctorate-holding parents.
+
+   What a job really has is a MIX. Most holders have the credential the
+   table lists and a substantial minority have the next one up, so its
+   expected attainment sits between the two rungs, not on either. 0.6 of
+   the way up, which is the promotion read as "employers increasingly want
+   the next one" rather than "everyone needs it". Measured, gardened:
+
+     air traffic control, doctorate parents   21.6% -> 11.9%
+     air traffic control, bachelor's parents  11.6% ->  7.7%
+     air traffic control, default dials        4.3% ->  2.9%
+     distinct outcomes, default dials            94 ->    96
+     three commonest, default dials           28.7% -> 25.6%
+     three commonest, doctorate parents       45.5% -> 35.3%
+
+   The credential a job ASKS for is still the table's own figure, kept in
+   o[7] and reported from there. A job sitting at 82 on the axis is a
+   bachelor's job whose holders often went further, and calling it a
+   master's job because 82 is nearer that rung would be a lie. */
+const PROMOTE_FRACTION = 0.6;
+OCC.forEach(o => {
+  const raw = o[2];
+  o[7] = raw;                                   // what the job formally asks for
+  if(NO_CREDENTIAL.indexOf(o[0]) >= 0){ o[2] = 0; return; }
+  if(raw === 109.4){ o[2] = +(DOCTORATE_RUNG * ED_STEEPNESS).toFixed(1); return; }
+  const next = NEXT_RUNG[raw];
+  if(next === undefined) throw new Error("no rung above education " + raw + " (" + o[0] + ")");
+  o[2] = +((raw + PROMOTE_FRACTION * (next - raw)) * ED_STEEPNESS).toFixed(1);
+});
+/* the credential a job asks for, by its own pre-promotion figure */
+const CRED_NAME = {0: "no credential", 3.3: "high school", 15.6: "some college",
+  17: "certificate", 24.6: "associate's", 32.9: "bachelor's", 66.2: "master's",
+  109.4: "doctorate"};
+/* What the people doing a job typically have, which is not the least you
+   can be hired with. The table figure is the entry-level minimum, and
+   reporting it alone made every career read as easier to reach than it is
+   -- a bachelor's job whose holders have mostly gone further was being
+   announced as a bachelor's job. It is also the whole reason an occupation
+   sits BETWEEN two rungs rather than on one, so the label says both: the
+   floor, and the rung a large share of holders have actually reached.
+
+   The five that genuinely ask for nothing say so, and a doctorate has no
+   rung above it to name. */
+CRED_NAME[MASTERS_RUNG] = "master's";       // the promotion targets are rungs too
+CRED_NAME[DOCTORATE_RUNG] = "doctorate";
+const occCred = o => {
+  const raw = o[7];
+  if(NO_CREDENTIAL.indexOf(o[0]) >= 0) return CRED_NAME[0];
+  const lo = CRED_NAME[raw], next = NEXT_RUNG[raw];
+  const hi = next === undefined ? lo : CRED_NAME[next];
+  /* a master's job is promoted to the master's rung, which is a harder
+     master's and not a different credential, so it names itself once */
+  return hi === lo ? lo : lo + ", often " + hi;
+};
+
+/* ============ the three axes ============
+   Education and contact are percentiles and stop at 100. Salary is NOT a
+   percentile: pay is exponential, and a percentile axis hides that. The 99th
+   percentile earns $609,684 and the 100th earns $17,000,000 -- twenty-eight
+   times the money, one point apart -- which made chasing extreme pay far too
+   easy, because the top of a percentile axis is only ever one step past the
+   next occupation down.
+
+   The salary coordinate is a fixed number of units per DOUBLING of median
+   pay, measured from the lowest-paid occupation in the set. Money is hard
+   the way it is hard in life: each further step costs as much as everything
+   before it. */
+
+/* ============ how steep the pay ladder is ============
+   Written at 23 units per doubling, which turned out to be far too cheap.
+   A five-stage life spent about a third of its travel on this axis, and a
+   third of the travel at 23 units each was six doublings of income: the
+   median child finished earning $244,000 and 28% of them finished over
+   $500,000 a year. Real American earners: a median near $60,000 and well
+   under 1% over $500,000.
+
+   That one number was behind most of what looked like separate faults. The
+   cloud of finished lives floated above the part of the space where real
+   occupations actually sit, so whatever was cheapest up there caught
+   everybody -- major league athletes took one life in ten at a mean of
+   $1.64m a year, and air traffic control, about the best-paid work in the
+   country that does not need a degree, took one in five.
+
+   Tripled to 69. The whole pay column rescales with it, so every occupation
+   keeps its meaning in dollars while the distance between two incomes
+   triples. Measured over 6,000 lives: the median child now finishes on
+   $69,000, 2.2% finish over $200,000 and none over $500,000; distinct
+   outcomes rise from 79 to 88 and the three commonest outcomes fall from
+   48% of all lives to 29%. Athletes stop being a destination at all.
+
+   It is not free. Holding the walk's reach fixed -- which it must be, or
+   the stretch only makes childhoods longer -- puts seven more careers out
+   of reach even when every stage is aimed at them, 50 of 115 against 43.
+   Chief executives and major league athletes are now goals that cannot be
+   hit rather than goals that are merely improbable. */
+const PAY_STEEPNESS = 3;
+OCC.forEach(o => { o[1] = +(o[1] * PAY_STEEPNESS).toFixed(1); });
+const SAL_PER_DOUBLING = 23 * PAY_STEEPNESS;
+/* The education extent was a fixed 110, written when the top rung was 109.4
+   and left behind when the rung moved. At 112 the doctorate sat at 156.8
+   against a ceiling of 154, so it was OUTSIDE the box: clampPt could never
+   put a child there, no child ever reached doctorate-level schooling, and
+   the seventeen doctorate careers were drawn beyond the wireframe. The
+   extent follows the top rung now, with headroom above it, so that reaching
+   a doctorate is something a child does rather than something only the
+   clamp can do. */
+const AXIS = [210 * PAY_STEEPNESS, (DOCTORATE_RUNG + 2) * ED_STEEPNESS, 100];
+const STAGE_NAMES = ["Infancy","Early childhood","Middle childhood","Adolescence","Emerging adulthood"];
+const TOTAL_STAGES = 5;
+
+/* A goal that is not an occupation: the far corner of the space, maximal on
+   all three axes at once. "Do their best" is the ambition with no address --
+   the parent is pushing up every ladder rather than toward one job -- so it
+   is kept out of OCC and can never be somewhere a child lands. Targets are
+   indexed into TARGETS, landings into OCC, and the two lists differ by
+   exactly this one entry. It is the default: the activity should open on the
+   ambition most parents would actually own up to. */
+const BEST = ["Encourage children to do their best", AXIS[0], AXIS[1], AXIS[2], "A", 0];
+const BEST_SHORT = "Their best";
+const TARGETS = OCC.concat([BEST]);
+const BEST_I = OCC.length;
+const isBest = i => i === BEST_I;
+/* nearestOcc takes a real occupation index to break ties with, so the
+   aspiration has to be passed as "no preference" wherever it is the goal */
+const tieWith = i => (isBest(i) ? undefined : i);
+
+/* The middle of the space is now the cloud's own centre of mass rather than a
+   fixed (50,50,50): with a stretched salary axis those are no longer the same
+   point, and the whole premise is that an untouched life lands on the average. */
+const CENTROID = (function(){
+  const c = [0,0,0];
+  OCC.forEach(o => { c[0] += o[1]; c[1] += o[2]; c[2] += o[3]; });
+  return c.map(v => v / OCC.length);
+})();
+/* Measured on the space as it stood BEFORE education was steepened. This is
+   the whole point of the steepening and it does not work without it: MU is
+   derived from how far out the average life sits, so stretching the
+   education axis moves the centroid out, lengthens every step in
+   proportion, and the child climbs just as far up a longer ladder. Measured
+   with MU left to follow the centroid, steepening education from 23 units
+   per halving all the way to 69 moved bachelor's-level outcomes only from
+   93% to 82% while collapsing variety. Pinned here instead, 2x does real
+   work. Putting degrees further away is meant to make them harder to reach,
+   not to make every childhood longer. */
+const CENTRE_DIST = Math.hypot(
+  CENTROID[0] / PAY_STEEPNESS, CENTROID[1] / ED_STEEPNESS, CENTROID[2]);
+/* Five plain segments land on the average life. Left at 1.0 with the
+   loosened direction clamp: scaling it up to keep an UNSTEERED walk on the
+   average was measured and backfires, because NURTURE_BONUS is a multiple of
+   MU, so every gardened stage grew too and the elite funnel came straight
+   back (35 distinct careers, Chief Executives 15%). An unsteered walk is not
+   playable anyway -- every gardened stage carries the bonus -- so the dial
+   that matters is the gardened one. */
+const MU  = CENTRE_DIST / TOTAL_STAGES;
+const SIG = 0.65 * MU;                    // spread of ordinary stage length
+/* The reach a nurtured stage buys, kept separate from the noise above. They
+   were the same number, which meant extra reach could only be bought by
+   widening the spread, and a wider spread drops a quarter of all stages onto
+   LEN_FLOOR. Separated, this is the one dial that makes the far corner of the
+   space attainable: at 1.0x SIG five nurtured stages reach 114 and a
+   psychiatrist at 169 is a 0.1% shot; at 1.6x they reach 141 and it is 2.9%. */
+const NURTURE_BONUS = 1.6 * SIG;
+const ANG = 15 * Math.PI / 180;           // heading noise per segment
+/* a wide length distribution is what lets nurture buy real reach, but an
+   unfloored draw can produce a stage that visibly does nothing */
+const LEN_FLOOR = 0.3 * MU;
+
+/* ============ small maths ============ */
+let spare = null;
+function gauss(){
+  if(spare !== null){ const v = spare; spare = null; return v; }
+  let u = Math.random(); if(u < 1e-12) u = 1e-12;
+  const r = Math.sqrt(-2 * Math.log(u)), t = 2 * Math.PI * Math.random();
+  spare = r * Math.sin(t); return r * Math.cos(t);
+}
+/* each axis has its own extent now, so clamping is per axis */
+const clampAx = (v, a) => v < 0 ? 0 : v > AXIS[a] ? AXIS[a] : v;
+const clampPt = p => [clampAx(p[0],0), clampAx(p[1],1), clampAx(p[2],2)];
+const norm = v => { const L = Math.hypot(v[0],v[1],v[2]) || 1; return [v[0]/L, v[1]/L, v[2]/L]; };
+
+/* tilt a unit vector by a gaussian angle, in a uniformly random plane */
+function perturb(d, sig){
+  const r = [gauss(), gauss(), gauss()];
+  const dot = r[0]*d[0] + r[1]*d[1] + r[2]*d[2];
+  let p = [r[0]-dot*d[0], r[1]-dot*d[1], r[2]-dot*d[2]];
+  const L = Math.hypot(p[0],p[1],p[2]);
+  if(L < 1e-9) return d.slice();
+  p = [p[0]/L, p[1]/L, p[2]/L];
+  const th = gauss() * sig, c = Math.cos(th), s = Math.sin(th);
+  return [c*d[0]+s*p[0], c*d[1]+s*p[1], c*d[2]+s*p[2]];
+}
+/* The gardener's flat law. This used to fold a downward draw into an upward
+   one, which is a hidden hand on the wheel: every unsteered stage climbed all
+   three ladders at once, and gardening funnelled half of all children into
+   the same elite medical cluster (Physician Assistants 19%, Chief Executives
+   12%, Anesthesiologists 10%).
+
+   The clamp was loosened rather than removed, and then removed. A downward
+   draw used to stall that dimension for the stage, on the reasoning that a
+   child does not un-learn a credential. That reasoning was too kind to the
+   model. These coordinates are expected attainment, not certificates in a
+   drawer, and expected attainment falls: a trajectory derails, a place is
+   lost, a settled child comes out of adolescence less able to sit with
+   other people than they went in. All three axes now go backwards.
+
+   What matters is that the AVERAGE progress does not change, because
+   backsliding is meant to widen the spread of lives, not to shorten them
+   all. Each axis is drawn from a normal with mean m and sd m/z, which falls
+   below zero exactly P(normal < -z) of the time while still averaging m.
+   Pay keeps the 20% it had, which is roughly how often real earnings fall.
+   Schooling and emotional labour take 25%, which is what holds their
+   landings where they were. */
+const RISE = 1 / Math.sqrt(2 * Math.PI);   // mean of a draw clamped at zero
+const Z80 = 0.8416;                        // P(normal < -Z80) = 0.20
+const Z75 = 0.6745;                        // P(normal < -Z75) = 0.25
+/* The three means are not what they look like, because the direction is
+   normalised and normalising rewards whichever axis has the steadiest draw
+   rather than the largest one. The old schooling and emotion draws were a
+   normal clamped at zero, so HALF of every stage's draws were exactly zero
+   -- an atom at the floor that dragged their realised climb far below their
+   nominal mean. Replacing the atom with a distribution that simply goes
+   negative makes them climb much more efficiently at the same nominal mean,
+   so both have to be scaled back to land where they used to. Swept against
+   the median finished life: 0.70, 0.76 and 0.66 hold it at (78, 64, 79)
+   against (81, 63, 77) before, with the median child on $68,000 against
+   $70,000. */
+const PAY_MEAN = 0.66 * RISE;
+const ED_MEAN  = 0.70 * RISE;
+const EQ_MEAN  = 0.76 * RISE;
+/* Growth has a memory. Until now every gardened stage was drawn fresh, with
+   no idea what the child had been growing into, which makes "focus on their
+   natural inclinations" a thing the button says rather than a thing the
+   model does. A child who spent adolescence climbing one ladder is more
+   likely to keep climbing it, and that is the whole difference between a
+   life that compounds and five unrelated coin flips.
+
+   So a gardened stage leans slightly toward the last gardened direction,
+   enough for a leaning to accumulate over five stages and nowhere near
+   enough to railroad anyone. It is what keeps doctorate-level careers
+   coming out at the rate they should -- 4.51% for children of
+   doctorate-holding parents, 0.26% for children starting at the bottom of
+   all three sliders, where a memoryless walk gives 3.32% and 0.18%.
+
+   It was 0.02 before the axes could go backwards and is 0.08 now, because
+   a doctorate needs a long unbroken climb and backsliding keeps breaking
+   it: at 0.02 with backsliding the doctorate rate fell to 3.5%. The dial
+   has a sharp response -- 0.12 gives 4.88%, 0.18 gives 5.87% -- and costs
+   variety, since a walk that compounds goes further in fewer directions,
+   though at 0.08 that cost is not yet visible: 94 distinct outcomes, the
+   three commonest taking 29.7% of lives. */
+const INCLINE = 0.08;
+function flatDir(grown){
+  const pay = PAY_MEAN + (PAY_MEAN / Z80) * gauss();
+  const ed  = ED_MEAN  + (ED_MEAN  / Z75) * gauss();
+  const eq  = EQ_MEAN  + (EQ_MEAN  / Z75) * gauss();
+  const d = [pay, ed, eq];
+  if(grown){ d[0] += INCLINE * grown[0]; d[1] += INCLINE * grown[1]; d[2] += INCLINE * grown[2]; }
+  // a near-zero vector has no direction to normalise, and must not be returned
+  return Math.hypot(d[0], d[1], d[2]) < 1e-9 ? norm([1, 1, 1]) : norm(d);
+}
+/* Some occupations now sit on exactly the same point -- Janitors and Bakers
+   both pay $36k, need no credential and score zero emotional labour, and the
+   model has nothing left to tell them apart. Without a tie-break the one later
+   in the array can never be the answer, so it reads as 0% difficulty when it
+   is really 0% distinguishable. `prefer` breaks an exact tie toward whichever
+   occupation was aimed at; with no target the first match stands. */
+/* Nearest is not the same as likeliest, and using nearest skewed every
+   outcome upward. Each of the 85 occupations counted once regardless of how
+   many people hold it, but the list is a spread of interesting careers, not
+   a sample of the workforce: fifteen doctorate-level occupations are listed
+   against two at associate's level, so doctorate work is 18% of the list and
+   4% of the population while high-school work is 15% of the list and 28% of
+   the population. 92% of lives were finishing in a career needing a
+   bachelor's, against the 38% of American adults who hold one.
+
+   An occupation now claims ground in proportion to how many people actually
+   do it. Each doubling of employment is worth EMP_PULL units of distance,
+   measured against the median occupation on the list. Logarithmic because
+   employment spans four orders of magnitude -- 3.7m retail salespersons to
+   2,300 mathematicians -- and a linear weight would let the largest handful
+   swallow the entire space. */
+const EMP_MED = (function(){
+  const e = OCC.map(o => o[6]).sort((a, b) => a - b);
+  return e[Math.floor(e.length / 2)];
+})();
+const EMP_PULL = 1.5;
+const empBonus = i => EMP_PULL * Math.log2(OCC[i][6] / EMP_MED);
+const distTo = (p, i) => Math.sqrt(
+  (p[0]-OCC[i][1])**2 + (p[1]-OCC[i][2])**2 + (p[2]-OCC[i][3])**2);
+/* You cannot hold a job you never got the credential for, and until now the
+   match ignored that completely. It is a distance in three dimensions, so a
+   child could be handed a doctorate-level career on the strength of their
+   pay and emotional range while their schooling sat nowhere near it.
+   Measured, that was most of the problem: children of PhD parents reached
+   doctorate-level SCHOOLING 0.1% of the time but were landing in doctorate
+   CAREERS 8.8% of the time, and 45% of all lives finished in a job they
+   were underqualified for, by an average of 19 rungs.
+
+   Falling short of a credential now costs distance -- a quarter of a unit
+   per unit of shortfall. Soft rather than absolute, because the education
+   coordinate is expected attainment rather than a certificate: being a
+   little under should make a job unlikely, not impossible. At 0.25 the
+   doctorate rate from PhD parents lands on 5%, which is about what it
+   should be. */
+const CRED_GATE = 0.25;
+const credCost = (p, i) => CRED_GATE * Math.max(0, OCC[i][2] - p[1]);
+function nearestOcc(p, prefer){
+  let best = Infinity, bi = 0;
+  for(let i = 0; i < OCC.length; i++){
+    const score = distTo(p, i) - empBonus(i) + credCost(p, i);
+    if(score < best){ best = score; bi = i; }
+  }
+  if(prefer !== undefined && prefer !== bi){
+    if(distTo(p, prefer) - empBonus(prefer) + credCost(p, prefer) <= best + 1e-9) bi = prefer;
+  }
+  /* the distance reported is the real one, not the score: satisfaction and
+     the readouts measure how near that life actually is, not how it won */
+  return {i: bi, dist: distTo(p, bi)};
+}
+const reachOf = o => Math.hypot(o[1], o[2], o[3]);
+/* "one of the hardest places in this space to arrive at" was a hardcoded
+   110 units, which stopped meaning anything the moment an axis was
+   rescaled -- tripling pay would have promoted every six-figure job to
+   elite. Taken from the catalogue instead: the furthest tenth of it, which
+   is what the sentence was always trying to say. */
+const ELITE_REACH = (function(){
+  const r = OCC.map(reachOf).sort((a, b) => a - b);
+  return r[Math.floor(r.length * 0.9)];
+})();
+/* how far a goal still is from a given point -- the origin is no longer
+   where every childhood begins, so "how far out is it" is a question about
+   this child, not about the space */
+const gapFrom = (p, t) => Math.hypot(t[1]-p[0], t[2]-p[1], t[3]-p[2]);
+/* ============ where the child starts ============
+   A child does not begin at the origin. What the parents reached is partly
+   handed on, and the three axes transmit at quite different rates.
+
+   PAY is the clean one, and only because of how the axis is built. The
+   intergenerational elasticity of income -- the share of a parent's income
+   advantage that shows up in the child's, about 0.4 in the United States --
+   is defined on LOG income, and this axis is log dollars at 23 units per
+   doubling. So the elasticity applies to the coordinate directly: a parent
+   twice as far up the pay axis hands on 0.4 of that distance. No conversion
+   and no fudge.
+
+   EDUCATION transmits at roughly the same rate by the usual estimates, but
+   it is fitted here rather than asserted, because what it has to reproduce
+   is a rate: a child of doctorate-holding parents finishing in a
+   doctorate-level career about 5% of the time. 0.32 does that. It was 0.15,
+   and at 0.15 the same child managed 2.1% -- the 5% only appeared when the
+   pay and home dials were ALSO at the top, which is not what "doctorate
+   parents" means. It went 0.25 -> 0.32 when the ten master's-level jobs
+   were promoted toward the doctorate instead of toward the rung they were
+   already on: sitting at 132.8 they intercept lives that used to carry on
+   to the doctorate rung, and the rate fell from 5.1% to 2.7% until the
+   head start made it up. It is a head start in expectation, not a guarantee; the
+   walk still has to cover the rest.
+
+   EMOTIONAL LABOUR is NOT a transmitted attainment and should not be
+   modelled as one. The parents' own emotional range is not what is handed
+   over; what the child banks is the caregiving they received plus a
+   heritable component of temperament, and the literature puts heritability
+   of emotional regulation around 0.4-0.5 with early caregiving quality
+   carrying much of the rest. So this slider is the environment, not the
+   parent's score: it runs from severe early deprivation, which banks
+   nothing, through ordinary, to a secure and attuned home.
+
+   One limit worth stating plainly: the axes floor at zero, so this model
+   can show a neglected child starting with nothing banked, but it cannot
+   show them starting BELOW nothing. Real early deprivation can leave a
+   child worse off than a neutral baseline, and that is not representable
+   here without a second mechanism. */
+const PAY_TRANSMIT = 0.40;    // intergenerational income elasticity, US
+const EDU_TRANSMIT = 0.32;    // fitted to the doctorate rate, see below
+const EQ_SECURE = 32;         // what a secure, attuned early home banks
+
+/* The slider stops, as [label, value] pairs. Education reuses the
+   credential ladder so the parents are described the way the occupations
+   are; pay is quoted in dollars, since a coordinate means nothing. */
+const START_EDU = [
+  ["No credential", 0], ["High school", 1], ["Some college", 2],
+  ["Associate's", 3], ["Bachelor's", 4], ["Master's", 5], ["Doctorate", 6]];
+const START_PAY = [25000, 40000, 60000, 90000, 140000, 220000, 400000];
+const START_EQ = [
+  ["Severe early neglect", 0], ["Neglectful", 0.12], ["Inconsistent", 0.3],
+  ["Ordinary", 0.5], ["Warm", 0.72], ["Secure and attuned", 1]];
+
+/* the education ladder, minus "certificate", which is an off-ramp rather
+   than a rung and would make the slider read oddly */
+const EDU_RUNGS = [0, 3.3, 15.6, 24.6, 32.9, MASTERS_RUNG, 109.4]
+  .map(c => c * ED_STEEPNESS);
+
+/* Where the median parents sit, which matters more than it looks. An
+   intergenerational coefficient describes how much of a parent's deviation
+   FROM THE MEAN reaches the child, not how much of their absolute position
+   does. Measuring from zero hands every child a head start including the
+   average one: measured, it pushed bachelor's-level outcomes from 67% back
+   to 86% and undid the steepened ladder entirely. Average parents hand on
+   nothing extra, because the plain five-stage walk already represents an
+   average life. */
+const POP_ED = 23 * ED_STEEPNESS;                              // half of adults clear it
+const POP_PAY = SAL_PER_DOUBLING * Math.log2(48000 / 31000);   // median US earnings
+
+/* How far apart the best and worst parents put a child, on each axis. These
+   are the full travel of the three sliders, and the spread below is written
+   as a fraction of them so that widening a slider widens its luck too. */
+const EDU_SPAN = EDU_TRANSMIT * (EDU_RUNGS[EDU_RUNGS.length - 1] - POP_ED);
+const PAY_SPAN = PAY_TRANSMIT *
+  (SAL_PER_DOUBLING * Math.log2(START_PAY[START_PAY.length - 1] / 31000) - POP_PAY);
+const EQ_SPAN  = EQ_SECURE;
+
+/* The sliders used to hand their advantage on exactly: a doctorate always
+   bought the same head start, a secure home always banked the same reserve.
+   Nothing about what parents pass down is that tidy. A transmission
+   coefficient describes an AVERAGE child, and the spread around that average
+   is as wide as the coefficient is strong -- which is why professors have
+   children who never finish a degree, and why a settled home still produces
+   an adult who flinches.
+
+   So each axis now takes a gaussian draw around the transmitted value, with
+   a standard deviation of half the slider's own travel. Half puts the luck
+   of the draw on the same scale as the entire difference between the best
+   and the worst parents: enough that the sliders load the dice rather than
+   decide the throw.
+
+   The draw goes down as readily as up, which is the point. A doctorate's
+   child can begin with less schooling banked than a labourer's, and a secure
+   home can produce a child who begins with nothing in reserve -- educational
+   downward mobility and emotional regression, neither of which the old
+   straight line could express. It stops at zero, because these axes are
+   ladders up from nothing and there is no less than nothing to hold.
+
+   Drawn once, in fresh(), and kept on the run: re-rolling it on every render
+   would make the child flicker while the parents' sliders stood still. */
+const START_SPREAD = 0.5;
+
+/* Education and pay are transmitted attainments, so they are deviations.
+   Emotional labour is not: that slider is the child's early environment,
+   not a parent's score, and zero genuinely means nothing banked -- so an
+   ordinary home banks something and severe neglect banks nothing. The
+   asymmetry is deliberate. */
+function startPoint(ed, pay, eq){
+  const parentPay = SAL_PER_DOUBLING * Math.log2(START_PAY[pay] / 31000);
+  return clampPt([
+    PAY_TRANSMIT * (parentPay - POP_PAY) + gauss() * START_SPREAD * PAY_SPAN,
+    EDU_TRANSMIT * (EDU_RUNGS[ed] - POP_ED) + gauss() * START_SPREAD * EDU_SPAN,
+    EQ_SECURE * START_EQ[eq][1]        + gauss() * START_SPREAD * EQ_SPAN
+  ]);
+}
+
+/* ============ the team's page, driven by the calibrated engine ============
+   Everything above this line is the published Garden or Blueprint engine,
+   unchanged: the occupation coordinates, the axis steepness, the stage
+   lengths, the aim noise, the gardener's flat law, the employment pull and
+   the credential gate. Everything below is the accessible page's own code,
+   with its deterministic 30%/22% steps replaced by that engine so the odds
+   of reaching a goal are the ones the model was tuned to produce. */
+let startEd=2,startPay=2,startEq=3;     // some college, $60k, ordinary: the published defaults
+const $=id=>document.getElementById(id);
+const stages=['Infancy','Early childhood','Middle childhood','Adolescence','Transition to adulthood'];
+const eduLabels={'no credential':'No credential','high school':'High school','certificate':'Certificate','some college':'Some college','associate':'Associate degree','bachelor':'Bachelor’s degree','master':'Master’s degree','doctorate':'Doctorate or professional degree'};
+const fmt=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+const logMin=Math.log(22000),logMax=Math.log(17000000);
+const normPay=p=>Math.max(0,Math.min(1,(Math.log(Math.max(22000,p))-logMin)/(logMax-logMin)));
+
+/* Tie the display table to the engine by name, and refuse to run on a
+   mismatch rather than quietly scoring an occupation against the wrong point. */
+const OCC_INDEX=new Map(OCC.map((o,i)=>[o[0],i]));
+occupations.forEach(o=>{o.idx=OCC_INDEX.get(o.name);if(o.idx===undefined)throw new Error('No model coordinates for '+o.name)});
+const occByIdx=i=>occupations.find(o=>o.idx===i);
+
+/* Positions are shown as a share of each axis, 0 to 100, which is what the
+   three-axis drawing and the growth table were built to display. */
+const toUnit=p=>[p[0]/AXIS[0],p[1]/AXIS[1],p[2]/AXIS[2]];
+const occPoint=i=>[OCC[i][1],OCC[i][2],OCC[i][3]];
+const matchScore=(p,i)=>distTo(p,i)-empBonus(i)+credCost(p,i);
+
+/* ============ the likelihood of reaching the goal ============
+   The same Monte Carlo the published page uses for its odds: play the rest
+   of the childhood many times under every split of Carpenter-then-Gardener
+   stages, and count how often the model's match at the end is the goal.
+   Run against a fixed seed, with Math.random restored in a finally, so the
+   figure does not flicker between renders of the same position. */
+function playFrom(ti,from,grown,left,nAim){
+ let p=from.slice(),h=norm(CENTROID.slice()),g=grown;
+ const t=OCC[ti];
+ for(let k=0;k<left;k++){
+  const aim=k<nAim;
+  const d=[t[1]-p[0],t[2]-p[1],t[3]-p[2]];
+  const L=Math.hypot(d[0],d[1],d[2]);
+  const dir=aim?perturb(L<1e-9?h:[d[0]/L,d[1]/L,d[2]/L],ANG):flatDir(g);
+  if(!aim)g=dir;
+  let len=MU+gauss()*SIG+(aim?0:NURTURE_BONUS);
+  if(len<LEN_FLOOR)len=LEN_FLOOR;
+  if(aim&&len>L)len=L;
+  p=clampPt([p[0]+dir[0]*len,p[1]+dir[1]*len,p[2]+dir[2]*len]);
+  h=dir;
+ }
+ return nearestOcc(p,ti).i;
+}
+function seeded(fn){
+ const real=Math.random;let seed=20260117;
+ Math.random=function(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296};
+ const keepSpare=spare;spare=null;
+ try{return fn()}finally{Math.random=real;spare=keepSpare}
+}
+/* `from` is a point, or a function that draws one (for a family not yet
+   played, so the figure averages over the luck of the starting draw). */
+function oddsFrom(ti,from,grown,left,n){
+ return seeded(()=>{
+  const byAim=[];
+  for(let a=0;a<=left;a++){let hit=0;for(let r=0;r<n;r++){const p=typeof from==='function'?from():from;if(playFrom(ti,p,grown,left,a)===ti)hit++}byAim.push(100*hit/n)}
+  let best=0;byAim.forEach((v,a)=>{if(v>byAim[best])best=a});
+  return {byAim,best,bestPct:byAim[best],allCarpenter:byAim[left],allGardener:byAim[0]};
+ });
+}
+const pct=v=>v<0.5?'under 1%':Math.round(v)+'%';
+/* With no hit in any plan there is no best plan to name, and naming one would
+   suggest it helps. */
+const bestPhrase=(o,left)=>o.bestPct===0?'under 1% whichever plan is used':pct(o.bestPct)+' with the best plan ('+planWords(o.best,left)+')';
+function planWords(best,left){const c=best,g=left-best,every=' at every '+(left<5?'remaining ':'')+'stage';return c===left?'Carpenter'+every:g===left?'Gardener'+every:c+' Carpenter then '+g+' Gardener'}
+
+let state={stage:0,choices:[],pos:null,start:null,goal:null,goalIdx:null,grown:null,setup:null,finished:false,odds:null,familyOdds:null};
+function createOption(select,value,label){const el=document.createElement('option');el.value=value;el.textContent=label;select.append(el)}
+function fillMenus(){
+ START_EDU.forEach(([label],i)=>createOption($('education'),i,label));
+ START_PAY.forEach((v,i)=>createOption($('income'),i,fmt(v)+' a year'));
+ START_EQ.forEach(([label],i)=>createOption($('environment'),i,label));
+ $('education').value=startEd;$('income').value=startPay;$('environment').value=startEq;
+ const goal=$('goal');occupations.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(o=>createOption(goal,o.name,o.name));goal.value=occupations.some(o=>o.name==='Family Medicine Physicians')?'Family Medicine Physicians':occupations[0].name;
+ const groups=[...new Set(occupations.map(o=>o.group))].sort();groups.forEach(g=>createOption($('groupFilter'),g,g));
+}
+function updateGoal(){
+ const o=state.goal;if(!o){$('goalInfo').textContent='';return}
+ const f=state.familyOdds;
+ $('goalInfo').textContent=o.name+': '+fmt(o.pay)+' annual median pay, '+eduLabels[o.edu]+', emotional labor score '+o.eq.toFixed(1)+'. '+
+  'Likelihood of reaching this goal, averaged over children from this family: '+bestPhrase(f,5)+'; '+pct(f.allCarpenter)+' with Carpenter at every stage, '+pct(f.allGardener)+' with Gardener at every stage.';
+}
+function summaryVector(v){
+ const approximatePay=Math.round(31000*Math.pow(2,v[0]/SAL_PER_DOUBLING)/1000)*1000;
+ let rung=0;EDU_RUNGS.forEach((r,i)=>{if(v[1]>=r-1e-9)rung=i});
+ return 'Illustrative position: pay near '+fmt(approximatePay)+'; schooling at or above '+START_EDU[rung][0]+'; emotional labor '+v[2].toFixed(1)+' of 100.'}
+/* Every occupation with its distance and its match score. "Closest" rows are
+   ordered by the match score, because that is what decides where a life
+   lands: a larger occupation pulls harder, and a missing credential pushes. */
+function currentRanking(){if(!state.pos)return occupations.map(o=>({...o,distance:null,score:null}));return occupations.map(o=>({...o,distance:distTo(state.pos,o.idx),score:matchScore(state.pos,o.idx)})).sort((a,b)=>a.score-b.score)}
+function currentClosest(){const m=nearestOcc(state.pos,state.goalIdx);return {...occByIdx(m.i),distance:m.dist}}
+function goalDistance(p){return distTo(p,state.goalIdx)}
+function setFocus(id){$(id).focus()}
+function liveOdds(){
+ const left=5-state.stage;
+ if(left===0){const met=currentClosest().name===state.goal.name;return {byAim:[met?100:0],best:0,bestPct:met?100:0,allCarpenter:met?100:0,allGardener:met?100:0}}
+ return oddsFrom(state.goalIdx,state.pos,state.grown,left,300);
+}
+function oddsSentence(o){
+ const left=5-state.stage;
+ if(left===0)return o.bestPct===100?'The goal was reached.':'The goal was not reached.';
+ return 'Likelihood of reaching the goal from here: '+bestPhrase(o,left).replace('best plan','best remaining plan')+'; '+pct(o.allCarpenter)+' with Carpenter at every remaining stage; '+pct(o.allGardener)+' with Gardener at every remaining stage.';
+}
+function updateJourney(){
+const progress=$('journeyProgress');if(progress)progress.value=state.stage;
+const hint=$('progressHint');if(hint)hint.textContent=state.stage+' of 5 developmental stages completed.';
+const items=$('stageNavigator')?.querySelectorAll('li');
+if(items)items.forEach((item,index)=>{item.classList.toggle('complete',index<state.stage);item.removeAttribute('aria-current');if(index===state.stage && state.stage<5)item.setAttribute('aria-current','step');});
+}
+function renderGame(){updateJourney();const c=state.choices.filter(x=>x.type==='Carpenter').length,g=state.choices.length-c;$('currentStage').textContent=state.stage<5?'Current developmental stage: '+(state.stage+1)+' of 5, '+stages[state.stage]+'.':'All five developmental stages completed.';$('stageCount').textContent=state.stage+' of 5';$('counts').textContent=c+' Carpenter / '+g+' Gardener';$('nearest').textContent=currentClosest().name;$('likelihood').textContent=state.odds.bestPct===0?'Under 1%':pct(state.odds.bestPct)+' with the best plan';$('positionText').textContent=summaryVector(state.pos)+' '+oddsSentence(state.odds);$('stageFeedback').textContent=state.choices.length?'Last stage: '+state.choices.at(-1).feedback:'No stages have been completed.';renderHistory('stageHistory');renderGrowth();renderTable();renderPlot()}
+function renderHistory(id){const list=$(id);list.replaceChildren();if(!state.choices.length){const li=document.createElement('li');li.textContent='No stages completed.';list.append(li);return}for(const [i,c] of state.choices.entries()){const li=document.createElement('li');li.textContent='Stage '+(i+1)+', '+stages[i]+': '+c.type+'. '+c.feedback;list.append(li)}}
+function setUp(){
+ startEd=Number($('education').value);startPay=Number($('income').value);startEq=Number($('environment').value);
+ state.goal=occupations.find(o=>o.name===$('goal').value);state.goalIdx=state.goal.idx;
+ state.setup={education:$('education').selectedOptions[0].textContent,income:$('income').selectedOptions[0].textContent,environment:$('environment').selectedOptions[0].textContent};
+ state.familyOdds=oddsFrom(state.goalIdx,()=>startPoint(startEd,startPay,startEq),null,5,400);
+ updateGoal();resetSame()}
+/* A new run draws a new child from the same family: what parents hand on is
+   a tendency, not a fixed head start, so "same setup" is not "same child". */
+function resetSame(){state.stage=0;state.choices=[];state.finished=false;state.grown=null;state.start=startPoint(startEd,startPay,startEq);state.pos=[...state.start];state.odds=liveOdds();state.startOdds=state.odds;$('setupSection').hidden=false;$('results').hidden=false;$('game').hidden=false;$('outcomeText').textContent='Complete all five developmental stages in Section 2 to view your final results here.';$('finalMetrics').replaceChildren();$('resultHistory').replaceChildren();['again','change','export'].forEach(id=>$(id).disabled=true);$('carpenter').disabled=false;$('gardener').disabled=false;$('viewFilter').value='nearest';$('search').value='';$('groupFilter').value='';$('sort').value='distance';renderGame();$('live').textContent='Stage 1 of 5, Infancy. Select Carpenter or Gardener.'}
+function resetAll(){setUp();$('live').textContent='The five developmental stages have been restarted with the current setup.';setFocus('stageH')}
+/* One stage, exactly as growStage plays it on the published page. */
+function grow(type){
+ const nurture=type==='Gardener';let dir;
+ if(nurture){dir=flatDir(state.grown)}else{
+  const t=occPoint(state.goalIdx),p=state.pos,d=[t[0]-p[0],t[1]-p[1],t[2]-p[2]],L=Math.hypot(d[0],d[1],d[2]);
+  dir=perturb(L<1e-9?norm(CENTROID.slice()):[d[0]/L,d[1]/L,d[2]/L],ANG)}
+ let len=MU+gauss()*SIG+(nurture?NURTURE_BONUS:0);
+ if(len<LEN_FLOOR)len=LEN_FLOOR;
+ if(!nurture){const rem=goalDistance(state.pos);if(len>rem)len=rem}
+ const p=state.pos;
+ state.pos=clampPt([p[0]+dir[0]*len,p[1]+dir[1]*len,p[2]+dir[2]*len]);
+ if(nurture)state.grown=dir;
+}
+function choose(type){if(state.finished||state.stage>=5)return;const before=currentClosest(),oddsBefore=state.odds.bestPct;
+grow(type);state.stage++;state.odds=liveOdds();
+const after=currentClosest();const feedback='Closest occupation: '+after.name+'. Previous nearest: '+before.name+'. '+(state.stage<5?'Likelihood of reaching the goal with the best remaining plan: '+pct(oddsBefore)+' before, '+pct(state.odds.bestPct)+' now.':'');state.choices.push({type,feedback,pos:[...state.pos],goalDistance:goalDistance(state.pos),odds:state.odds.bestPct});if(state.stage===5){finish()}else{renderGame();$('live').textContent=type+' selected for '+stages[state.stage-1]+'. '+feedback+' Stage '+(state.stage+1)+' is ready.';setFocus('currentStage')}}
+function metric(label,value){const div=document.createElement('div');div.className='metric';const span=document.createElement('span');span.textContent=label;const strong=document.createElement('strong');strong.textContent=value;div.append(span,strong);return div}
+function finish(){state.finished=true;updateJourney();$('stageCount').textContent='5 of 5';$('counts').textContent=state.choices.filter(x=>x.type==='Carpenter').length+' Carpenter / '+state.choices.filter(x=>x.type==='Gardener').length+' Gardener';$('nearest').textContent=currentClosest().name;renderHistory('stageHistory');renderGrowth();$('game').hidden=false;$('results').hidden=false;$('carpenter').disabled=true;$('gardener').disabled=true;$('currentStage').textContent='All five developmental stages completed.';['again','change','export'].forEach(id=>$(id).disabled=false);const closest=currentClosest();const n=state.choices.filter(x=>x.type==='Carpenter').length;const met=closest.name===state.goal.name;$('likelihood').textContent=met?'Reached':'Not reached';$('positionText').textContent=summaryVector(state.pos)+' '+oddsSentence(state.odds);
+$('outcomeText').textContent='All five stages are complete. The closest occupation in this illustrative model is '+closest.name+'. The chosen goal was '+state.goal.name+'. '+(met?'The simulation matched the selected goal.':'The simulation did not match the selected goal.')+' Before the first stage, this child had a '+pct(state.startOdds.bestPct)+' likelihood of reaching it with the best plan. These results are not career predictions.';
+$('finalMetrics').replaceChildren(metric('Final occupation',closest.name),metric('Median pay in supplied data',fmt(closest.pay)),metric('Typical schooling',eduLabels[closest.edu]),metric('Emotional labor score',closest.eq.toFixed(1)+' / 100'),metric('Career goal met in this model?',met?'Yes':'No'),metric('Likelihood at the start, best plan',pct(state.startOdds.bestPct)),metric('Carpenter / Gardener choices',n+' / '+(5-n)),metric('Distance to selected goal',goalDistance(state.pos).toFixed(1)+' model units'),metric('Distance to final occupation',closest.distance.toFixed(1)+' model units'));renderHistory('resultHistory');renderTable();renderPlot();$('live').textContent='All five stages complete. The closest occupation is '+closest.name+'. '+(met?'The goal was reached.':'The goal was not reached.');setFocus('resultsH')}
+function cell(tr,value,header=false){const td=document.createElement(header?'th':'td');if(header)td.scope='row';td.textContent=value;tr.append(td)}
+function renderTable(){const all=currentRanking();const hasPos=!!state.pos;const search=$('search').value.trim().toLowerCase(),group=$('groupFilter').value,view=$('viewFilter').value,sort=$('sort').value;let items=all;
+if(view==='nearest'&&hasPos){items=items.slice(0,10);if(state.goal&&!items.some(o=>o.name===state.goal.name)){const goal=all.find(o=>o.name===state.goal.name);items.push(goal)}}
+items=items.filter(o=>(!search||o.name.toLowerCase().includes(search))&&(!group||o.group===group));
+if(sort==='name'||(!hasPos&&sort==='distance'))items.sort((a,b)=>a.name.localeCompare(b.name));else if(sort==='pay')items.sort((a,b)=>b.pay-a.pay);else if(sort==='eq')items.sort((a,b)=>b.eq-a.eq);else items.sort((a,b)=>a.score-b.score);
+const body=$('occupationRows');body.replaceChildren();items.forEach(o=>{const tr=document.createElement('tr');cell(tr,o.name+(state.goal&&o.name===state.goal.name?' (selected goal)':''),true);cell(tr,fmt(o.pay));cell(tr,eduLabels[o.edu]);cell(tr,o.eq.toFixed(1)+(o.scored?'':' (total only)'));cell(tr,hasPos?o.distance.toFixed(1):'Not yet calculated');cell(tr,o.group);cell(tr,o.employment.toLocaleString('en-US'));body.append(tr)});if(!items.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=7;td.textContent='No occupations match the selected filters.';tr.append(td);body.append(tr)}
+$('tableStatus').textContent='Showing '+items.length+' of 115 occupations.'+(hasPos?' Distance is based on the current illustrative position.':' Start a run to calculate comparisons.');$('tableCaption').textContent='Occupation data and '+(hasPos?'distance from current illustrative position':'career attributes')}
+function renderGrowth(){
+ const svg=$('growthPlot'),ns='http://www.w3.org/2000/svg';
+ while(svg.lastChild && !['growthPlotDesc','growthPlotTitle'].includes(svg.lastChild.id))svg.lastChild.remove();
+ const add=(tag,attrs={},label)=>{const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,String(v)));if(label!==undefined)el.textContent=label;svg.append(el);return el};
+ // Fixed orthographic isometric projection of the model's three axes, each
+ // drawn as a share of its own extent. It does not change any distance.
+ const project=v=>({x:310+(v[0]-v[1])*210,y:302-(v[0]+v[1])*76-v[2]*185});
+ const origin=project([0,0,0]);
+ const axes=[{v:[1,0,0],name:'Pay',dx:13,dy:0},{v:[0,1,0],name:'Education',dx:-88,dy:0},{v:[0,0,1],name:'Emotional labor',dx:10,dy:-10}];
+ for(const a of axes){const pt=project(a.v);add('line',{x1:origin.x,y1:origin.y,x2:pt.x,y2:pt.y,stroke:'#4c627a','stroke-width':2});add('text',{x:pt.x+a.dx,y:pt.y+a.dy,fill:'#15263b','font-size':16,'font-weight':650},a.name)}
+ const points=[{name:'S',pos:state.start,type:'Start'},...state.choices.map((c,i)=>({name:String(i+1),pos:c.pos,type:c.type}))];
+ const goal=project(toUnit(occPoint(state.goalIdx)));
+ const coords=points.map(p=>project(toUnit(p.pos)));
+ if(coords.length>1)add('polyline',{points:coords.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:'#173f78','stroke-width':4,'stroke-linejoin':'round'});
+ const current=coords[coords.length-1];
+ add('line',{x1:current.x,y1:current.y,x2:goal.x,y2:goal.y,stroke:'#8b4a00','stroke-width':2,'stroke-dasharray':'7 5'});
+ add('rect',{x:goal.x-12,y:goal.y-12,width:24,height:24,fill:'#fff4d7',stroke:'#8b4a00','stroke-width':3,rx:3});
+ add('text',{x:goal.x,y:goal.y+5,'text-anchor':'middle',fill:'#653800','font-size':15,'font-weight':800},'G');
+ points.forEach((p,i)=>{const xy=coords[i];add('circle',{cx:xy.x,cy:xy.y,r:12,fill:i===coords.length-1?'#173f78':'#fff',stroke:'#173f78','stroke-width':3});add('text',{x:xy.x,y:xy.y+5,'text-anchor':'middle',fill:i===coords.length-1?'#fff':'#173f78','font-size':14,'font-weight':800},p.name)});
+ const gd=goalDistance(state.pos);
+ const firstDistance=goalDistance(state.start);
+ const prev=state.choices.length>1?state.choices[state.choices.length-2].goalDistance:firstDistance;
+ const change=prev-gd;
+ const trend=state.choices.length?(Math.abs(change)<0.05?'unchanged':change>0?'closer to':'farther from'):'not yet changed relative to';
+ $('growthSummary').textContent='Current distance to the selected career goal: '+gd.toFixed(1)+' model units. Starting distance: '+firstDistance.toFixed(1)+'. '+(state.choices.length?'The most recent choice moved the pathway '+trend+' the goal by '+Math.abs(change).toFixed(1)+' units. ':'Select an approach to see the pathway grow. ')+oddsSentence(state.odds)+' A greater distance from the parental goal does not mean a worse outcome.';
+ const tbody=$('growthRows');tbody.replaceChildren();
+ const rows=[{name:'Starting position',pos:state.start,distance:firstDistance,odds:state.startOdds.bestPct},...state.choices.map((c,i)=>({name:(i+1)+'. '+stages[i]+' ('+c.type+')',pos:c.pos,distance:c.goalDistance,odds:i===4?(currentClosest().name===state.goal.name?'Reached':'Not reached'):c.odds}))];
+ rows.forEach(r=>{const tr=document.createElement('tr');[r.name,...toUnit(r.pos).map(n=>(n*100).toFixed(1)),r.distance.toFixed(1),typeof r.odds==='string'?r.odds:pct(r.odds)].forEach((val,i)=>{const cell=document.createElement(i===0?'th':'td');if(i===0)cell.scope='row';cell.textContent=val;tr.append(cell)});tbody.append(tr)});
+ $('growthPlotDesc').textContent='Three-dimensional projection with pay, education, and emotional labor axes. The starting position, '+state.choices.length+' completed stages, and the selected career goal are displayed. Current distance to the goal is '+gd.toFixed(1)+' model units. Full coordinates, choices, and likelihoods are in the following table.';
+}
+function renderPlot(){const svg=$('plot');svg.querySelectorAll('.dynamic').forEach(n=>n.remove());const ns='http://www.w3.org/2000/svg';const make=(tag,attrs,text)=>{const el=document.createElementNS(ns,tag);el.classList.add('dynamic');Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,String(v)));if(text!==undefined)el.textContent=text;svg.append(el);return el};const x=p=>60+620*normPay(p),y=eq=>315-(eq/100)*265;for(const score of [0,25,50,75,100]){const yy=y(score);make('line',{x1:60,y1:yy,x2:680,y2:yy,stroke:'#d1dce6'});make('text',{x:45,y:yy+5,'text-anchor':'end',fill:'#15263b','font-size':13},score.toString())}for(const p of [30000,100000,300000,1000000,10000000]){const xx=x(p);make('line',{x1:xx,y1:50,x2:xx,y2:315,stroke:'#e2e7ed'});make('text',{x:xx,y:339,'text-anchor':'middle',fill:'#15263b','font-size':12},p>=1000000?'$'+p/1000000+'m':'$'+p/1000+'k')};make('text',{x:355,y:363,'text-anchor':'middle',fill:'#15263b','font-size':14},'Median pay (logarithmic scale)');make('text',{x:15,y:28,fill:'#15263b','font-size':14},'Emotional labor score');for(const o of occupations){const chosen=state.goal&&state.goal.name===o.name;make('circle',{cx:x(o.pay),cy:y(o.eq),r:chosen?7:3,fill:chosen?'#a54a00':'#174783',stroke:chosen?'#172435':'none','stroke-width':chosen?2:0})}}
+function downloadRun(){const closest=currentClosest();const c=state.choices.map((s,i)=>'Stage '+(i+1)+' ('+stages[i]+'): '+s.type+'. '+s.feedback).join('\n');const text='Carpenter or Gardener: accessible illustrative run\nCalibrated with the Garden or Blueprint engine\nFamily: '+Object.values(state.setup).join(', ')+'\nGoal: '+state.goal.name+'\nLikelihood at the start, best plan: '+pct(state.startOdds.bestPct)+'\nFinal occupation: '+closest.name+'\nGoal reached: '+(closest.name===state.goal.name?'Yes':'No')+'\nFinal career pay: '+fmt(closest.pay)+'\nTypical schooling: '+eduLabels[closest.edu]+'\nEmotional labor score: '+closest.eq+'\n\n'+c+'\n\nThe model is illustrative, not predictive.\n';const blob=new Blob([text],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='carpenter-gardener-run.txt';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('setupForm').addEventListener('submit',e=>e.preventDefault());['education','income','environment','goal'].forEach(id=>$(id).addEventListener('change',()=>{setUp();$('live').textContent='Setup updated. The five developmental stages restarted at Infancy. '+$('goalInfo').textContent;}));$('carpenter').addEventListener('click',()=>choose('Carpenter'));$('gardener').addEventListener('click',()=>choose('Gardener'));$('reset').addEventListener('click',resetAll);$('again').addEventListener('click',resetSame);$('change').addEventListener('click',resetAll);$('export').addEventListener('click',downloadRun);['search','groupFilter','viewFilter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',renderTable));fillMenus();setUp();
+</script></body></html>
