@@ -1,86 +1,116 @@
-Occupation,D1_duration,D2_stakes,D3_reading,D4_self_regulation,D5_responsibility,Total,EQ_coordinate,Old_contact_pctl,Change,Education,Median_pay_USD
-Psychiatrists,4,4,4,4,4,20,100.0,54,+46.0,doctorate,350786
-Family Medicine Physicians,4,4,4,4,4,20,100.0,99,+1.0,doctorate,325040
-Clinical and Counseling Psychologists,4,4,4,4,4,20,100.0,42,+58.0,doctorate,96000
-Nurse Practitioners,3,4,4,4,4,19,93.8,67,+26.8,master,129000
-Clergy,4,4,3,4,3,18,87.7,48,+39.7,bachelor,58000
-Police and Sheriff's Patrol Officers,1,4,4,4,4,17,81.8,45,+36.8,high school,77000
-Physician Assistants,2,4,3,4,4,17,81.8,93,-11.2,master,133000
-Veterinarians,2,4,3,4,3,16,76.1,85,-8.9,doctorate,125000
-Registered Nurses,2,4,3,4,3,16,76.1,85,-8.9,bachelor,93600
-Physical Therapists,3,3,3,3,4,16,76.1,94,-17.9,doctorate,101000
-Paramedics,1,4,3,4,4,16,76.1,37,+39.1,certificate,54000
-Judges and Magistrates,1,4,3,4,4,16,76.1,57,+19.1,doctorate,151000
-Childcare Workers,3,3,3,3,4,16,76.1,67,+9.1,high school,32000
-Secondary School Teachers,3,3,3,3,3,15,70.4,76,-5.6,bachelor,66000
-Nursing Assistants,3,3,3,3,3,15,70.4,79,-8.6,certificate,40000
-Medical and Health Services Managers,3,3,3,3,3,15,70.4,79,-8.6,bachelor,117000
-Licensed Practical Nurses,3,3,3,3,3,15,70.4,79,-8.6,certificate,62000
-Lawyers,3,3,3,3,3,15,70.4,67,+3.4,doctorate,151160
-Human Resources Specialists,3,3,3,3,3,15,70.4,67,+3.4,bachelor,72000
-General and Operations Managers,3,3,3,3,3,15,70.4,54,+16.4,bachelor,103000
-Fortune 500 CEO (illustrative),3,3,3,3,3,15,70.4,48,+22.4,master,17000000
-Firefighters,1,4,2,4,4,15,70.4,18,+52.4,certificate,59000
-Elementary School Teachers,3,3,3,3,3,15,70.4,85,-14.6,bachelor,64000
-Chief Executives,3,3,3,3,3,15,70.4,48,+22.4,bachelor,239200
-Anesthesiologists,1,4,2,3,4,14,65.0,99,-34.0,doctorate,557131
-Air Traffic Controllers,1,4,1,4,4,14,65.0,60,+5.0,associate,145000
-Real Estate Sales Agents,3,3,3,2,2,13,59.7,54,+5.7,high school,56000
-Pharmacists,2,3,2,2,3,12,54.5,60,-5.5,doctorate,137000
-Hairdressers and Cosmetologists,3,2,3,2,2,12,54.5,67,-12.5,certificate,36000
-Architects,3,2,2,2,2,11,49.6,40,+9.6,bachelor,96000
-Marketing Managers,2,2,2,2,2,10,44.9,33,+11.9,bachelor,161000
-Financial Managers,2,2,2,2,2,10,44.9,27,+17.9,bachelor,161000
-Dental Assistants,2,2,2,2,2,10,44.9,76,-31.1,certificate,48000
-Customer Service Representatives,1,2,2,3,2,10,44.9,79,-34.1,high school,42000
-Construction Managers,2,2,2,2,2,10,44.9,48,-3.1,bachelor,106000
-Accountants and Auditors,2,2,2,2,2,10,44.9,12,+32.9,bachelor,81000
-Security Guards,1,2,2,2,2,9,40.3,85,-44.7,high school,38000
-Paralegals and Legal Assistants,2,2,2,2,1,9,40.3,42,-1.7,associate,61000
-Software Developers,2,1,2,1,2,8,36.0,18,+18.0,bachelor,133080
-Secretaries and Administrative Assistants,2,1,2,2,1,8,36.0,85,-49.0,high school,46000
-Librarians,2,1,2,1,2,8,36.0,23,+13.0,master,65000
-Computer User Support Specialists,1,1,2,2,2,8,36.0,36,+0.0,some college,60000
-Civil Engineers,2,2,1,1,2,8,36.0,27,+9.0,bachelor,99000
-Bartenders,1,2,2,2,1,8,36.0,60,-24.0,no credential,34000
-Waiters and Waitresses,1,1,2,2,1,7,31.9,79,-47.1,no credential,34000
-Retail Salespersons,1,1,2,2,1,7,31.9,85,-53.1,no credential,35000
-Mechanical Engineers,2,1,1,1,2,7,31.9,60,-28.1,bachelor,102320
-Information Security Analysts,2,1,1,1,2,7,31.9,31,+0.9,bachelor,124000
-HVAC Mechanics and Installers,2,1,1,1,2,7,31.9,60,-28.1,certificate,59000
-Graphic Designers,2,1,2,1,1,7,31.9,30,+1.9,bachelor,61000
-Electricians,2,1,1,1,2,7,31.9,67,-35.1,high school,62350
-Electrical Engineers,2,1,1,1,2,7,31.9,33,-1.1,bachelor,111000
-Chefs and Head Cooks,2,1,1,2,1,7,31.9,48,-16.1,high school,60000
-Automotive Service Technicians,2,1,1,1,2,7,31.9,20,+11.9,certificate,50000
-Radiologists,0,2,0,1,3,6,28.1,21,+7.1,doctorate,609684
-Carpenters,2,1,1,1,1,6,28.1,67,-38.9,high school,59000
-Medical Scientists,1,1,1,1,1,5,24.6,57,-32.4,doctorate,100000
-Economists,1,1,1,1,1,5,24.6,7,+17.6,master,116000
-Cashiers,1,1,1,1,1,5,24.6,94,-69.4,no credential,31000
-"Child, Family, and School Social Workers",4,4,4,4,4,20,100.0,94,+6.0,bachelor,55000
-"Airline Pilots, Copilots, and Flight Engineers",1,4,1,4,4,14,65.0,37,+28.0,bachelor,239200
-Statisticians,1,0,1,0,1,3,18.6,5,+13.6,master,104000
-Market Research Analysts,1,0,1,0,1,3,18.6,11,+7.6,bachelor,76000
-Data Scientists,1,0,1,0,1,3,18.6,2,+16.6,bachelor,120230
-"Mathematical Science Teachers, Postsecondary",3,2,2,2,3,12,54.5,31,+23.5,doctorate,80000
-"English Language and Literature Teachers, Postsecondary",3,2,3,2,3,13,59.7,37,+22.7,doctorate,80470
-"Educational, Guidance, and Career Counselors",3,3,4,3,4,17,81.8,85,-3.2,master,64000
-"Dentists, General",2,3,3,3,3,14,65.0,94,-29.0,doctorate,172000
-Writers and Authors,0,1,1,0,0,2,16.4,7,+9.4,bachelor,72000
-Physicists,1,0,0,0,1,2,16.4,10,+6.4,doctorate,156000
-Mathematicians,1,0,0,0,1,2,16.4,4,+12.4,master,120000
-Heavy and Tractor-Trailer Truck Drivers,0,0,0,1,1,2,16.4,26,-9.6,certificate,58000
-Construction Laborers,1,0,0,1,0,2,16.4,45,-28.6,no credential,46000
-"News Analysts, Reporters, and Journalists",1,3,3,2,1,10,44.9,42,+2.9,bachelor,58000
-Machinists,1,0,0,0,0,1,15.0,14,+1.0,high school,53000
-Fine Artists,0,0,1,0,0,1,15.0,1,+14.0,bachelor,66000
-"Plumbers, Pipefitters, and Steamfitters",2,1,1,1,2,7,31.9,23,+8.9,high school,62000
-"Office Clerks, General",1,0,1,1,1,4,21.4,60,-38.6,high school,41000
-Landscaping and Groundskeeping Workers,0,0,0,0,0,0,0.0,0,+0.0,no credential,38000
-Janitors and Cleaners,0,0,0,0,0,0,0.0,13,-13.0,no credential,36000
-Bakers,0,0,0,0,0,0,0.0,67,-67.0,no credential,36000
-"Welders, Cutters, Solderers, and Brazers",1,0,0,0,0,1,15.0,17,-2.0,high school,51000
-"Laborers and Freight, Stock, and Material Movers",0,0,0,0,0,0,0.0,14,-14.0,no credential,38000
-"Farmworkers and Laborers, Crop",0,0,0,0,0,0,0.0,6,-6.0,no credential,35000
-"Cooks, Restaurant",1,0,0,1,0,2,16.4,23,-6.6,no credential,37000
+Occupation,D1_duration,D2_stakes,D3_reading,D4_self_regulation,D5_responsibility,Total,EQ_coordinate,Old_contact_pctl,Change,Education,Median_pay_USD,Group,Employment_thousands,Dimensions_scored
+Chief Executives,3,3,3,3,3,15,70.4,48,+22.4,bachelor,239200,Management,211,yes
+Fortune 500 CEO (illustrative),3,3,3,3,3,15,70.4,48,+22.4,master,17000000,Management,0.5,yes
+General and Operations Managers,3,3,3,3,3,15,70.4,54,+16.4,bachelor,103000,Management,3500,yes
+Marketing Managers,2,2,2,2,2,10,44.9,33,+11.9,bachelor,161000,Management,320,yes
+Financial Managers,2,2,2,2,2,10,44.9,27,+17.9,bachelor,161000,Management,770,yes
+Construction Managers,2,2,2,2,2,10,44.9,48,-3.1,bachelor,106000,Management,300,yes
+Medical and Health Services Managers,3,3,3,3,3,15,70.4,79,-8.6,bachelor,117000,Management,500,yes
+Human Resources Specialists,3,3,3,3,3,15,70.4,67,+3.4,bachelor,72000,Business & finance,800,yes
+Market Research Analysts,1,0,1,0,1,3,18.6,11,+7.6,bachelor,76000,Business & finance,800,yes
+Accountants and Auditors,2,2,2,2,2,10,44.9,12,+32.9,bachelor,81000,Business & finance,1400,yes
+Information Security Analysts,2,1,1,1,2,7,31.9,31,+0.9,bachelor,124000,Computing & math,175,yes
+Computer User Support Specialists,1,1,2,2,2,8,36.0,36,+0.0,some college,60000,Computing & math,700,yes
+Software Developers,2,1,2,1,2,8,36.0,18,+18.0,bachelor,133080,Computing & math,1650,yes
+Mathematicians,1,0,0,0,1,2,16.4,4,+12.4,master,120000,Computing & math,2.3,yes
+Statisticians,1,0,1,0,1,3,18.6,5,+13.6,master,104000,Computing & math,33,yes
+Data Scientists,1,0,1,0,1,3,18.6,2,+16.6,bachelor,120230,Computing & math,200,yes
+Architects,3,2,2,2,2,11,49.6,40,+9.6,bachelor,96000,Engineering & science,110,yes
+Civil Engineers,2,2,1,1,2,8,36.0,27,+9.0,bachelor,99000,Engineering & science,330,yes
+Electrical Engineers,2,1,1,1,2,7,31.9,33,-1.1,bachelor,111000,Engineering & science,190,yes
+Mechanical Engineers,2,1,1,1,2,7,31.9,60,-28.1,bachelor,102320,Engineering & science,280,yes
+Medical Scientists,1,1,1,1,1,5,24.6,57,-32.4,doctorate,100000,Engineering & science,115,yes
+Physicists,1,0,0,0,1,2,16.4,10,+6.4,doctorate,156000,Engineering & science,20,yes
+Economists,1,1,1,1,1,5,24.6,7,+17.6,master,116000,Engineering & science,16,yes
+Clinical and Counseling Psychologists,4,4,4,4,4,20,100.0,42,+58.0,doctorate,96000,Engineering & science,71,yes
+"Educational, Guidance, and Career Counselors",3,3,4,3,4,17,81.8,85,-3.2,master,64000,Social service & legal,300,yes
+"Child, Family, and School Social Workers",4,4,4,4,4,20,100.0,94,+6.0,bachelor,55000,Social service & legal,340,yes
+Clergy,4,4,3,4,3,18,87.7,48,+39.7,bachelor,58000,Social service & legal,55,yes
+Lawyers,3,3,3,3,3,15,70.4,67,+3.4,doctorate,151160,Social service & legal,735,yes
+Judges and Magistrates,1,4,3,4,4,16,76.1,57,+19.1,doctorate,151000,Social service & legal,30,yes
+Paralegals and Legal Assistants,2,2,2,2,1,9,40.3,42,-1.7,associate,61000,Social service & legal,350,yes
+"Mathematical Science Teachers, Postsecondary",3,2,2,2,3,12,54.5,31,+23.5,doctorate,80000,Education & arts,50,yes
+"English Language and Literature Teachers, Postsecondary",3,2,3,2,3,13,59.7,37,+22.7,doctorate,80470,Education & arts,60,yes
+Elementary School Teachers,3,3,3,3,3,15,70.4,85,-14.6,bachelor,64000,Education & arts,1400,yes
+Secondary School Teachers,3,3,3,3,3,15,70.4,76,-5.6,bachelor,66000,Education & arts,1000,yes
+Librarians,2,1,2,1,2,8,36.0,23,+13.0,master,65000,Education & arts,130,yes
+Fine Artists,0,0,1,0,0,1,15.0,1,+14.0,bachelor,66000,Education & arts,12,yes
+Graphic Designers,2,1,2,1,1,7,31.9,30,+1.9,bachelor,61000,Education & arts,215,yes
+"News Analysts, Reporters, and Journalists",1,3,3,2,1,10,44.9,42,+2.9,bachelor,58000,Education & arts,45,yes
+Writers and Authors,0,1,1,0,0,2,16.4,7,+9.4,bachelor,72000,Education & arts,50,yes
+"Dentists, General",2,3,3,3,3,14,65.0,94,-29.0,doctorate,172000,Healthcare,120,yes
+Pharmacists,2,3,2,2,3,12,54.5,60,-5.5,doctorate,137000,Healthcare,330,yes
+Physician Assistants,2,4,3,4,4,17,81.8,93,-11.2,master,133000,Healthcare,145,yes
+Physical Therapists,3,3,3,3,4,16,76.1,94,-17.9,doctorate,101000,Healthcare,240,yes
+Veterinarians,2,4,3,4,3,16,76.1,85,-8.9,doctorate,125000,Healthcare,80,yes
+Registered Nurses,2,4,3,4,3,16,76.1,85,-8.9,bachelor,93600,Healthcare,3200,yes
+Nurse Practitioners,3,4,4,4,4,19,93.8,67,+26.8,master,129000,Healthcare,280,yes
+Anesthesiologists,1,4,2,3,4,14,65.0,99,-34.0,doctorate,557131,Healthcare,32,yes
+Family Medicine Physicians,4,4,4,4,4,20,100.0,99,+1.0,doctorate,325040,Healthcare,110,yes
+Psychiatrists,4,4,4,4,4,20,100.0,54,+46.0,doctorate,350786,Healthcare,25,yes
+Radiologists,0,2,0,1,3,6,28.1,21,+7.1,doctorate,609684,Healthcare,30,yes
+Paramedics,1,4,3,4,4,16,76.1,37,+39.1,certificate,54000,Healthcare,95,yes
+Licensed Practical Nurses,3,3,3,3,3,15,70.4,79,-8.6,certificate,62000,Healthcare,630,yes
+Nursing Assistants,3,3,3,3,3,15,70.4,79,-8.6,certificate,40000,Healthcare,1350,yes
+Dental Assistants,2,2,2,2,2,10,44.9,76,-31.1,certificate,48000,Healthcare,370,yes
+Firefighters,1,4,2,4,4,15,70.4,18,+52.4,certificate,59000,"Protective, food & personal service",320,yes
+Police and Sheriff's Patrol Officers,1,4,4,4,4,17,81.8,45,+36.8,high school,77000,"Protective, food & personal service",665,yes
+Security Guards,1,2,2,2,2,9,40.3,85,-44.7,high school,38000,"Protective, food & personal service",1100,yes
+Chefs and Head Cooks,2,1,1,2,1,7,31.9,48,-16.1,high school,60000,"Protective, food & personal service",160,yes
+"Cooks, Restaurant",1,0,0,1,0,2,16.4,23,-6.6,no credential,37000,"Protective, food & personal service",1400,yes
+Bartenders,1,2,2,2,1,8,36.0,60,-24.0,no credential,34000,"Protective, food & personal service",670,yes
+Waiters and Waitresses,1,1,2,2,1,7,31.9,79,-47.1,no credential,34000,"Protective, food & personal service",2200,yes
+Janitors and Cleaners,0,0,0,0,0,0,0.0,13,-13.0,no credential,36000,"Protective, food & personal service",2200,yes
+Landscaping and Groundskeeping Workers,0,0,0,0,0,0,0.0,0,+0.0,no credential,38000,"Protective, food & personal service",950,yes
+Hairdressers and Cosmetologists,3,2,3,2,2,12,54.5,67,-12.5,certificate,36000,"Protective, food & personal service",400,yes
+Childcare Workers,3,3,3,3,4,16,76.1,67,+9.1,high school,32000,"Protective, food & personal service",500,yes
+Cashiers,1,1,1,1,1,5,24.6,94,-69.4,no credential,31000,Sales & office,3300,yes
+Retail Salespersons,1,1,2,2,1,7,31.9,85,-53.1,no credential,35000,Sales & office,3700,yes
+Real Estate Sales Agents,3,3,3,2,2,13,59.7,54,+5.7,high school,56000,Sales & office,160,yes
+Customer Service Representatives,1,2,2,3,2,10,44.9,79,-34.1,high school,42000,Sales & office,2800,yes
+Secretaries and Administrative Assistants,2,1,2,2,1,8,36.0,85,-49.0,high school,46000,Sales & office,2900,yes
+"Office Clerks, General",1,0,1,1,1,4,21.4,60,-38.6,high school,41000,Sales & office,2600,yes
+"Farmworkers and Laborers, Crop",0,0,0,0,0,0,0.0,6,-6.0,no credential,35000,Trades & transport,280,yes
+Carpenters,2,1,1,1,1,6,28.1,67,-38.9,high school,59000,Trades & transport,700,yes
+Construction Laborers,1,0,0,1,0,2,16.4,45,-28.6,no credential,46000,Trades & transport,1000,yes
+Electricians,2,1,1,1,2,7,31.9,67,-35.1,high school,62350,Trades & transport,700,yes
+"Plumbers, Pipefitters, and Steamfitters",2,1,1,1,2,7,31.9,23,+8.9,high school,62000,Trades & transport,470,yes
+Automotive Service Technicians,2,1,1,1,2,7,31.9,20,+11.9,certificate,50000,Trades & transport,660,yes
+HVAC Mechanics and Installers,2,1,1,1,2,7,31.9,60,-28.1,certificate,59000,Trades & transport,400,yes
+Bakers,0,0,0,0,0,0,0.0,67,-67.0,no credential,36000,Trades & transport,210,yes
+Machinists,1,0,0,0,0,1,15.0,14,+1.0,high school,53000,Trades & transport,300,yes
+"Welders, Cutters, Solderers, and Brazers",1,0,0,0,0,1,15.0,17,-2.0,high school,51000,Trades & transport,430,yes
+"Airline Pilots, Copilots, and Flight Engineers",1,4,1,4,4,14,65.0,37,+28.0,bachelor,239200,Trades & transport,90,yes
+Air Traffic Controllers,1,4,1,4,4,14,65.0,60,+5.0,associate,145000,Trades & transport,22,yes
+Heavy and Tractor-Trailer Truck Drivers,0,0,0,1,1,2,16.4,26,-9.6,certificate,58000,Trades & transport,2100,yes
+"Laborers and Freight, Stock, and Material Movers",0,0,0,0,0,0,0.0,14,-14.0,no credential,38000,Trades & transport,2900,yes
+Dental Hygienists,,,,,,10,44.9,,,associate,87000,Healthcare,215,no - total only
+Radiation Therapists,,,,,,17,81.8,,,associate,98000,Healthcare,17,no - total only
+Diagnostic Medical Sonographers,,,,,,11,49.6,,,associate,84000,Healthcare,84,no - total only
+Nuclear Medicine Technologists,,,,,,11,49.6,,,associate,92000,Healthcare,18,no - total only
+MRI Technologists,,,,,,9,40.3,,,associate,83000,Healthcare,40,no - total only
+Respiratory Therapists,,,,,,15,70.4,,,associate,77000,Healthcare,135,no - total only
+Web Developers,,,,,,8,36.0,,,associate,86000,Computing & math,90,no - total only
+Nuclear Technicians,,,,,,9,40.3,,,associate,101000,Engineering & science,6,no - total only
+Electrical Power-Line Installers,,,,,,8,36.0,,,high school,85000,Trades & transport,125,no - total only
+Elevator and Escalator Installers,,,,,,7,31.9,,,high school,102000,Trades & transport,25,no - total only
+Power Plant Operators,,,,,,9,40.3,,,high school,100000,Trades & transport,32,no - total only
+Detectives and Criminal Investigators,,,,,,17,81.8,,,high school,91000,"Protective, food & personal service",108,no - total only
+First-Line Supervisors of Police,,,,,,18,87.7,,,high school,101000,"Protective, food & personal service",135,no - total only
+Ship Engineers,,,,,,10,44.9,,,high school,90000,Trades & transport,8,no - total only
+Boilermakers,,,,,,6,28.1,,,high school,72000,Trades & transport,11,no - total only
+Subway and Streetcar Operators,,,,,,8,36.0,,,high school,84000,Trades & transport,10,no - total only
+Wholesale and Manufacturing Sales Representatives,,,,,,12,54.5,,,high school,73000,Sales & office,1400,no - total only
+Real Estate Brokers,,,,,,13,59.7,,,high school,79000,Sales & office,50,no - total only
+"Transportation, Storage, and Distribution Managers",,,,,,12,54.5,,,high school,99000,Management,165,no - total only
+Radiologic Technologists and Technicians,,,,,,11,49.6,,,associate,73410,Healthcare,220,no - total only
+Aircraft Mechanics and Service Technicians,,,,,,7,31.9,,,associate,75400,Trades & transport,150,no - total only
+Computer Network Support Specialists,,,,,,8,36.0,,,associate,71530,Computing & math,170,no - total only
+Physical Therapist Assistants,,,,,,16,76.1,,,associate,64080,Healthcare,100,no - total only
+Commercial Pilots,,,,,,12,54.5,,,certificate,113080,Trades & transport,50,no - total only
+"Psychology Teachers, Postsecondary",,,,,,13,59.7,,,master,82000,Education & arts,37,no - total only
+Neurosurgeons,,,,,,16,76.1,,,doctorate,790000,Healthcare,5,no - total only
+Law Firm Equity Partners,,,,,,15,70.4,,,doctorate,1400000,Social service & legal,25,no - total only
+Private Equity and Hedge Fund Partners,,,,,,13,59.7,,,master,3000000,Business & finance,8,no - total only
+Major League Athletes,,,,,,15,70.4,,,high school,4500000,Education & arts,3.5,no - total only
+Lead Film and Television Actors,,,,,,11,49.6,,,no credential,8000000,Education & arts,1,no - total only
