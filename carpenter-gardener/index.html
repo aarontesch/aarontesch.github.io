@@ -2023,13 +2023,12 @@ function finishRun(reason){
         : "You aimed at " + TARGETS[s.target][0] + " and they became " + anOcc(career[0]) +
           ". By the goal that is a failure. It is also just a life." + revisionNote +
           (elite ? " It is also one of the hardest places in this space to arrive at." : ""))
-    /* Nothing is withheld under the aspiration, so the sentence states the
-       rule rather than reporting a deduction that was never made. */
+    /* Nothing is withheld under the aspiration, so the sentence explains
+       what the score means rather than reporting a deduction. */
     + " " + (best
-      ? "Satisfaction " + sat.value + " out of 100, with nothing deducted. You asked for their " +
-        "best and this is it, so there is nothing to be disappointed by; the score says this " +
-        "life sits more squarely on a real occupation than " + Math.round(2 * (sat.value - 50)) +
-        "% of undirected lives do."
+      ? "No life is perfect and with no specified career goal a satisfaction score of " +
+        sat.value + " represents the relative fit of this outcome to where this child has " +
+        "ended up."
       : "Goal satisfaction " + (sat.cost === 0
           ? sat.value + " out of 100: you never pushed, so nothing was deducted."
           : sat.value + " out of 100 — " +
