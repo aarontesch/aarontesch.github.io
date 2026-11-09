@@ -180,6 +180,10 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
    so the row reads as a scale rather than as a count floating on its own */
 .faces{display:block;font-size:14px;line-height:1.15;letter-spacing:.5px}
 .faces .face.spent{opacity:.17;filter:grayscale(1)}
+/* the keepsake for the kind of life it was: a rose or a trophy */
+.emblem{display:flex;align-items:center;gap:12px;margin:6px 0 2px}
+.emblem-icon{font-size:48px;line-height:1}
+.emblem-text{font-size:15px;font-weight:700;color:var(--deep)}
 .result .outof{display:block;font-style:normal;font-size:16px;color:var(--deep);margin-top:1px}
 .modalbtns{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
 .primary{background:var(--deep);color:#fff;border-radius:99px;padding:12px 18px;font-weight:800}
@@ -205,7 +209,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 84</span></div>
+    <span class="ver" role="note">build 85</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -429,6 +433,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <div class="modal" id="modal">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle" aria-describedby="resultText" tabindex="-1" id="modalCard">
     <div class="eyebrow">Run complete</div>
+    <div class="emblem" id="resultEmblem" hidden><span class="emblem-icon" id="emblemIcon" role="img" aria-label="Rose">&#x1F339;</span><span class="emblem-text" id="emblemText">A gardener&rsquo;s rose</span></div>
     <h2 id="resultTitle">A life has taken shape.</h2>
     <p id="resultText"></p>
     <!-- Seeded with the cells a finished run fills in. Left empty this was an
@@ -1998,6 +2003,17 @@ function finishRun(reason){
   const hitTarget = best || w.i === s.target;
   const sat = satisfaction(s);
   const elite = reachOf(career) >= ELITE_REACH;
+
+  /* A keepsake for the kind of life it was: a rose when most stages were
+     gardened, a trophy when most were built. Five stages, so never a tie,
+     and "do their best" gardens every stage, so it always earns the rose. */
+  const gardened = s.nurtured > s.aimed;
+  el("emblemIcon").textContent = gardened ? "\u{1F339}" : "\u{1F3C6}";
+  el("emblemIcon").setAttribute("aria-label", gardened ? "Rose" : "Trophy");
+  el("emblemText").textContent = gardened
+    ? "A gardener’s rose: " + s.nurtured + " of " + TOTAL_STAGES + " stages supported"
+    : "A carpenter’s trophy: " + s.aimed + " of " + TOTAL_STAGES + " stages built";
+  el("resultEmblem").hidden = !s.segs.length;
 
   el("resultTitle").textContent = best ? "They did their best."
     : hitTarget ? "The goal was met." : "The goal was missed.";
