@@ -78,6 +78,18 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 .sselect:hover:not([aria-disabled="true"]){border-color:var(--deep)}
 .sout{font-size:12px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
 .sout b{color:var(--deep);font-weight:750}
+.switch{display:flex;align-items:center;gap:10px;width:100%;margin:4px 0 0;padding:6px 4px;
+  border:0;background:none;font:inherit;font-size:13.5px;font-weight:650;color:var(--ink);
+  text-align:left;cursor:pointer}
+.switch .track{flex:none;position:relative;width:40px;height:22px;border-radius:99px;
+  border:1px solid var(--ctl);background:var(--card);transition:background-color .2s}
+.switch .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;
+  background:var(--ctl);transition:transform .2s,background-color .2s}
+.switch[aria-checked="true"] .track{background:var(--deep);border-color:var(--deep)}
+.switch[aria-checked="true"] .knob{transform:translateX(18px);background:#fff}
+.switch[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+.switch:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){.switch .track,.switch .knob{transition:none}}
 
 /* ---- the three-dimensional space ---- */
 .space{position:relative;border-radius:18px;overflow:hidden;margin-bottom:12px;
@@ -205,7 +217,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 88</span></div>
+    <span class="ver" role="note">build 89</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -326,6 +338,12 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
       <div class="sout" id="targetCred"></div>
       <p class="pickhint">Least likely first. The figure is how often that occupation
         comes out when the run is played as well as it can be.</p>
+      <!-- A switch, not a list entry: it has no career to name, and it sets the
+           picker aside rather than replacing what was picked. The visible text
+           is the switch's name. -->
+      <button type="button" class="switch" id="bestSwitch" role="switch" aria-checked="false"
+              aria-describedby="odds"><span class="track" aria-hidden="true"><span class="knob"></span></span>
+        <span>Encourage children to do their best</span></button>
     </fieldset>
 
     <!-- The stage choice used to sit here. It now lives on the drawing itself,
@@ -1269,6 +1287,9 @@ let state;
    activity is about is visible straight away -- under "do their best" there
    is nothing to steer toward and carpentry is not offered at all. */
 const DEFAULT_TARGET = OCC.findIndex(o => o[0] === "Family Medicine Physicians");
+/* "Do their best" is a switch beside the picker, not an entry in it, so the
+   picker keeps the last career named and switching off returns to it. */
+let goalOcc = DEFAULT_TARGET;
 /* the slider positions carry over a reset the way the goal does: you are
    usually replaying the same childhood with a different parenting choice */
 let startEd = 2, startPay = 2, startEq = 3;     // some college, $60k, ordinary
@@ -1928,15 +1949,16 @@ function render(){
     const sel = el("targetSel");
     if(!sel.options.length){
       sel.innerHTML =
-        '<option value="' + BEST_I + '">' + esc(BEST[0]) + ' — no specific career goal</option>' +
         PICK_ORDER.map(i => {
           const o = OCC[i], od = DIFFICULTY[i].pct;
           return '<option value="' + i + '">' + esc(o[0]) + ' — ' +
             (od ? od + '%' : 'under 1%') + ' · ' + money(o[5]) + ' · ' + esc(occCred(o)) + '</option>';
         }).join("");
     }
-    sel.value = String(s.target);
-    sel.setAttribute("aria-disabled", s.over ? "true" : "false");
+    sel.value = String(goalOcc);
+    sel.setAttribute("aria-disabled", s.over || best ? "true" : "false");
+    el("bestSwitch").setAttribute("aria-checked", best ? "true" : "false");
+    el("bestSwitch").setAttribute("aria-disabled", s.over ? "true" : "false");
     const t = TARGETS[s.target];
     el("targetCred").innerHTML = best ? "No specific career goal"
       : esc(money(OCC[s.target][5])) + " &middot; " + esc(occCred(OCC[s.target]));
@@ -2235,6 +2257,11 @@ document.addEventListener("click", e => {
     return growStage(actionButton.dataset.act);
   }
 
+  if(e.target.closest("#bestSwitch")){
+    if(state.over) return;
+    return setTarget(isBest(state.target) ? goalOcc : BEST_I);
+  }
+
   if(e.target.closest("#rowsBtn")){
     showAllRows = !showAllRows;
     el("rowsBtn").setAttribute("aria-pressed", showAllRows ? "true" : "false");
@@ -2297,14 +2324,18 @@ function startChanged(e){
   state = fresh(state.target);
   render();
 }
-function targetChanged(e){
-  if(e.target.id !== "targetSel") return;
-  if(state.over){ e.target.value = String(state.target); return; }
-  const next = +e.target.value;
+function setTarget(next){
   if(next === state.target) return;
   if(state.segs.length) state.reaims++; else state.firstTarget = next;
   state.target = next;
   render();
+}
+function targetChanged(e){
+  if(e.target.id !== "targetSel") return;
+  // set aside while "do their best" is on, and locked once the life is over
+  if(state.over || isBest(state.target)){ e.target.value = String(goalOcc); return; }
+  goalOcc = +e.target.value;
+  setTarget(goalOcc);
 }
 document.addEventListener("change", targetChanged);
 document.addEventListener("input", startChanged);
