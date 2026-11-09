@@ -205,7 +205,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 86</span></div>
+    <span class="ver" role="note">build 87</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -1457,6 +1457,18 @@ function vineWindow(L, vh, i){
 }
 
 const gardenedLife = s => s.nurtured > s.aimed;
+/* The rose that ends a gardened life, in its own units: the stem leaves the
+   origin and runs up -y, so a turn about the origin lays it along the vine.
+   About 32 units tall; the caller scales it. */
+const ROSE_ART =
+  '<path d="M0 2C1-5-1-11 0-18" fill="none" stroke="#4c7602" stroke-width="2.2" stroke-linecap="round"/>' +
+  '<path d="M0-8C4-13 9-11 10-7C6-5 3-6 0-8Z" fill="#6f9a2c"/>' +
+  '<path d="M0-12C-3-16-8-15-9-12C-6-10-3-10 0-12Z" fill="#5f8a22"/>' +
+  '<path d="M-5-18L0-21.5L5-18L0-19.5Z" fill="#4c7602"/>' +
+  '<path d="M-7-21C-8-27-5-32 0-32C5-32 8-27 7-21C4-17.5-4-17.5-7-21Z" fill="#b3203a"/>' +
+  '<path d="M-7-23C-6-29-3-31 0-28C3-31 6-29 7-23C3-20.5-3-20.5-7-23Z" fill="#d23a50"/>' +
+  '<path d="M-3.5-25C-3-29.5 3-29.5 3.5-25C1.5-23.5-1.5-23.5-3.5-25Z" fill="#9a1830"/>' +
+  '<path d="M-5.5-22.5C-2-21 2.5-21.5 5.5-24.5" fill="none" stroke="#8a1328" stroke-width=".9"/>';
 function spaceSvg(s){
   const items = [];                      // {d, svg} painted far-to-near
   const defs = [];                       // clip windows onto the vine art
@@ -1622,22 +1634,37 @@ function spaceSvg(s){
      so never a tie, and "do their best" grows every stage. */
   if(s.segs.length){
     const p = project(s.pos), w = nearestOcc(s.pos);
-    let tip, lx = p.x + 10;
+    let tip, lx = p.x + 10, ly = p.y - 8;
     if(s.over){
       const em = Math.max(20, 26 * p.f);
-      /* the trophy stands on the end of the last board; the rose's bloom
-         sits on the end of the vine, its stem trailing back along it */
-      tip = '<text class="emblem" x="' + p.x.toFixed(1) + '" y="' +
-        (gardenedLife(s) ? p.y + em * 0.3 : p.y + em * 0.1).toFixed(1) +
-        '" font-size="' + em.toFixed(1) + '" text-anchor="middle">' +
-        (gardenedLife(s) ? "\u{1F339}" : "\u{1F3C6}") + '</text>';
-      lx = p.x + em * 0.6;
+      if(gardenedLife(s)){
+        /* The rose grows on out of the vine: its stem starts at the tip and
+           carries on along the last stage's direction on screen, bloom
+           outermost. Drawn rather than an emoji, because every emoji font
+           slants its rose differently and a turn can only line up a stem
+           whose angle is known. ROSE_ART's stem runs up local -y, hence the
+           quarter turn. */
+        const a = project(s.segs[s.segs.length - 1].from);
+        const dx = p.x - a.x, dy = p.y - a.y;
+        const turn = Math.hypot(dx, dy) > 1 ? Math.atan2(dy, dx) * 180 / Math.PI + 90 : 0;
+        tip = '<g class="emblem" transform="translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) +
+          ') rotate(' + turn.toFixed(1) + ') scale(' + (em / 30).toFixed(3) + ')">' + ROSE_ART + '</g>';
+        /* the bloom sits out along the vine now, so the name goes past it */
+        const L = Math.hypot(dx, dy) || 1, ux = L > 1 ? dx / L : 0, uy = L > 1 ? dy / L : -1;
+        lx = p.x + ux * em * 0.87 + em * 0.4;
+        ly = p.y + uy * em * 0.87 + 4;
+      } else {
+        /* the trophy stands upright on the end of the last board */
+        tip = '<text class="emblem" x="' + p.x.toFixed(1) + '" y="' + (p.y + em * 0.1).toFixed(1) +
+          '" font-size="' + em.toFixed(1) + '" text-anchor="middle">\u{1F3C6}</text>';
+        lx = p.x + em * 0.6;
+      }
     } else {
       tip = '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' +
         (4.2 * p.f).toFixed(2) + '" fill="' +
         (s.segs[s.segs.length - 1].nurtured ? "#3f7250" : "#8a5c39") + '" stroke="#fffdf8" stroke-width="1.6"/>';
     }
-    push(p.d - 1, tip + '<text class="reslabel" x="' + lx.toFixed(1) + '" y="' + (p.y - 8).toFixed(1) +
+    push(p.d - 1, tip + '<text class="reslabel" x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) +
       '">' + esc(OCC[w.i][0]) + '</text>');
   }
 
