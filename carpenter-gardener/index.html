@@ -205,7 +205,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 87</span></div>
+    <span class="ver" role="note">build 88</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -2250,7 +2250,8 @@ document.addEventListener("click", e => {
     const v = view.dataset.view;
     if(v === "iso"){ cam.yaw = -0.62; cam.pitch = 0.40; }
     if(v === "sal"){ cam.yaw = 0; cam.pitch = 0; }
-    if(v === "con"){ cam.yaw = 0; cam.pitch = Math.PI / 2 - 0.001; }
+    /* From below, not above: from above more emotional labour reads downward. */
+    if(v === "con"){ cam.yaw = 0; cam.pitch = -(Math.PI / 2 - 0.001); }
     if(v === "spin"){
       cam.spin = !cam.spin;
       el("spinBtn").setAttribute("aria-pressed", cam.spin ? "true" : "false");
