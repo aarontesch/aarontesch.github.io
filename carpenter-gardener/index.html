@@ -180,10 +180,6 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
    so the row reads as a scale rather than as a count floating on its own */
 .faces{display:block;font-size:14px;line-height:1.15;letter-spacing:.5px}
 .faces .face.spent{opacity:.17;filter:grayscale(1)}
-/* the keepsake for the kind of life it was: a rose or a trophy */
-.emblem{display:flex;align-items:center;gap:12px;margin:6px 0 2px}
-.emblem-icon{font-size:48px;line-height:1}
-.emblem-text{font-size:15px;font-weight:700;color:var(--deep)}
 .result .outof{display:block;font-style:normal;font-size:16px;color:var(--deep);margin-top:1px}
 .modalbtns{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
 .primary{background:var(--deep);color:#fff;border-radius:99px;padding:12px 18px;font-weight:800}
@@ -209,7 +205,7 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <header class="topbar">
   <div class="brand"><div class="mark" aria-hidden="true">✦</div> Parenting like a Carpenter or a Gardener
     <!-- bumped on every edit, so a stale cached copy is obvious at a glance -->
-    <span class="ver" role="note">build 85</span></div>
+    <span class="ver" role="note">build 86</span></div>
   <button class="reset" id="reset">Reset run</button>
 </header>
 
@@ -433,7 +429,6 @@ h3.eyebrow{margin:0;font-size:11px;line-height:1.5}
 <div class="modal" id="modal">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resultTitle" aria-describedby="resultText" tabindex="-1" id="modalCard">
     <div class="eyebrow">Run complete</div>
-    <div class="emblem" id="resultEmblem" hidden><span class="emblem-icon" id="emblemIcon" role="img" aria-label="Rose">&#x1F339;</span><span class="emblem-text" id="emblemText">A gardener&rsquo;s rose</span></div>
     <h2 id="resultTitle">A life has taken shape.</h2>
     <p id="resultText"></p>
     <!-- Seeded with the cells a finished run fills in. Left empty this was an
@@ -1461,6 +1456,7 @@ function vineWindow(L, vh, i){
   return pool[i % pool.length].v;
 }
 
+const gardenedLife = s => s.nurtured > s.aimed;
 function spaceSvg(s){
   const items = [];                      // {d, svg} painted far-to-near
   const defs = [];                       // clip windows onto the vine art
@@ -1620,13 +1616,28 @@ function spaceSvg(s){
     }
   }
 
-  /* the tip, named */
+  /* the tip, named. Once the life is finished the tip is crowned with what
+     it was: a trophy set on top of the build when most stages were built, a
+     rose blooming at the end of the vine when most were grown. Five stages,
+     so never a tie, and "do their best" grows every stage. */
   if(s.segs.length){
     const p = project(s.pos), w = nearestOcc(s.pos);
-    push(p.d - 1, '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' +
-      (4.2 * p.f).toFixed(2) + '" fill="' +
-      (s.segs[s.segs.length - 1].nurtured ? "#3f7250" : "#8a5c39") + '" stroke="#fffdf8" stroke-width="1.6"/>' +
-      '<text class="reslabel" x="' + (p.x + 10).toFixed(1) + '" y="' + (p.y - 8).toFixed(1) +
+    let tip, lx = p.x + 10;
+    if(s.over){
+      const em = Math.max(20, 26 * p.f);
+      /* the trophy stands on the end of the last board; the rose's bloom
+         sits on the end of the vine, its stem trailing back along it */
+      tip = '<text class="emblem" x="' + p.x.toFixed(1) + '" y="' +
+        (gardenedLife(s) ? p.y + em * 0.3 : p.y + em * 0.1).toFixed(1) +
+        '" font-size="' + em.toFixed(1) + '" text-anchor="middle">' +
+        (gardenedLife(s) ? "\u{1F339}" : "\u{1F3C6}") + '</text>';
+      lx = p.x + em * 0.6;
+    } else {
+      tip = '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' +
+        (4.2 * p.f).toFixed(2) + '" fill="' +
+        (s.segs[s.segs.length - 1].nurtured ? "#3f7250" : "#8a5c39") + '" stroke="#fffdf8" stroke-width="1.6"/>';
+    }
+    push(p.d - 1, tip + '<text class="reslabel" x="' + lx.toFixed(1) + '" y="' + (p.y - 8).toFixed(1) +
       '">' + esc(OCC[w.i][0]) + '</text>');
   }
 
@@ -1639,7 +1650,11 @@ function spaceSvg(s){
       'Occupation space, ' + OCC.length + ' occupations by pay, education and emotional labour. ' +
       s.segs.length + ' of ' + TOTAL_STAGES + ' stages grown, now at pay ' + money(payAt(pos[0])) +
       ', schooling to ' + edReached(pos[1]) + ', emotional labour ' + Math.round(pos[2]) +
-      ', nearest occupation ' + esc(w2) + '. The figures are in the table below; the view buttons turn it.">' +
+      ', nearest occupation ' + esc(w2) +
+      (s.over && s.segs.length ? (gardenedLife(s)
+        ? '. The life ends in a rose at the tip of the vine, for ' + s.nurtured + ' of ' + TOTAL_STAGES + ' stages supported'
+        : '. The life ends in a trophy on top of the build, for ' + s.aimed + ' of ' + TOTAL_STAGES + ' stages built') : '') +
+      '. The figures are in the table below; the view buttons turn it.">' +
     (defs.length ? '<defs>' + defs.join("") + '</defs>' : "") +
     '<g aria-hidden="true" transform="translate(0,6)">' + items.map(i => i.svg).join("") + '</g></svg>';
 }
@@ -2003,17 +2018,6 @@ function finishRun(reason){
   const hitTarget = best || w.i === s.target;
   const sat = satisfaction(s);
   const elite = reachOf(career) >= ELITE_REACH;
-
-  /* A keepsake for the kind of life it was: a rose when most stages were
-     gardened, a trophy when most were built. Five stages, so never a tie,
-     and "do their best" gardens every stage, so it always earns the rose. */
-  const gardened = s.nurtured > s.aimed;
-  el("emblemIcon").textContent = gardened ? "\u{1F339}" : "\u{1F3C6}";
-  el("emblemIcon").setAttribute("aria-label", gardened ? "Rose" : "Trophy");
-  el("emblemText").textContent = gardened
-    ? "A gardener’s rose: " + s.nurtured + " of " + TOTAL_STAGES + " stages supported"
-    : "A carpenter’s trophy: " + s.aimed + " of " + TOTAL_STAGES + " stages built";
-  el("resultEmblem").hidden = !s.segs.length;
 
   el("resultTitle").textContent = best ? "They did their best."
     : hitTarget ? "The goal was met." : "The goal was missed.";
