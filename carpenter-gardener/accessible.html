@@ -90,6 +90,13 @@ label{margin-top:.35rem;}
 .compact-stats .metric{padding:.55rem;font-size:.91rem;}
 .compact-stats .metric strong{font-size:1.05rem;}
 .growth-section{margin-top:.7rem;}
+.growth-panel{border:2px solid #9db8d5;border-radius:10px;background:#f8fbff;padding:.8rem;margin:.7rem 0;min-width:0}
+.growth-panel h4{margin:0 0 .35rem;font-size:1.05rem}
+.growth-panel svg{display:block;width:100%;height:auto;background:#fff;border:1px solid #9badc1;border-radius:7px}
+.growth-panel .key{margin:.5rem 0;font-size:.93rem}.growth-panel .key span{font-weight:750}
+.path-summary{padding:.6rem .7rem;background:#e8f2fe;border-left:4px solid #173f78;margin:.6rem 0}
+#pathDetails table{font-size:.93rem}#pathDetails td,#pathDetails th{padding:.3rem .45rem}
+@media print{.growth-panel svg{display:none}}
 .growth-section h3{margin:.3rem 0;}
 .growth-section>p{margin:.35rem 0;}
 .score-layout{gap:.6rem;}
@@ -104,7 +111,7 @@ label{margin-top:.35rem;}
 <main id="main">
 <section aria-labelledby="instructionsHeading"><h2 id="instructionsHeading">How this works</h2><p class="instructions-lead">1. Choose a goal.  2. Make five decisions.  3. Compare the outcomes.</p><details><summary>Read step-by-step instructions</summary><ol class="quick-steps"><li>Decide whether to set a specific career goal. The initial example is becoming a family medicine physician. You can instead choose “I want my child to try their best.”</li><li>Choose family starting conditions.</li><li>At each of the five developmental stages, choose the available approach. Carpenter appears only when a specific career goal is selected.</li><li>Review the changing career possibilities and the visual growth path, or read the equivalent stage-by-stage text.</li><li>Compare satisfaction with the selected parenting goal and the model's occupational-fit proxy. Save the completed run, switch the goal definition, and play again. Review the side-by-side comparison. Different goal definitions use different satisfaction calculations.</li></ol></details><p class="instructions-note">There is no single correct sequence. Try a second round with different decisions and compare the results.</p><p class="hint">Keyboard access: Tab to move between controls, arrow keys to change menu choices, and Enter or Space to select a button.</p></section>
 <section aria-labelledby="setupH" id="setupSection"><h2 id="setupH">1. Choose what success means</h2><form id="setupForm"><fieldset id="goalModeField"><legend>Choose how to define success</legend><div class="goal-mode"><label><input checked="" id="specificGoal" name="goalMode" type="radio" value="specific"/> I want my child to become a doctor (or select another specific occupation)</label><label><input id="openGoal" name="goalMode" type="radio" value="open"/> I want my child to try their best and find a fulfilling career</label></div></fieldset><details class="optional-settings"><summary>Optional: change family starting conditions</summary><fieldset><legend>Where the child starts</legend><div class="layout"><div><label for="education">Parents’ education</label><select id="education"><option value="0">No credential or high school</option><option value="2">Some college or associate degree</option><option selected="" value="4">Bachelor’s degree</option><option value="6">Graduate or professional degree</option></select></div><div><label for="income">Parents’ income</label><select id="income"><option value="0">Lower income</option><option selected="" value="1">Middle income</option><option value="2">Higher income</option></select></div><div><label for="environment">Early emotional environment</label><select id="environment"><option value="0">Limited emotional support</option><option selected="" value="1">Mixed emotional support</option><option value="2">Consistent emotional support</option></select></div></div></fieldset></details><div id="specificGoalPanel"><label for="goal">Choose the specific career goal (only when a career goal is set)</label><select id="goal"></select><p class="hint" id="goalInfo"></p></div><p class="hint" id="setupNote">Changing these choices restarts the five-stage activity.</p></form></section>
-<section aria-labelledby="stageH" id="game"><h2 id="stageH" tabindex="-1">2. Make five parenting decisions</h2><p class="instruction-emphasis" id="stageIntro">Select Carpenter or Gardener for each stage. Your decision shapes the simulated path.</p><div class="stage-track" id="stageTrack"><label class="stage-track-label" for="journeyProgress">Your five-stage journey</label><progress aria-describedby="progressHint" id="journeyProgress" max="5" value="0"></progress><p class="hint" id="progressHint">0 of 5 developmental stages completed.</p><ol aria-label="Developmental stages" class="stage-list" id="stageNavigator"><li aria-current="step">Infancy</li><li>Early childhood</li><li>Middle childhood</li><li>Adolescence</li><li>Transition to adulthood</li></ol></div><p class="current-stage" id="currentStage" tabindex="-1">Current developmental stage: 1 of 5, Infancy.</p><fieldset><legend>Choose your parenting approach for this stage</legend><div class="actions"><button class="primary" id="carpenter" type="button">Carpenter: Guide towards a specific career goal</button><button id="gardener" type="button">Gardener: Support interests and encourage growth</button></div><p class="hint" id="approachExplanation">The next stage appears after your choice. Without a specific career goal, Carpenter is unavailable.</p></fieldset><div class="layout compact-stats"><div class="metric"><span>Stages completed</span><strong id="stageCount">0 of 5</strong></div><div class="metric"><span>Carpenter / Gardener</span><strong id="counts">0 / 0</strong></div><div class="metric"><span>Nearest occupation now</span><strong id="nearest">Not determined</strong></div></div><details class="secondary-details"><summary>Read developmental position and feedback</summary><div class="panel"><h3>Where they are now</h3><p id="positionText"></p><p id="stageFeedback"></p></div></details><section aria-labelledby="growthTitle" class="growth-section"><h3 id="growthTitle">Growth across five stages</h3><p>Each choice adds a visual change. Equivalent information is provided in the text below.</p><div aria-hidden="true" class="growth-art" id="growthArt"></div><p class="growth-summary" id="growthText">No stages completed. The child's path is just beginning.</p><div class="score-layout"><div><label for="goalScoreBar">Goal satisfaction in this scenario</label><progress id="goalScoreBar" max="100" value="0"></progress><output for="goalScoreBar" id="goalScoreText">Not calculated</output></div><div><label for="fitScoreBar">Illustrative occupational fit</label><progress id="fitScoreBar" max="100" value="0"></progress><output for="fitScoreBar" id="fitScoreText">Not calculated</output></div></div><p class="hint">Scores are illustrative. Changing the goal changes how satisfaction is calculated; it does not prove a change in happiness.</p></section><details><summary>Review decisions from earlier stages</summary><ol id="stageHistory"><li>No stages completed.</li></ol></details><div class="buttons"><button id="reset" type="button">Restart the five stages</button></div></section>
+<section aria-labelledby="stageH" id="game"><h2 id="stageH" tabindex="-1">2. Make five parenting decisions</h2><p class="instruction-emphasis" id="stageIntro">Select Carpenter or Gardener for each stage. Your decision shapes the simulated path.</p><div class="stage-track" id="stageTrack"><label class="stage-track-label" for="journeyProgress">Your five-stage journey</label><progress aria-describedby="progressHint" id="journeyProgress" max="5" value="0"></progress><p class="hint" id="progressHint">0 of 5 developmental stages completed.</p><ol aria-label="Developmental stages" class="stage-list" id="stageNavigator"><li aria-current="step">Infancy</li><li>Early childhood</li><li>Middle childhood</li><li>Adolescence</li><li>Transition to adulthood</li></ol></div><p class="current-stage" id="currentStage" tabindex="-1">Current developmental stage: 1 of 5, Infancy.</p><fieldset><legend>Choose your parenting approach for this stage</legend><div class="actions"><button class="primary" id="carpenter" type="button">Carpenter: Guide towards a specific career goal</button><button id="gardener" type="button">Gardener: Support interests and encourage growth</button></div><p class="hint" id="approachExplanation">The next stage appears after your choice. Without a specific career goal, Carpenter is unavailable.</p></fieldset><div class="layout compact-stats"><div class="metric"><span>Stages completed</span><strong id="stageCount">0 of 5</strong></div><div class="metric"><span>Carpenter / Gardener</span><strong id="counts">0 / 0</strong></div><div class="metric"><span>Nearest occupation now</span><strong id="nearest">Not determined</strong></div></div><details class="secondary-details"><summary>Read developmental position and feedback</summary><div class="panel"><h3>Where they are now</h3><p id="positionText"></p><p id="stageFeedback"></p></div></details><section aria-labelledby="growthTitle" class="growth-section"><h3 id="growthTitle">Growth across five stages</h3><p>Each choice adds a visual change. Equivalent information is provided in the text below.</p><div aria-hidden="true" class="growth-art" id="growthArt"></div><p class="growth-summary" id="growthText">No stages completed. The child's path is just beginning.</p><div class="growth-panel"><h4 id="pathHeading">Watch the pathway develop in three dimensions</h4><p class="hint">The three axes are pay, education, and emotional labor, each drawn as a share of its full range. The pathway shows the starting point, each completed stage, and the selected career goal, or with no goal set, the typical outcome for this family. It is an illustrative model, not a prediction.</p><svg aria-labelledby="growthPlotTitle growthPlotDesc" id="growthPlot" role="img" viewBox="0 0 680 355" xmlns="http://www.w3.org/2000/svg"><title id="growthPlotTitle">Three-dimensional career pathway</title><desc id="growthPlotDesc">The pathway is also described in the text and stage-by-stage table below.</desc></svg><p class="key" id="pathKey"></p><p class="path-summary" id="pathSummary"></p><details id="pathDetails"><summary>Read the same pathway as a table</summary><div aria-labelledby="pathCaption" class="tablewrap" role="region" tabindex="0"><table><caption id="pathCaption">Career pathway by developmental stage</caption><thead><tr><th scope="col">Stage and choice</th><th scope="col">Pay (0 to 100)</th><th scope="col">Education (0 to 100)</th><th scope="col">Emotional labor (0 to 100)</th><th id="pathDistHead" scope="col">Distance to goal</th><th scope="col">Likelihood of reaching goal, best remaining plan</th></tr></thead><tbody id="pathRows"></tbody></table></div></details></div><div class="score-layout"><div><label for="goalScoreBar">Goal satisfaction in this scenario</label><progress id="goalScoreBar" max="100" value="0"></progress><output for="goalScoreBar" id="goalScoreText">Not calculated</output></div><div><label for="fitScoreBar">Illustrative occupational fit</label><progress id="fitScoreBar" max="100" value="0"></progress><output for="fitScoreBar" id="fitScoreText">Not calculated</output></div></div><p class="hint">Scores are illustrative. Changing the goal changes how satisfaction is calculated; it does not prove a change in happiness.</p></section><details><summary>Review decisions from earlier stages</summary><ol id="stageHistory"><li>No stages completed.</li></ol></details><div class="buttons"><button id="reset" type="button">Restart the five stages</button></div></section>
 <section aria-labelledby="resultsH" id="results"><h2 id="resultsH" tabindex="-1">3. Review your outcome</h2><p id="outcomeText">Complete five stages to see the modeled outcome.</p><p class="panel" id="resultInterpretation" role="note"></p><details><summary>View all modeled outcome measures</summary><div class="layout" id="finalMetrics"></div></details><h3>Compare saved scenarios</h3><p>Save a completed run, then try a different goal. Scores use different definitions and are not measures of happiness.</p><div class="buttons"><button disabled="" id="saveRun" type="button">Save this run for comparison</button><button id="clearRuns" type="button">Clear saved runs</button></div><p aria-live="polite" id="compareStatus" role="status">No scenarios saved yet.</p><div class="tablewrap"><table><caption>Saved scenario comparison, illustrative model results</caption><thead><tr><th scope="col">Run</th><th scope="col">Parent goal definition</th><th scope="col">Approaches used</th><th scope="col">Modeled outcome</th><th scope="col">Goal satisfaction</th><th scope="col">Fit proxy</th></tr></thead><tbody id="compareRows"><tr><td colspan="6">Save a completed run to begin comparing.</td></tr></tbody></table></div><details><summary>Review the five decisions</summary><ol id="resultHistory"></ol></details><div class="buttons"><button class="primary" disabled="" id="again" type="button">Play another run, same setup</button><button disabled="" id="change" type="button">Change family and career goal</button><button disabled="" id="export" type="button">Download this run as text</button></div></section>
 <section aria-labelledby="explorerH" id="explorer"><h2 id="explorerH">Optional: explore the occupation data</h2><details class="explorer-details"><summary>Search the occupation table and read model details</summary><p>All occupations are available in the table regardless of whether you can see or use the chart. The table identifies career pay, typical education, emotional labor score, employment estimate, and comparison distance from the current simulated position. The nearest matches appear first by default.</p><div class="toolbar"><div><label for="search">Search occupation name</label><input id="search" placeholder="Example: teacher" type="search"/></div><div><label for="groupFilter">Career field</label><select id="groupFilter"><option value="">All career fields</option></select></div><div><label for="viewFilter">Which occupations?</label><select id="viewFilter"><option value="nearest">10 closest, plus selected goal</option><option value="all">All 115 occupations</option></select></div><div><label for="sort">Sort rows by</label><select id="sort"><option value="distance">Closest to current position</option><option value="name">Occupation A to Z</option><option value="pay">Pay, highest first</option><option value="eq">Emotional labor, highest first</option></select></div></div><p aria-live="polite" id="tableStatus" role="status"></p><div class="tablewrap"><table><caption id="tableCaption">Occupations and simulation comparisons</caption><thead><tr><th scope="col">Occupation</th><th scope="col">Median pay (USD)</th><th scope="col">Typical education</th><th scope="col">Emotional labor (data score)</th><th scope="col">Comparison distance</th><th scope="col">Career field</th><th scope="col">Employment (thousands)</th></tr></thead><tbody id="occupationRows"></tbody></table></div><p class="hint">The supplied file contains illustrative high-income occupations alongside conventional job categories. Employment values and median pay are reproduced from that file, without external validation. Emotional labor scores reflect the supplied EQ_coordinate field. Some occupations have only a total score, with individual dimensions not scored.</p>
 <details><summary>Optional visual comparison of occupation pay and emotional labor</summary><p id="chartDesc">A two-dimensional plot depicts all 115 occupations by pay and emotional labor. It is supplemental only. All values are in the table above. The chart uses a logarithmic pay axis.</p><svg aria-labelledby="plotTitle plotDescription" id="plot" role="img" viewbox="0 0 720 370" xmlns="http://www.w3.org/2000/svg"><title id="plotTitle">Occupation pay compared with emotional labor</title><desc id="plotDescription">Scatterplot of all 115 occupations. Equivalent numerical details are provided in the adjacent table.</desc></svg></details>
@@ -957,6 +964,25 @@ function familyOdds(ti){
  }finally{Math.random=real;spare=keepSpare}
 }
 const pct=v=>v<0.5?'under 1%':Math.round(v)+'%';
+/* The same count from where this child is now, for the stages left. */
+function oddsFromHere(){
+ const s=state,ti=s.target,left=TOTAL_STAGES-s.segs.length,t=OCC[ti];
+ const real=Math.random;let seed=20260117;
+ Math.random=function(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296};
+ const keepSpare=spare;spare=null;
+ try{
+  let best=0;
+  for(let a=0;a<=left;a++){let hit=0;for(let r=0;r<300;r++){
+   let q=s.pos.slice(),hh=s.heading,gg=s.grown;
+   for(let k=0;k<left;k++){const aim=k<a,d=[t[1]-q[0],t[2]-q[1],t[3]-q[2]],L=Math.hypot(d[0],d[1],d[2]);
+    const dir=aim?perturb(L<1e-9?hh:[d[0]/L,d[1]/L,d[2]/L],ANG):flatDir(gg);if(!aim)gg=dir;
+    let len=MU+gauss()*SIG+(aim?0:NURTURE_BONUS);if(len<LEN_FLOOR)len=LEN_FLOOR;if(aim&&len>L)len=L;
+    q=clampPt([q[0]+dir[0]*len,q[1]+dir[1]*len,q[2]+dir[2]*len]);hh=dir}
+   if(nearestOcc(q,ti).i===ti)hit++}
+   best=Math.max(best,100*hit/300)}
+  return best;
+ }finally{Math.random=real;spare=keepSpare}
+}
 function planWords(c){const g=TOTAL_STAGES-c;return c===TOTAL_STAGES?'Carpenter at every stage':g===TOTAL_STAGES?'Gardener at every stage':c+' Carpenter then '+g+' Gardener'}
 
 /* ============ the run ============
@@ -969,7 +995,7 @@ const isSpecific=()=>state&&!isBest(state.target);
 const goalOcc=()=>isSpecific()?occByIdx(state.target):null;
 function freshRun(target){
  const from=startPoint(startEd,startPay,startEq);
- return {start:from.slice(),pos:from.slice(),heading:norm(CENTROID.slice()),grown:null,segs:[],target:target,aimed:0,nurtured:0,choices:[],finished:false};
+ return {odds:[],start:from.slice(),pos:from.slice(),heading:norm(CENTROID.slice()),grown:null,segs:[],target:target,aimed:0,nurtured:0,choices:[],finished:false};
 }
 /* One stage, exactly as growStage plays it on the published page. */
 function growStage(nurture){
@@ -986,6 +1012,60 @@ function growStage(nurture){
 }
 function currentClosest(){const m=nearestOcc(state.pos,tieWith(state.target));return {...occByIdx(m.i),distance:m.dist}}
 const sat=()=>satisfaction(state);
+/* the likelihood column: at the start, then after each stage */
+function recordOdds(){if(!isBest(state.target))state.odds.push(state.segs.length<TOTAL_STAGES?oddsFromHere():(currentClosest().idx===state.target?'Reached':'Not reached'))}
+const toUnit=p=>[p[0]/AXIS[0],p[1]/AXIS[1],p[2]/AXIS[2]];
+/* With no career named there is nothing to aim at, so the drawing marks the
+   typical outcome instead: the median end point, axis by axis, of children
+   from this family supported at every stage. A reference only -- it is not
+   scored, and the run is not steered toward it. */
+let typical=null;
+const ptDist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+function typicalOutcome(){
+ const real=Math.random;let seed=19740412;
+ Math.random=function(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296};
+ const keepSpare=spare;spare=null;
+ try{
+  const ends=[[],[],[]];
+  for(let r=0;r<1500;r++){let q=startPoint(startEd,startPay,startEq),g=null;
+   for(let k=0;k<TOTAL_STAGES;k++){const d=flatDir(g);g=d;let len=MU+gauss()*SIG+NURTURE_BONUS;if(len<LEN_FLOOR)len=LEN_FLOOR;q=clampPt([q[0]+d[0]*len,q[1]+d[1]*len,q[2]+d[2]*len])}
+   q.forEach((v,a)=>ends[a].push(v))}
+  const pos=ends.map(a=>a.sort((x,y)=>x-y)[a.length>>1]);
+  return {pos,near:OCC[nearestOcc(pos).i][0]};
+ }finally{Math.random=real;spare=keepSpare}
+}
+function renderPath(){
+ const svg=$('growthPlot'),ns='http://www.w3.org/2000/svg',specific=isSpecific();
+ while(svg.lastChild&&!['growthPlotDesc','growthPlotTitle'].includes(svg.lastChild.id))svg.lastChild.remove();
+ const add=(tag,attrs,label)=>{const el=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,String(v)));if(label!==undefined)el.textContent=label;svg.append(el);return el};
+ /* A fixed isometric projection, each axis drawn as a share of its own
+    extent. It is a picture only: no distance is measured on it. */
+ const project=v=>({x:310+(v[0]-v[1])*210,y:302-(v[0]+v[1])*76-v[2]*185});
+ const origin=project([0,0,0]);
+ for(const a of [{v:[1,0,0],name:'Pay',dx:-20,dy:28},{v:[0,1,0],name:'Education',dx:0,dy:40},{v:[0,0,1],name:'Emotional labor',dx:10,dy:-10}]){const pt=project(a.v);add('line',{x1:origin.x,y1:origin.y,x2:pt.x,y2:pt.y,stroke:'#4c627a','stroke-width':2});add('text',{x:pt.x+a.dx,y:pt.y+a.dy,fill:'#15263b','font-size':22,'font-weight':650},a.name)}
+ const pts=[state.start,...state.segs.map(g=>g.to)],coords=pts.map(p=>project(toUnit(p))),current=coords[coords.length-1];
+ if(coords.length>1)add('polyline',{points:coords.map(p=>p.x+','+p.y).join(' '),fill:'none',stroke:'#173f78','stroke-width':4,'stroke-linejoin':'round'});
+ const mark=specific?OCC[state.target].slice(1,4):typical&&typical.pos;
+ if(mark){const g=project(toUnit(mark)),letter=specific?'G':'M';
+  add('line',{x1:current.x,y1:current.y,x2:g.x,y2:g.y,stroke:'#8b4a00','stroke-width':2,'stroke-dasharray':'7 5'});
+  add('rect',{x:g.x-15,y:g.y-15,width:30,height:30,fill:'#fff4d7',stroke:'#8b4a00','stroke-width':3,rx:3});
+  add('text',{x:g.x,y:g.y+5,'text-anchor':'middle',fill:'#653800','font-size':19,'font-weight':800},letter)}
+ coords.forEach((xy,i)=>{const last=i===coords.length-1;add('circle',{cx:xy.x,cy:xy.y,r:15,fill:last?'#173f78':'#fff',stroke:'#173f78','stroke-width':3});add('text',{x:xy.x,y:xy.y+6,'text-anchor':'middle',fill:last?'#fff':'#173f78','font-size':17,'font-weight':800},i?String(i):'S')});
+ $('pathKey').innerHTML='Visual key: <span>S</span> is the starting point and <span>numbered circles</span> are completed stages'+(specific?'; <span>G</span> is the parental career goal and the dashed line runs from the current stage to it':'; <span>M</span> marks the typical outcome for this family when every stage is supported (a reference, not a goal), and the dashed line runs from the current stage to it')+'. Connecting lines show the pathway.';
+ const n=state.segs.length,near=currentClosest().name;let text;
+ if(specific){
+  const goalAt=i=>distTo(pts[i],state.target),now=goalAt(n),first=goalAt(0),change=n?goalAt(n-1)-now:0;
+  const trend=Math.abs(change)<0.05?'did not change the distance to':change>0?'moved the pathway closer to':'moved the pathway farther from';
+  const o=state.odds[n];
+  text='Distance to '+OCC[state.target][0]+': '+now.toFixed(1)+' model units, from '+first.toFixed(1)+' at the start. '+(n?'The most recent choice '+trend+' the goal'+(Math.abs(change)<0.05?'':' by '+Math.abs(change).toFixed(1)+' units')+'. ':'')+(typeof o==='number'?'Likelihood of reaching the goal from here with the best remaining plan: '+pct(o)+'. ':'The goal was '+(o==='Reached'?'':'not ')+'reached. ')+'Nearest occupation now: '+near+'. A greater distance from the parental goal does not mean a worse outcome.';
+ }else text='No career goal is set. For reference, M marks where a typical child from this family ends up when every stage is supported, nearest '+typical.near+'; this child is '+ptDist(state.pos,typical.pos).toFixed(1)+' model units from it. It is not a target and does not affect the score. Nearest occupation now: '+near+'. '+(n?'':'Select Gardener to see the pathway grow.');
+ $('pathSummary').textContent=text;
+ $('pathDistHead').textContent=specific?'Distance to goal':'Distance to typical outcome (M)';
+ const body=$('pathRows');body.replaceChildren();
+ pts.forEach((p,i)=>{const tr=document.createElement('tr');const o=state.odds[i];
+  [i?i+'. '+stages[i-1]+' ('+state.choices[i-1].type+')':'Starting position',...toUnit(p).map(v=>(v*100).toFixed(1)),specific?distTo(p,state.target).toFixed(1):ptDist(p,typical.pos).toFixed(1),specific?(typeof o==='number'?pct(o):o):'No goal set'].forEach((val,j)=>{const c=document.createElement(j?'td':'th');if(!j)c.scope='row';c.textContent=val;tr.append(c)});body.append(tr)});
+ $('growthPlotDesc').textContent='Three-dimensional projection with pay, education, and emotional labor axes, showing the starting point and '+n+' completed stage'+(n===1?'':'s')+(specific?', and the selected career goal. Current distance to the goal is '+distTo(state.pos,state.target).toFixed(1)+' model units':', and the typical outcome for this family, '+ptDist(state.pos,typical.pos).toFixed(1)+' model units away')+'. Full coordinates are in the table that follows.';
+}
 
 function updateGoalMode(){const specific=hasSpecificGoal();$('specificGoalPanel').hidden=!specific;$('carpenter').hidden=!specific;$('carpenter').disabled=!specific||(state&&state.finished);$('stageIntro').textContent=specific?'A specific career has been selected. Choose Carpenter to guide toward that occupation or Gardener to support exploration.':'No specific career goal has been set. Gardener supports exploration at each developmental stage. Carpenter is disabled because there is no specific occupation to guide the child toward.';$('viewFilter').options[0].textContent=specific?'10 closest, plus selected goal':'10 closest occupations';}
 function createOption(select,value,label){const el=document.createElement('option');el.value=value;el.textContent=label;select.append(el)}
@@ -1024,17 +1104,17 @@ function setUp(){
  startEd=Number($('education').value);startPay=Number($('income').value);startEq=Number($('environment').value);
  setupText={education:$('education').selectedOptions[0].textContent,income:$('income').selectedOptions[0].textContent,environment:$('environment').selectedOptions[0].textContent};
  const g=occupations.find(o=>o.name===$('goal').value);
- odds=hasSpecificGoal()?familyOdds(g.idx):null;
+ odds=hasSpecificGoal()?familyOdds(g.idx):null;typical=hasSpecificGoal()?null:typicalOutcome();
  updateGoal();resetSame()}
 /* A new run draws a new child from the same family: what parents hand on is
    a tendency, not a fixed head start, so "same setup" is not "same child". */
-function resetSame(){const specific=hasSpecificGoal();state=freshRun(specific?occupations.find(o=>o.name===$('goal').value).idx:BEST_I);$('outcomeText').textContent='Complete all five developmental stages in Section 2 to view your final results here.';$('resultInterpretation').textContent='';$('finalMetrics').replaceChildren();$('resultHistory').replaceChildren();['again','change','export','saveRun'].forEach(id=>$(id).disabled=true);$('gardener').disabled=false;updateGoalMode();$('viewFilter').value='nearest';$('search').value='';$('groupFilter').value='';$('sort').value='distance';renderGame();$('live').textContent='Stage 1 of 5, Infancy. Select '+(specific?'Carpenter or Gardener':'Gardener')+'.'}
+function resetSame(){const specific=hasSpecificGoal();state=freshRun(specific?occupations.find(o=>o.name===$('goal').value).idx:BEST_I);$('outcomeText').textContent='Complete all five developmental stages in Section 2 to view your final results here.';$('resultInterpretation').textContent='';$('finalMetrics').replaceChildren();$('resultHistory').replaceChildren();['again','change','export','saveRun'].forEach(id=>$(id).disabled=true);$('gardener').disabled=false;updateGoalMode();$('viewFilter').value='nearest';$('search').value='';$('groupFilter').value='';$('sort').value='distance';recordOdds();renderGame();$('live').textContent='Stage 1 of 5, Infancy. Select '+(specific?'Carpenter or Gardener':'Gardener')+'.'}
 function resetAll(){setUp();$('live').textContent='The five developmental stages have been restarted with the current setup.';setFocus('stageH')}
 function choose(type){
  if(state.finished||state.choices.length>=5||(type==='Carpenter'&&!isSpecific()))return;
  const before=currentClosest();growStage(type==='Gardener');const after=currentClosest();
  const feedback='Closest occupation: '+after.name+'. Previous nearest: '+before.name+'.';
- state.choices.push({type,feedback});
+ state.choices.push({type,feedback});recordOdds();
  if(state.choices.length===5){finish()}else{renderGame();$('live').textContent=type+' selected for '+stages[state.choices.length-1]+'. '+feedback+' Stage '+(state.choices.length+1)+' is ready.';setFocus('currentStage')}}
 function metric(label,value){const div=document.createElement('div');div.className='metric';const span=document.createElement('span');span.textContent=label;const strong=document.createElement('strong');strong.textContent=value;div.append(span,strong);return div}
 function renderGrowth(){
@@ -1048,6 +1128,7 @@ function renderGrowth(){
  $('growthText').textContent=state.choices.length?state.choices.map((c,i)=>'Stage '+(i+1)+' ('+stages[i]+'): '+(c.type==='Carpenter'?'a board added for directed guidance':'a vine added for exploration')).join('. ')+'.':'No stages completed. The child’s path is just beginning.';
  const s=sat(),started=state.segs.length>0;
  $('goalScoreBar').value=s.value;$('goalScoreText').textContent=started?s.value+' of 100, '+(isSpecific()?'progress toward the selected career'+(s.cost?', less '+s.cost+' for pushing':''):'fit-based satisfaction, which runs from 50 to 100 with no career goal'):'Not calculated';
+ renderPath();
  $('fitScoreBar').value=s.fit;$('fitScoreText').textContent=started?s.fit+' of 100, how close the child is to a real occupation':'Not calculated';
 }
 function finish(){
